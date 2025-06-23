@@ -1,0 +1,14 @@
+{
+    "name": "joris/facebookclone",
+    "autoload": {
+        "psr-4": {
+            "Joris\\Facebookclone\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Seathiel"
+        }
+    ],
+    "require": {}
+}

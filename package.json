@@ -1,0 +1,20 @@
+{
+  "name": "facebook-clone",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "browser-sync start --proxy localhost:8000 --files '**/*.{php,html,js,css}' ",
+    "vite": "vite",
+    "start": "php -S localhost:8000 -t ./",
+    "build": "npx browser-sync start --proxy 'localhost:8000' --files './' --host --port 3000 --reload -delay 500 --no-ui"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "browser-sync": "^2.27.10",
+    "vite": "^6.0.7"
+  }
+}
