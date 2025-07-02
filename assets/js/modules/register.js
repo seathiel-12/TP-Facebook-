@@ -74,6 +74,54 @@ const validateRegister=(data)=>{
     return true;
 }
 
+const handleRegisterRetrieveCode=()=>{
+    const cancelCode=document.querySelector('.not-me');
+    cancelCode.onclick=()=>fetchPageContent('../../frontend/views/usersClients/auth.php');
+    
+    const form=document.querySelector('form');
+
+    form.onsubmit=async (e)=>{
+        e.preventDefault();
+        const code=document.getElementById('code');
+        code.style.borderColor='';
+        const token=document.getElementById('csrf_token').value;
+
+
+        if(!/^[A-Z0-9]{6,6}/.test(code.value)){
+            code.style.borderColor='red';
+            return showNotification('Code invalide!');
+        }
+        
+        await apiRequest('user/register/codeVerify','POST', {code:code.value,"csrf_token":token})
+                .then(response=>{
+                    if(response && response.success){
+                        // askFillOtherRegisterInfo();
+                        fetchPageContent('../../frontend/views/templates/homeT.php');
+                        return;
+                    }else{
+                        showNotification(response.message);
+                    }
+                })
+                .then(err=>"Une erreur s'est produite, veuillez réessayer!");
+    }
+}
+
+export const askFillOtherRegisterInfo=()=>{
+    document.body.innerHTML=`
+        <header>
+        <img src="https://static.xx.fbcdn.net/rsrc.php/y1/r/4lCu2zih0ca.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
+        </header>
+
+        <div class='card'>
+            <h2 style="padding:20px 0;">Facebook Clone, Un réseau puissant!</h2>
+
+            <hr style="margin:0 auto; border:0.5px solid rgba(52, 52, 52, 0.12); width:100%;">
+        <div>
+
+    `
+}
+
+
 export const initRegister=async()=>{
 
     const form=document.getElementById('form-register');
@@ -88,18 +136,32 @@ export const initRegister=async()=>{
 
     if(validateRegister(data)){
         if(data.email){
-            await apiRequest('mailVerify','POST', {email:data.email});
-        }else{
-            const registered= await apiRequest('register','POST',data);
-            if(registered.success){
-                await fetchPageContent('/frontend/views/templates/homeT.php');
-                lucide.createIcons();
-                showNotification('Succesfully registered', 'success', 5000);
-            }else{
-                console.error('Erreur de création de compte.');
-            }
-    
+
+            const fullname=data.firstname+' '+data.lastname;
+            await apiRequest('user/register/mailVerify','POST', {email:data.email, fullname:fullname})
+                    .then(response=>{
+                        if(response && response.success){
+                            import('./includes.js')
+                            .then(module=>{
+                                module.retrieveCode(response.email,response['csrf_token']);
+                                handleRegisterRetrieveCode();
+                            })
+                            .catch(err=>console.log(err));
+                        }
+                    })
+                    .catch(err=>console.log(err));
+        }else if(data.phone){
+            data["csrf_token"]=document.getElementById('csrf_token').value;
+            await apiRequest('user/register/phone','POST', data)
+                        .then(response=>{
+                            if(response && response.success){
+                                // askFillOtherRegisterInfo();
+                                fetchPageContent('../../frontend/views/templates/homeT.php');
+                                return;
+                            }else showNotification(response.message);
+                        }).catch(err=>showNotification(err));
         }
+    
     }
 }
 

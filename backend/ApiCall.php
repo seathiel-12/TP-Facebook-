@@ -6,7 +6,7 @@ use App\Models\User;
 use \PDOException;
   require_once $_SERVER['DOCUMENT_ROOT'].'/headers.php';
 //   header('Content-Type: application/json');
-
+session_start();
 class ApiCall{
     private $method;
     private $uri;
@@ -22,17 +22,22 @@ class ApiCall{
         if(isset($_SESSION['csrf_token']) && !empty($_SESSION['csrf_token'])){
             if($this->method!=='GET'){
                 $request=file_get_contents('php://input');
-                $data=json_decode($request,true);
-                if(!isset($data['csrf_token']) || $data['csrf_token']!== $_SESSION['csrf_token']){
-                    echo json_encode(['success'=>false, 'message'=>'CSRF token not valid']);
-                    return;
+                 $data=json_decode($request,true);
+                if(isset($data['csrf_token'])){
+                    if($data['csrf_token']===$_SESSION['csrf_token']){
+                        return 200;
+                    }
+                    session_start();
+                    session_unset();
+                    session_destroy();
+                    if(isset($_COOKIE['PHPSESSID']))
+                     setcookie('PHPSESSID','', time()-3600);
+                    throw new \Exception("Alerte de securité! Tentative d'envoi de données frauduleuses.");
                 }
             }
-            echo json_encode(['success'=>true]);
-            return;
+            return 'Méthode GET!';
         }
-        echo json_encode(['success'=>false, 'message'=>'CSRF token not found']);
-        return;
+        return 400;
     }
 
     private function getRequestData(){
@@ -46,20 +51,18 @@ class ApiCall{
     }
 
     private function generateMailerCode(){
-        $letter="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        $nbrDigit=rand(5,7);
+        $letter="ABC3DE0FGHIJ1KLM2NO9PQR7S4T8UVWXYZ56";
         $code="";
-        for($i=0; $i<$nbrDigit; $i++){
-            $code.=$letter[$i];
+        for($i=0; $i<6; $i++){
+            $code.=$letter[rand(0,35)];
         }
-        session_start();
-        session_unset();
-        session_destroy();
-        if(isset($_COOKIE['PHPSESSID']))
-        setcookie('PHPSESSID','', time()-3600);
+       return $code;
+    }
 
-        session_start();
-        $_SESSION['resetPassCode']=password_hash($code,PASSWORD_ARGON2I);
+    private function debug($data){
+        echo '<pre>';
+        print_r($data);
+        echo '</pre>';
     }
 
     public function requestTreatment(){
@@ -72,25 +75,134 @@ class ApiCall{
                     case 'user':{
 
                         switch($this->uri[3]){
+                            //Route 'api/user/register'
+                            case 'register':{
+                                if(isset($this->uri[4]) && $this->uri[4]==='mailVerify'){
+                                      $data=$this->getRequestData();
+                                      if(!filter_var($data['email'],FILTER_VALIDATE_EMAIL)){
+                                        echo json_encode(['success'=>false,'message'=>'Email invalide']);
+                                        return;
+                                      }
+                                      $_SESSION['registerCode']=$this->generateMailerCode();
+                                      $_SESSION['registerCode_sent_time']=time();
+                                      new AuthController()->generateCSRFToken();
+                                      new AuthController()->mailerSend($data['fullname'],'register');
+                                      echo json_encode(['success'=>true, 'email'=>$data['email'],'csrf_token'=>$_SESSION['csrf_token'],'code'=>$_SESSION['registerCode']]);
+                                    break;
+                                }
+
+                                if(isset($this->uri[4]) && $this->uri[4]==='codeVerify'){
+                                    
+                                    if(time() - $_SESSION['registerCode_sent_time'] > PASSCODE_LIFETIME){
+                                        echo json_encode(['success'=>false, 'message'=>'Code expiré! Veuillez vous inscrire à nouveau.']);
+                                        return;
+                                    }
+                                    $data=$this->getRequestData();
+                                    if($this->verifyCSRFToken()===200){
+                                        if(isset($_SESSION['registerCode']) && $_SESSION['registerCode'] === $data['code']){
+                                            echo json_encode(['success'=>true]);
+                                            return;
+                                        }
+                                    }else{
+                                        echo json_encode(['success'=>false, 'message'=>'Alerte de securité! Veuillez vous reconnecter!']);
+
+                                        session_unset();
+                                        session_destroy(); 
+                                        if(isset($_COOKIE['PHPSESSID'])){
+                                            setcookie('PHPSESSID','', time()-3600);
+                                        }
+                                    }
+                                    return;
+                                }
+                                
+                                if(isset($this->uri[4]) && $this->uri[4]==='otherInfo'){
+                                    
+                                }
+                            break;
+                            }
                             //Route 'api/user/forgotPassword'
                             case 'forgotPassword':{
                                 if(isset($this->uri[4]) && $this->uri[4]==='find'){
                                     $findwith=$this->getRequestData();
-                                    $userData= new User()->getRequestedUserData($findwith,['username', 'firstname', 'lastname', 'gender','profil_picture']);
+                                    
+                                    if(!filter_var($findwith['email'],FILTER_VALIDATE_EMAIL)){
+                                        echo json_encode(['success'=>false,'message'=>"Email invalide"]);
+                                        return;
+                                    }
+                                    $userData= new User()->getRequestedUserData($findwith,['id','username', 'email', 'firstname', 'lastname', 'gender','profil_picture']);
+                                    new AuthController()->generateCSRFToken();
                                     
                                     echo json_encode(
                                         [
                                             'success'=>true,
-                                            'data'=> $userData
+                                            'data'=> $userData,
+                                            'csrf_token'=>$_SESSION['csrf_token']
                                         ]);
-                                    return;
+                                    break;
                                 }
 
                                 if(isset($this->uri[4]) && $this->uri[4]==='retrieveCode'){
-                                    $this->generateMailerCode();
+                                    $user=$this->getRequestData();
+                                    $userData= new User()->getRequestedUserData(["email"=>$user['email']],['id','username','firstname', 'lastname', 'gender','profil_picture']);
+                                    
+                                    foreach($userData as $key=>$data){
+                                        if($userData[$key]!=$user[$key] || !filter_var($user['email'],FILTER_VALIDATE_EMAIL)){
+                                            echo json_encode(['success'=>false, 'message'=>'Données utilisateur non valides!']);
+                                            return;
+                                        }
+                                    }
+                                    if($this->verifyCSRFToken()===200){
+                                        $_SESSION['resetPassCode']=$this->generateMailerCode();
+                                        $_SESSION['id']=$user['id'];
+                                        $_SESSION['username']=$user['username']?$user['username']:($user['firstname'].' '.$user['lastname']);
+
+                                        if($_SESSION['connect'])
+                                        unset($_SESSION['connect']);
+
+                                        $user['fullname']=$user['firstname'].' '.$user['lastname'];
+                                        new AuthController()->mailerSend($user['fullname'],'resetPassCode');
+
+                                        $_SESSION['passCode_sent_time']=time();
+                                        echo json_encode(['success'=>true, 'email'=>$user['email'], "csrf_token"=>$_SESSION['csrf_token']]);
+                                        break;    
+                                    }
+                                    echo json_encode('Méthode GET ou user non authentifié!');
+                                } 
+
+                                if(isset($this->uri[4]) && $this->uri[4]==='codeVerify'){
+                                    if(time()-$_SESSION['passCode_sent_time'] > PASSCODE_LIFETIME){
+                                        echo json_encode(['success'=>false, 'message'=>'Code expiré! Veuillez demander un nouveau code et réessayer!']);
+                                        return;
+                                    }
+                                    $code=$this->getRequestData();
+                                    $this->verifyCSRFToken();
+                                    
+                                    if(isset($_SESSION['resetPassCode'])){
+                                        if($_SESSION['resetPassCode']===$code['code']){
+                                            new AuthController();
+                                            echo json_encode(['success'=>true, "fullname"=>$_SESSION['username'], "csrf_token"=>$_SESSION['csrf_token']]);
+                                        }
+                                        else {
+                                            echo json_encode(['success'=>false, 'message'=>'Code non valide']);
+                                        }
+                                        break;
+                                    }
+                                    echo json_encode(['success'=>false, 'message'=>'Veuillez demander un nouveau code et rééssayer.']);
+                                    break;
                                 }
+
+                                if(isset($this->uri[4]) && $this->uri[4]==='reset'){
+                                    $password=$this->getRequestData();
+                                    if($this->verifyCSRFToken() === 200){
+                                        new User()->update(['password'=>$password['newPassword']], $_SESSION['id']);
+                                        unset($_SESSION['resetPassCode'],$_SESSION['passCode_sent_time']);
+                                        new AuthController($_SESSION);
+                                        echo json_encode(['success'=>true]);
+                                    }
+                                }
+                                break;
                             }
-                        }
+                        }   
                         break;
                     }
                     case 'login':{
@@ -99,13 +211,13 @@ class ApiCall{
                          
                         break;
                     }
-                    case 'register':{
-                            $data=json_decode(file_get_contents('php://input'),true);
-                            new AuthController()->register($data);
-                        break;
-                    }
                     case 'verifyToken':{
-                        $this->verifyCSRFToken();
+                        $verify=$this->verifyCSRFToken();
+                       if($verify===200){
+                         echo json_encode(['success'=>true]);
+                         break;
+                       }
+                        echo json_encode(['success'=>false, 'message'=>'Utilisateur non authentifié.']);
                         break;
                     }
                     case 'generateCSRF':{
@@ -115,26 +227,23 @@ class ApiCall{
                                 [
                                     'success'=>true,
                                     'token'=> $_SESSION['csrf_token']??null
-                                ]
-                                );
+                                ]);
                         }catch(PDOException $e){
                             echo json_encode(['success'=>false]);
                         }
                         break;
                     }
-                    case 'mailVerify':{
-                        $data=json_decode(file_get_contents('php://input'),true);
-                        new AuthController()->mailerSend($data['email']);
-                        break;
+                    default :{
+                        // new Fallback();
+                        echo 'Code 400: Ressource not found.';
                     }
-
                 }
             }catch(PDOException $e){
                 throw new PDOException("Erreur lors de l'execution de la requête!:".$e->getMessage());
             }
 
        }else{
-         
+          echo 'Access denied';
        }
     }
 }

@@ -1,4 +1,4 @@
-
+const DOCUMENT_ROOT={};
 const loadJsModule=async(bodyId)=>{
     switch(bodyId){
         case 'register':
@@ -134,49 +134,49 @@ const apiRequest=async (url, method='GET', data)=>{
 
   window.addEventListener('load',async ()=>{
 
-    const csrfToken=document.getElementById('csrf-token');
-    console.log(csrfToken ,document.body.id);
-    if(csrfToken){
-      const token=csrfToken.value;
-      if(token){
-        await apiRequest('verifyToken', 'POST', {"csrf_token":token})
-        .then(async (data)=> {
-          if(data && data.success){
-            await fetchPageContent('/frontend/views/templates/homeT.php');
-            lucide.createIcons();
-          }else{
-            showNotification(data.message, 'error');
-            await fetchPageContent('/frontend/views/usersClients/auth.php');
-            lucide.createIcons();
-          }
-        })
-        .catch(error=>console.error('Error verifying token:', error));
-        return;
-      }
-    }
+    // const csrfToken=document.getElementById('csrf_token');
+    // console.log(csrfToken ,document.body.id);
+    // if(csrfToken){
+    //   const token=csrfToken.value;
+    //   if(token){
+    //     await apiRequest('verifyToken', 'POST', {"csrf_token":token})
+    //     .then(async (data)=> {
+    //       if(data && data.success){
+    //         await fetchPageContent('/frontend/views/templates/homeT.php');
+    //         lucide.createIcons();
+    //       }else{
+    //         showNotification(data.message, 'error');
+    //         await fetchPageContent('/frontend/views/usersClients/auth.php');
+    //         lucide.createIcons();
+    //       }
+    //     })
+    //     .catch(error=>console.error('Error verifying token:', error));
+    //     return;
+    //   }
+    // }
 
     // Regenerer le csrf chaque 10min
-    setInterval(async()=>{
+    // setInterval(async()=>{
 
       //Gérer les collisions lors des requetes
-      const collision=(e)=>{
-        e.preventDefault();
-      }
-      const forms=document.querySelectorAll('form');
-      forms.forEach(form=>form.onsubmit=collision)
+      // const collision=(e)=>{
+      //   e.preventDefault();
+      // }
+      // const forms=document.querySelectorAll('form');
+      // forms.forEach(form=>form.onsubmit=collision)
 
-      const generateCRSF=await apiRequest('generateCSRF');
-      if(generateCRSF && generateCRSF.success){
-        const csrfInput=document.getElementById('csrf-token');
-        csrfInput.value=generateCRSF.token;
-      }
-    },600000);
+    //   const generateCRSF=await apiRequest('generateCSRF');
+    //   if(generateCRSF && generateCRSF.success){
+    //     const csrfInput=document.getElementById('csrf_token');
+    //     csrfInput.value=generateCRSF['csrf_token'];
+    //   }
+    // },600000);
 
-    fetchPageContent('/frontend/views/usersClients/auth.php');
-      lucide.createIcons();
+    // fetchPageContent('/frontend/views/usersClients/auth.php');
+    //   lucide.createIcons();
 
-    // await import('./modules/includes.js')
-    //         .then(module=>module.resetPassword())
-    //         .catch(err=>console.log(err));
+    await import('./modules/register.js')
+            .then(module=>module.askFillOtherRegisterInfo())
+            .catch(err=>console.log(err));
   });
   

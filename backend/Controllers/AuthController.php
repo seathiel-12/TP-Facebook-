@@ -11,15 +11,16 @@
     use PHPMailer\PHPMailer\Exception;
 
     use Dotenv\Dotenv;
-use PHPMailer\PHPMailer\PHPMailer as PHPMailerPHPMailer;
 
     Dotenv::createImmutable(__DIR__.'/../../')->load();
 
     require_once $_SERVER['DOCUMENT_ROOT'].'/headers.php';
   class AuthController extends Controller{
         
-    public function __construct(){
-        
+    public function __construct($sessionInfo=null){
+        if(is_array($sessionInfo)){
+            $this->startSession($sessionInfo);
+        }
     }
 
     public function verifyEntries(array $data){
@@ -48,32 +49,32 @@ use PHPMailer\PHPMailer\PHPMailer as PHPMailerPHPMailer;
     private function limitLogin(){
         if(isset($_SESSION['attempt']) && isset($_SESSION['first_try_time'])){
             $delay=new DateTime(date('H:i:s'))->getTimestamp() - $_SESSION['first_try_time'];
-            if($delay<600 && $_SESSION['attempt']>5){
+            if($delay<MAX_CONNECTION_ATTEMPT_TIME && $_SESSION['attempt']>MAX_CONNECTION_ATTEMPT){
                 die('Too much attempt');
             }
         }
     }
 
     public function generateCSRFToken(){
-        if(isset($_SESSION['id'])){
-            $_SESSION['csrf_token']=bin2hex(random_bytes(32));
-        }
+        $_SESSION['csrf_token']=bin2hex(random_bytes(32));
     }
 
     private function startSession($sessionInfo){
-        if(session_status() == PHP_SESSION_ACTIVE && !isset($_SESSION['id'])){
+        if(session_status() == PHP_SESSION_ACTIVE && !isset($_SESSION['connect'])){
             ini_set('session.cookie_httponly',1);
             session_set_cookie_params(
                 [
-                    'lifetime'=>time()+3600,
+                    'lifetime'=>time()+SESSION_LIFETIME,
                     'httponly'=>true,
                     'secure'=>false,
                 ]
             );        
             session_start();
+            
             $_SESSION['id']=$sessionInfo['id'];
-            $_SESSION['username']=$sessionInfo['username'];
+            $_SESSION['username']=$sessionInfo['username']?$sessionInfo['username']:($sessionInfo['firstname'].' '.$sessionInfo['lastname']);
             $_SESSION['attempt']=1;
+            $_SESSION['connect']=true;
             $_SESSION['first_try_time']=new DateTime(date('H:i:s'))->getTimestamp();
            
             $this->generateCSRFToken();
@@ -99,7 +100,6 @@ use PHPMailer\PHPMailer\PHPMailer as PHPMailerPHPMailer;
         try{
             $data=$this->cleanData($data);
 
-
             if($this->verifyEmailOrPhone($data)){
                 new User($data);
 
@@ -113,33 +113,40 @@ use PHPMailer\PHPMailer\PHPMailer as PHPMailerPHPMailer;
         }
     }
     
-    public function mailerSend(){
+    public function mailerSend($fullname,$type){
 
-        try{
-            $mail=new PHPMailer();
-            $mail->isSMTP();
-            $mail->Host=$_ENV['MAILER_HOST'];
-            $mail->SMTPAuth=true;
-            $mail->Username=$_ENV['MAILER_USERNAME'];
-            $mail->Password=$_ENV['MAILER_PASSWORD'];
-            $mail->SMTPSecure= 'tls';
-            $mail->Port= $_ENV['MAILER_PORT'];
-
-            $mail->setFrom($_ENV['MAILER_USERNAME'],'Clone Project');
-            $mail->addAddress($_ENV['MAILER_ADMINISTRATOR'],'New Facebook User');
-            
-            $mail->Subject="Code de confirmation";
-            $mail->Body="Merci de rejoindre Facebook Clone.";
-            // $mail->SMTPDebug=4;
-            // $mail->Debugoutput='html';
-            // $mail->send();
-            
-            echo json_encode(['success'=>true]);
-        }catch(Exception $e){
-            echo json_encode(['message'=>$mail->ErrorInfo]);
-        }
-       
-        
+            try{
+                $mail=new PHPMailer();
+                $mail->isSMTP();
+                $mail->Host=$_ENV['MAILER_HOST'];
+                $mail->SMTPAuth=true;
+                $mail->Username=$_ENV['MAILER_USERNAME'];
+                $mail->Password=$_ENV['MAILER_PASSWORD'];
+                $mail->SMTPSecure= 'tls';
+                $mail->Port= $_ENV['MAILER_PORT'];
+    
+                if(isset($_SESSION['resetPassCode']) && $type==="resetPassCode"){
+                    $message="Plus qu'une étape avant de réinitialiser votre mot de passe. $fullname, Nous avons recu votre demande de réinitialisation de mot de passe. Saisissez le code suivant dans le champ requis sur le site pour effectuer la modification: <br> <br> <strong  style='background:rgb(77, 118, 255); width:max-content; border-radius:10px; padding:10px 15px; display:block; margin:auto;'>".$_SESSION['resetPassCode']."</strong>. <br><br>
+                    <p>Vous n'avez pas demandé ce code? Signalez-ce mail.<p>";
+                }else{
+                    if(isset($_SESSION['registerCode']) && $type==="register")
+                    $message="Bienvenue $fullname sur Facebook Clone. Validez votre e-mail avec le code suivant pour accéder à des fonctionnalités uniques et communiquer avec vos amis: <br><br> <strong style='background:rgb(77, 118, 255); width:max-content; border-radius:10px; padding:10px 15px; display:block; margin:auto;'>".$_SESSION['registerCode']."</strong>. <br><br>
+                    Vous n'avez pas demandé ce code? Signalez-ce mail.";
+                }
+                $mail->setFrom($_ENV['MAILER_USERNAME'],'Facebook Clone');
+                $mail->addAddress($_ENV['MAILER_ADMINISTRATOR'],'New Facebook User');
+                
+                $mail->isHTML();
+                $mail->CharSet='UTF-8';
+                $mail->Subject="Code de confirmation.";
+                $mail->Body=$message;
+                // $mail->SMTPDebug=4;
+                // $mail->Debugoutput='html';
+                // $mail->send();
+            }catch(Exception $e){
+                echo json_encode(['message'=>$mail->ErrorInfo]);
+            }
+             
     }
     
  }
