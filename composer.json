@@ -2,7 +2,7 @@
     "name": "joris/facebookclone",
     "autoload": {
         "psr-4": {
-            "Joris\\Facebookclone\\": "src/"
+            "App\\": "backend/"
         }
     },
     "authors": [
@@ -10,5 +10,16 @@
             "name": "Seathiel"
         }
     ],
-    "require": {}
+    "require": {
+        "vlucas/phpdotenv": "^5.6",
+        "php-http/guzzle7-adapter": "^1.1",
+        "nyholm/psr7": "^1.8",
+        "mailersend/mailersend": "^0.34.0",
+        "phpmailer/phpmailer": "^6.10"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    }
 }

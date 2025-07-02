@@ -1,0 +1,100 @@
+header{
+    display: flex;
+    justify-content: space-between;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+}
+#search{
+    border-radius: 50px;
+    font-size: 0.9em;
+    padding:10px 15px 10px 40px;
+}
+.flexDivIcon div{
+    padding: 17px 45px;
+}
+.top-nav div:hover{
+    background-color: #e4e6eb;
+}
+.searchZone{
+    margin-left: 10px;
+    gap: 10px;
+}
+#search-icon{
+    position: absolute;
+    top: 24%;
+    left: 4%;
+    color:gray;
+}
+.bxl{
+    width: 24px;
+    height: 24px;
+    display: flex;
+    padding: 2px 1px;
+    align-items: center;
+    justify-content: center;
+}
+.bxl:before{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: scale(2);    
+    border-radius: 100%;
+    padding: 4px;
+}
+
+.left-nav div, .find-friends{
+    border-radius: 30px;
+    padding: 12px 15px;
+    background: #b8b5b57a;
+    margin: 5px 0;
+    cursor: pointer;
+}
+.find-friends{
+    margin-right: 5px;
+}
+.left-nav div{
+    transform: scale(0.8) ;
+}
+.left-nav div:hover, .find-friends:hover {
+    background: #5d5a5a7a;
+    opacity: 0.8;
+}
+.divIconBorder{
+    background:var(--bg-button-primary);
+    width: 113.5px;
+    height:4px;
+    position: absolute;
+    z-index: 3;
+    display: none;
+} 
+
+@media (max-width: 750px) {
+    header{
+        flex-direction: column;
+    }
+    #search{
+        width: 100%;
+        margin: 15px 0;
+    }
+    .searchZone{
+        width: 100%;
+        margin:0;
+        display: flex;
+    }
+    .searchZone p{
+        display: flex;
+        width: 70%;
+    }
+    
+    #search-icon{
+        top:28%;
+        left:2%;
+    }
+    
+}
+@media (max-width: 450px) {
+    
+}

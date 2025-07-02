@@ -1,0 +1,41 @@
+
+
+<section class="chat-container">
+    <section class="head">
+        <i data-lucide="user-circle"></i>
+    </section>
+</section>
+
+<style>
+    main{
+        display: grid;
+        grid-template-columns: 10;
+        width: 100%;
+        height: 88%;
+    }
+    aside{
+        grid-column: 1/2;
+        background-color: rgb(234, 232, 232);
+        height: 100%;
+    }
+    .chat-container{
+        grid-column: 2/10;
+        width: 97%;
+        height: 100%;
+        background-color: rgba(205, 199, 199, 0.655);
+        border-radius: 10px;
+        margin:15px auto;
+    }
+    .chat-container .head{
+        border-bottom: solid 1px gray;
+        padding:10px;
+    }
+    .chat-container .head svg{
+        display: flex;
+        transform: scale(1.5);
+    }
+</style>
+
+<script>
+    lucide.createIcons();
+</script>

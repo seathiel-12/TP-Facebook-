@@ -1,0 +1,131 @@
+/* connexion and register */
+.forgot-password{
+    color: var(--bg-button-primary);
+    cursor: pointer;
+}
+.forgot-password:hover{
+    opacity:0.8;
+}
+input:focus{
+    border:solid 3px var(--bg-button-primary)
+}
+form div{
+    width: 100%;
+}
+hr{
+    margin: 10px;
+}
+.flexDivIcon{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+.flexDivIcon svg{
+    transform: translateY(2px);
+}
+select{
+    font-size: 1em;
+    margin: 10px 2px;
+    width: calc((100% - 25px)/3);
+    height: 40px;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 0 2px 0 rgb(54, 53, 53,0.8);
+    outline: none;
+    cursor: pointer;
+}
+.gender-label{
+    cursor: pointer;
+    box-shadow: 0 0 2px 0 rgb(54, 53, 53,0.8);
+    width: calc((100% - 25px)/3);
+    padding: 10px;
+    border-radius: 5px;
+}
+.other-gender{
+    display: none;
+}
+.other-gender.active{
+    display: block;
+}
+#login-btn{
+    cursor: pointer;
+    color:var(--bg-button-primary);
+    font-size:1.2em;
+    margin-top: 10px;
+}
+#login-btn:hover{
+    opacity:0.8;
+    text-decoration: underline;
+}
+/* register */
+form:not(.forgot-password-form,.loginHeaderForm){
+    width: 400px;
+    background:white;
+}
+#form-register{
+    width: 450px;
+}
+#form-auth{
+    width: 400px;
+}
+/* footer */
+footer{
+    padding: 10px;
+    box-shadow: 0 0 15px 0 rgba(11, 11, 11, 0.3);
+    border-radius: 10px;
+}
+
+#auth footer{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+}
+
+footer ul{
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    width: 95%;
+    margin: 0 auto;
+    font-size: 14px;
+}
+li{
+    list-style-type: none;
+}
+a{
+    text-decoration: none;
+    color: gray;
+}
+a:hover{
+    text-decoration: underline;
+}
+form a{
+    color:var(--webkit-link);
+}
+.card{
+    border-radius:10px;
+    box-shadow:0 0 5px 0 rgba(22, 22, 22, 0.2); 
+    background:white;
+    width: 520px;
+    margin: 40px auto;
+}
+/*  */
+.notReceivedCode{
+    cursor: pointer;
+    color:var(--bg-button-primary);
+}
+.notReceivedCode:hover{
+    text-decoration: underline;
+}
+@media (max-width: 700px) {
+    header img{
+       margin:0 auto;
+       margin:10px auto;
+    }
+    .main-auth-content{
+       transform: scale(0.9) translateY(-5%);
+    }
+}

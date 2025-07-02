@@ -19,7 +19,7 @@ body{
     background: var(--bg-secondary);
     overflow-x: hidden; 
 }
-button{
+button, .cancelForgotBtn{
     display: block;
     border: none;
     border-radius: 5px;
@@ -34,15 +34,15 @@ button{
     margin:15px auto;
     transition:all 0.5s 0s ease;
 }
-button:hover{
+button:hover, .cancelForgotBtn:hover{
     opacity: 0.8;
     box-shadow: none;
 }
 
-form{
+form:not(.forgot-password-form,.loginHeaderForm, .noFormRootStyle){
     box-shadow: 0 0 15px 0 rgba(11, 11, 11, 0.3);
     border-radius: 10px;
-    width:400px;
+    max-width: 450px;
     margin:10px auto 30px;
     padding: 20px;
 }
@@ -58,99 +58,58 @@ input:not([type="radio"]){
     box-shadow: 0 0 2px 0 rgb(54, 53, 53,0.8);
     height: 10px;
 }
-
-/* connexion and register */
-.forgot-password{
-    color: var(--bg-button-primary);
-    cursor: pointer;
-}
-.forgot-password:hover{
-    opacity:0.8;
-}
-input:focus{
-    border:solid 3px var(--bg-button-primary)
-}
-form div{
-    width: 100%;
-}
-hr{
-    margin: 10px;
-}
-.flexDivIcon{
+.notification{
+    margin:1px;
+    background: var(--bg-primary);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.4);
+    max-width: 250px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 5px;
+    gap: 10px;
+    animation: SlidefadeIn 0.5s ease;
 }
-.flexDivIcon svg{
-    transform: translateY(2px);
-}
-select{
-    font-size: 1em;
-    margin: 10px 2px;
-    width: calc((100% - 25px)/3);
-    height: 40px;
-    border: none;
-    border-radius: 5px;
-    padding: 10px;
-    box-shadow: 0 0 2px 0 rgb(54, 53, 53,0.8);
-    outline: none;
-    cursor: pointer;
-}
-.gender-label{
-    cursor: pointer;
-    box-shadow: 0 0 2px 0 rgb(54, 53, 53,0.8);
-    width: calc((100% - 25px)/3);
-    padding: 10px;
-    border-radius: 5px;
-}
-.other-gender{
-    display: none;
-}
-.other-gender.active{
-    display: block;
-}
-#login-btn{
-    cursor: pointer;
-    color:var(--bg-button-primary);
-    font-size:1.2em;
-    margin-top: 10px;
-}
-#login-btn:hover{
-    opacity:0.8;
-    text-decoration: underline;
-}
-/* register */
-form{
-    width: 450px;
-    background:white;
-}
-/* footer */
-footer{
-    padding: 10px;
-    box-shadow: 0 0 15px 0 rgba(11, 11, 11, 0.3);
+.borderOnNotification{
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index:3;
+    border:solid 5px transparent;
     border-radius: 10px;
 }
-footer ul{
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    width: 95%;
-    margin: 0 auto;
-    font-size: 14px;
+.error{
+    background: rgba(240, 75, 75, 0.61);
 }
-li{
-    list-style: none;
+.success{
+    background: rgb(114, 241, 114);
 }
-a{
-    text-decoration: none;
-    color: gray;
+.error .icon{
+    color:red
 }
-a:hover{
-    text-decoration: underline;
+.success .icon{
+    color:green
 }
-form a{
-    color:var(--webkit-link);
+.icon{
+    border-radius: 100%;
+    border:solid 2px black;
+    padding: 5px;
+    width: 17px;
+    height: 17px;
 }
-/*  */
-
+.image{
+    border-radius: 100%;
+    border:solid 1px rgba(39, 38, 38, 0.47);
+    padding: 2px;
+    margin-top:10px;
+}
+@keyframes SlidefadeIn{
+    from{
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to{
+        opacity: 1;
+        transform: translateX(0);
+    }
+}

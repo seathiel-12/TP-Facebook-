@@ -1,5 +1,5 @@
 
-function showInfoIconDiv(icon, index){
+export function showInfoIconDiv(icon, index){
     const infoIcon=document.querySelectorAll('.info-icon');
 
     infoIcon.forEach((icon, index)=>{
@@ -25,10 +25,10 @@ function showInfoIconDiv(icon, index){
           e.stopPropagation();
       });
    });
-    lucide.createIcons();
+   lucide.createIcons();
 }
 
-function hideInfoIconDiv(e){
+export function hideInfoIconDiv(e){
     const infoDiv=document.getElementById('info-div');
         if(infoDiv && !infoDiv.contains(e.target)){
             infoDiv.animate([
@@ -48,9 +48,59 @@ const validateNames=(input)=>{
     return regex.test(input.trim());
 }
 
-export const initRegister=()=>{
-    showInfoIconDiv();
-    window.addEventListener('click',(e)=>hideInfoIconDiv(e));
+
+const validateRegister=(data)=>{
+    let valid=true;
+
+    if(!validateNames(data.firstname) || !validateNames(data.lastname)){
+        valid=false;
+    }
+
+    if(!verifyEmailOrPhone(data.emailOrPhone)){
+        valid=false;
+    }else{
+        data[verifyEmailOrPhone(data.emailOrPhone)]=data.emailOrPhone;
+        delete data.emailOrPhone;
+    }
+
+    if(!validatePassword(data.password)){
+        valid=false;
+    }
+
+    if(!valid){
+        return 'Veuillez remplir les champs avec des valeurs valides';
+    }
+
+    return true;
+}
+
+export const initRegister=async()=>{
+
+    const form=document.getElementById('form-register');
+    const data={
+        firstname:form.querySelector('input[name="firstname"]').value,
+        lastname:form.querySelector('input[name="lastname"]').value,
+        emailOrPhone:form.querySelector('#email-phone').value,
+        password:form.querySelector('input[name="password"]').value,
+        gender:form.querySelector('input[name="gender"]:checked').value,
+        "date_of_birth":`${form.querySelector('select[name="year"]').value}-${form.querySelector('select[name="month"]').value}-${form.querySelector('select[name="day"]').value}`,
+    }
+
+    if(validateRegister(data)){
+        if(data.email){
+            await apiRequest('mailVerify','POST', {email:data.email});
+        }else{
+            const registered= await apiRequest('register','POST',data);
+            if(registered.success){
+                await fetchPageContent('/frontend/views/templates/homeT.php');
+                lucide.createIcons();
+                showNotification('Succesfully registered', 'success', 5000);
+            }else{
+                console.error('Erreur de création de compte.');
+            }
+    
+        }
+    }
 }
 
     

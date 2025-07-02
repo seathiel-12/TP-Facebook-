@@ -1,20 +1,41 @@
-const loadJsModule=(bodyId)=>{
+
+const loadJsModule=async(bodyId)=>{
     switch(bodyId){
         case 'register':
-            import('./modules/register.js')
+            document.title="Register";
+            await import('./modules/register.js')
                .then(module=>{
-                module.initRegister();
-                document.title="Register";
+                  const formRegister=document.getElementById('form-register');
+                  module.showInfoIconDiv();
+                  window.addEventListener('click',(e)=>{
+                    module.hideInfoIconDiv(e);
+                  })
+                  formRegister.onsubmit=async (e)=>{
+                   e.preventDefault();
+                  await module.initRegister();
+                }
             })
                 .catch(error=>console.error('Error loading register module:', error));
           break;
         case 'auth':
-            import('./modules/auth.js')
-              .then(module=>{
-                 module.initAuth();
-              })
-              .catch(error=>console.error('Error loading auth module:', error));
             document.title="Authenfication-login";
+            await import('./modules/auth.js')
+              .then(module=>{
+                module.handleForgotPassword();
+                const formAuth=document.getElementById('form-auth');
+                formAuth.onsubmit=(e)=>{
+                  e.preventDefault();
+                  module.initAuth();
+                }                
+              })
+              .catch(error=>console.error(`Error loading auth module: ${error}`));
+          break;
+          case 'home':
+            import('./modules/home.js')
+              .then(module=>{
+                module.initHome();
+              })
+              .catch(error=>console.error(`Error loading module home: ${error}`));
           break;
     }
 }
@@ -27,13 +48,135 @@ const fetchPageContent=async(url)=>{
             html=parser.parseFromString(html,'text/html');
             document.body.innerHTML=html.body.innerHTML;
             document.body.id=html.body.id;
+            console.log(document.body.id);
             loadJsModule(document.body.id);
          })
     .catch(error=>console.error('Error fetching page content:', error));
 }
 
-const form=document.querySelector('form');
-form.onsubmit=(e)=>{
-  e.preventDefault();
-  loadJsModule('auth')
+const verifyEmailOrPhone=(input)=>{
+    const emailRegex=/^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex=/^\+[0-9]{1,3}\s\d{8,13}$/;
+
+    if(emailRegex.test(input.trim())){
+        return 'email';
+    }else if(phoneRegex.test(input.trim())){
+        return 'phone';
+    }else{
+        return null;
+    }
 }
+
+const validatePassword=(input)=>{
+    const passwordRegex=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(input.trim()) || input.trim().length>=8;
+}
+
+
+const apiRequest=async (url, method='GET', data)=>{
+    const options={
+      method:method,
+      headers:{
+        'Content-Type':'application/json',
+      }
+    }
+    if(data){
+      options.body=JSON.stringify(data);
+    }
+    try{
+      const request= 
+      await fetch(`/api/${url}`, options)
+              .then(response=> response.json())
+              .catch(error=> console.warn(`Erreur lors de l\'appel API ${url} :${error}`))  
+      return request;
+    }catch(error){
+      console.warn(`Erreur lors de l\'appel API ${url} :${error}`)
+    } 
+  }
+
+  const showNotification=(message,type='error', duration=5000)=>{
+    const notification=document.createElement('div');
+    notification.classList.add('borderOnNotification');
+
+    const icon=document.createElement('i');
+    icon.classList.add('icon');
+    if(type==='error'){
+      // notification.classList.add('error');
+      icon.setAttribute('data-lucide','user-x');
+    }else if(type==='success'){
+      // notification.classList.add('success');
+      icon.setAttribute('data-lucide','user-check');
+    }
+
+    notification.innerHTML=`
+    <div class="notification ${type}">
+      <div class="">
+           ${icon.outerHTML}
+        <p>${message}</p>
+      </div>
+    </div>
+    `;
+    document.body.appendChild(notification);
+    lucide.createIcons();
+    setTimeout(()=>{
+      notification.animate([
+        {transform:'translateX(0)', opacity:1},
+        {transform:'translateX(100%)', opacity:0}
+      ],{
+        duration:500,
+        fill:'forwards',
+        easing:'ease-in-out'
+      }).onfinish=()=>{
+        notification.remove();
+      }
+    },duration);
+  }
+
+  window.addEventListener('load',async ()=>{
+
+    const csrfToken=document.getElementById('csrf-token');
+    console.log(csrfToken ,document.body.id);
+    if(csrfToken){
+      const token=csrfToken.value;
+      if(token){
+        await apiRequest('verifyToken', 'POST', {"csrf_token":token})
+        .then(async (data)=> {
+          if(data && data.success){
+            await fetchPageContent('/frontend/views/templates/homeT.php');
+            lucide.createIcons();
+          }else{
+            showNotification(data.message, 'error');
+            await fetchPageContent('/frontend/views/usersClients/auth.php');
+            lucide.createIcons();
+          }
+        })
+        .catch(error=>console.error('Error verifying token:', error));
+        return;
+      }
+    }
+
+    // Regenerer le csrf chaque 10min
+    setInterval(async()=>{
+
+      //Gérer les collisions lors des requetes
+      const collision=(e)=>{
+        e.preventDefault();
+      }
+      const forms=document.querySelectorAll('form');
+      forms.forEach(form=>form.onsubmit=collision)
+
+      const generateCRSF=await apiRequest('generateCSRF');
+      if(generateCRSF && generateCRSF.success){
+        const csrfInput=document.getElementById('csrf-token');
+        csrfInput.value=generateCRSF.token;
+      }
+    },600000);
+
+    fetchPageContent('/frontend/views/usersClients/auth.php');
+      lucide.createIcons();
+
+    // await import('./modules/includes.js')
+    //         .then(module=>module.resetPassword())
+    //         .catch(err=>console.log(err));
+  });
+  
