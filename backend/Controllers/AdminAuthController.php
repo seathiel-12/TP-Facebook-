@@ -12,6 +12,6 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/headers.php';
         private $role;
         
         public function __construct(){
-
+            
         }
     }

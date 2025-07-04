@@ -12,7 +12,7 @@
 </head>
 <body id="auth">
          
-    <div class="main-auth-content">
+    <div class="main-auth-content auth-animate-hidden">
     <img src="https://static.xx.fbcdn.net/rsrc.php/y1/r/4lCu2zih0ca.svg" alt="facebook logo" width="300" height="100">
 
     <p style=" font-size:1.5em; font-weight:600; color:black">Avec Facebook, partagez et restez <br> en contact  avec votre entourage.</p>

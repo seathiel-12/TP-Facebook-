@@ -46,6 +46,9 @@ form:not(.forgot-password-form,.loginHeaderForm, .noFormRootStyle){
     margin:10px auto 30px;
     padding: 20px;
 }
+div{
+    padding:0;
+}
 input:not([type="radio"]){
     border:solid 3px transparent;
     border-radius: 5px;
@@ -103,6 +106,7 @@ input:not([type="radio"]){
     padding: 2px;
     margin-top:10px;
 }
+
 @keyframes SlidefadeIn{
     from{
         opacity: 0;

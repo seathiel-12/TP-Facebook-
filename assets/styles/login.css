@@ -75,8 +75,19 @@ footer{
     padding: 10px;
     box-shadow: 0 0 15px 0 rgba(11, 11, 11, 0.3);
     border-radius: 10px;
+    animation: arise 1s ease-in-out;
 }
 
+@keyframes arise {
+    0%{
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    100%{
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
 #auth footer{
     position:fixed;
     bottom:0;
@@ -129,3 +140,7 @@ form a{
        transform: scale(0.9) translateY(-5%);
     }
 }
+/* .auth-animate-hidden {
+  opacity: 0;
+  transition: opacity 0.5s;
+} */

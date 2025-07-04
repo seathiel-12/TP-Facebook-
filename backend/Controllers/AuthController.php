@@ -23,6 +23,17 @@
         }
     }
 
+    public function verifyOnline(){
+        session_start();
+        if(isset($_SESSION['connect']) && $_SESSION['connect']){
+            $this->limitLogin();
+            $this->generateCSRFToken();
+            echo json_encode(true);
+            return;
+        }
+        echo json_encode(false);
+    }
+
     public function verifyEntries(array $data){
         try{
             $emailOrPhone=$this->verifyEmailOrPhone($data);
@@ -35,6 +46,7 @@
             $result=$result->fetch();
             if(password_verify($data['password'],$result['password'])){
                 $this->startSession($result);
+                
                 echo json_encode(['success'=>true]);
                 return;
             }
@@ -49,18 +61,39 @@
     private function limitLogin(){
         if(isset($_SESSION['attempt']) && isset($_SESSION['first_try_time'])){
             $delay=new DateTime(date('H:i:s'))->getTimestamp() - $_SESSION['first_try_time'];
-            if($delay<MAX_CONNECTION_ATTEMPT_TIME && $_SESSION['attempt']>MAX_CONNECTION_ATTEMPT){
-                die('Too much attempt');
+            
+            if($delay<=MAX_CONNECTION_ATTEMPT_TIME && $_SESSION['attempt']>MAX_CONNECTION_ATTEMPT){
+                
+                echo json_encode(['success'=>false, 'message'=>'Trop de tentatives de connection. Veuillez réessayer dans 5h.']);
+                exit();
             }
         }
     }
 
     public function generateCSRFToken(){
-        $_SESSION['csrf_token']=bin2hex(random_bytes(32));
+        if(
+            !isset($_SESSION['csrf_token']) || 
+            (isset($_SESSION['csrf_token']) && 
+            isset($_SESSION['token_lifetime']) && 
+            time() - $_SESSION['token_set_time']>TOKEN_LIFETIME)
+            )
+        {
+            $_SESSION['csrf_token']=bin2hex(random_bytes(32));
+            $_SEssion['token_set_time']=time();    
+        }
+    }
+
+    public function logout(){
+        session_start();
+        session_unset();
+        session_destroy();
+        setcookie('PHPSESSID','', time()-3600);
     }
 
     private function startSession($sessionInfo){
         if(session_status() == PHP_SESSION_ACTIVE && !isset($_SESSION['connect'])){
+            
+            $this->logout();
             ini_set('session.cookie_httponly',1);
             session_set_cookie_params(
                 [
@@ -81,6 +114,7 @@
             return true;
         }
         session_regenerate_id(true);
+        session_start();
         $this->generateCSRFToken();
         $_SESSION['attempt']+=1;
         $this->limitLogin();
@@ -99,7 +133,6 @@
     public function register($data){
         try{
             $data=$this->cleanData($data);
-
             if($this->verifyEmailOrPhone($data)){
                 new User($data);
 

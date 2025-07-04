@@ -20,6 +20,7 @@ CREATE TABLE users (
     CHECK (email LIKE '%@%.%'), CHECK (email IS NOT NULL OR phone IS NOT NULL)
 );
 
+ALTER TABLE users ADD COLUMN worked_at VARCHAR(255) DEFAULT NULL, ;
 
 CREATE TABLE managers(
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -35,6 +36,24 @@ CREATE TABLE managers(
     CHECK (email LIKE '%@%.%')
 );
 
+
+CREATE TABLE security_log (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    action ENUM('banned', 'unbanned', 'disabled', 'enabled') NOT NULL,
+    reason VARCHAR(255) DEFAULT NULL,
+    time_disabled INT DEFAULT NULL,
+    ip_address VARCHAR(255) NOT NULL,
+    user_agent VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id), 
+    CHECK(
+        (time_disabled IS NOT NULL AND action='disabled') 
+            OR
+         (time_disabled IS NULL AND action!= 'disabled')
+         )
+);
 
 
 CREATE TABLE posts (

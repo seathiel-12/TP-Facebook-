@@ -50,6 +50,7 @@ const fetchPageContent=async(url)=>{
             document.body.id=html.body.id;
             console.log(document.body.id);
             loadJsModule(document.body.id);
+            lucide.createIcons();
          })
     .catch(error=>console.error('Error fetching page content:', error));
 }
@@ -116,6 +117,10 @@ const apiRequest=async (url, method='GET', data)=>{
       </div>
     </div>
     `;
+
+    if(document.querySelector('.notification'))
+      document.querySelector('.notification').remove(); 
+
     document.body.appendChild(notification);
     lucide.createIcons();
     setTimeout(()=>{
@@ -132,51 +137,61 @@ const apiRequest=async (url, method='GET', data)=>{
     },duration);
   }
 
-  window.addEventListener('load',async ()=>{
+  const animateElement=(element)=>{
 
-    // const csrfToken=document.getElementById('csrf_token');
-    // console.log(csrfToken ,document.body.id);
-    // if(csrfToken){
-    //   const token=csrfToken.value;
-    //   if(token){
-    //     await apiRequest('verifyToken', 'POST', {"csrf_token":token})
-    //     .then(async (data)=> {
-    //       if(data && data.success){
-    //         await fetchPageContent('/frontend/views/templates/homeT.php');
-    //         lucide.createIcons();
-    //       }else{
-    //         showNotification(data.message, 'error');
-    //         await fetchPageContent('/frontend/views/usersClients/auth.php');
-    //         lucide.createIcons();
-    //       }
-    //     })
-    //     .catch(error=>console.error('Error verifying token:', error));
-    //     return;
-    //   }
-    // }
+      element.animate([
+        {transform:"translateX(10%)", opacity:0},
+        {transform:"translateX(0)", opacity:"1"}
+       ],
+       {
+        duration:1000,
+        fill:"forwards",
+        easing:"ease-in-out"
+       } 
+      )
+  }
 
-    // Regenerer le csrf chaque 10min
-    // setInterval(async()=>{
+  window.addEventListener('DOMContentLoaded',async ()=>{
+          await apiRequest('isOnline')
+        .then(async (data)=> {
+          if(data){
+            await fetchPageContent('/frontend/views/templates/homeT.php');
+            lucide.createIcons();
+          }else{
+            showNotification('Veuillez vous reconnecter!', 'error');
+            await fetchPageContent('/frontend/views/usersClients/auth.php');
+            lucide.createIcons();
+          }
+        })
+        .catch(error=>console.error('Erreur de connection:', error));
+          
+        // // Regenerer le csrf chaque 10min
 
-      //Gérer les collisions lors des requetes
-      // const collision=(e)=>{
-      //   e.preventDefault();
-      // }
-      // const forms=document.querySelectorAll('form');
-      // forms.forEach(form=>form.onsubmit=collision)
+        setInterval(async()=>{
 
-    //   const generateCRSF=await apiRequest('generateCSRF');
-    //   if(generateCRSF && generateCRSF.success){
-    //     const csrfInput=document.getElementById('csrf_token');
-    //     csrfInput.value=generateCRSF['csrf_token'];
-    //   }
-    // },600000);
+          // Gérer les collisions lors des requetes
+          // const collision=(e)=>{
+          //   e.preventDefault();
+          // }
+          // const forms=document.querySelectorAll('form');
+          // forms.forEach(form=>form.onsubmit=collision)
+    
+          const generateCRSF=await apiRequest('generateCSRF');
+          if(generateCRSF && generateCRSF.success){
+            const csrfInput=document.getElementById('csrf_token');
+            csrfInput.value=generateCRSF['csrf_token'];
+          }
+        },600000);
 
-    // fetchPageContent('/frontend/views/usersClients/auth.php');
-    //   lucide.createIcons();
 
-    await import('./modules/register.js')
-            .then(module=>module.askFillOtherRegisterInfo())
-            .catch(err=>console.log(err));
-  });
+        // await import('./modules/register.js')
+        // .then(module=>{module.showLoadingPage(); lucide.createIcons()})
+        // .catch(err=>console.log(err));
+
+
+      });
+
+  
+    
+
   

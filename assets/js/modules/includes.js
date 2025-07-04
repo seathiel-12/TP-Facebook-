@@ -3,7 +3,7 @@
 const createForgotHeader=()=>{
     const header=document.createElement('header');
     header.innerHTML=`
-        <img src="https://static.xx.fbcdn.net/rsrc.php/y1/r/4lCu2zih0ca.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
+        <img src="/assets/images/facebook.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
 
         <form class="flexDivIcon loginHeaderForm" style=" margin-right:20px;">
             <input type="text" placeholder="E-mail ou numéro de téléphone" style=" font-size:1rem; width:150px; max-height:35px; padding:12px 10px;" required />
@@ -148,8 +148,7 @@ const HandleAskRetrieveCodeBtn=(user)=>{
     const sendCodeBtn=document.querySelector('.sendCode');
     sendCodeBtn.onclick=async ()=>{
         user['csrf_token']=document.getElementById('csrf_token').value;
-        console.log(user['csrf_token'])
-        await apiRequest('user/forgotPassword/retrieveCode', 'POST', user)
+            await apiRequest('user/forgotPassword/retrieveCode', 'POST', user)
                 .then(response=> {
                     if(response){
                         if(response.success){
@@ -171,7 +170,7 @@ const HandleAskRetrieveCodeBtn=(user)=>{
 export const retrieveCode=(email,token,type=null)=>{
     document.body.innerHTML=`
         <header>
-        <img src="https://static.xx.fbcdn.net/rsrc.php/y1/r/4lCu2zih0ca.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
+        <img src="/assets/images/facebook.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
         </header>
 
 
@@ -213,7 +212,10 @@ export const retrieveCode=(email,token,type=null)=>{
 
 const handleRetrieveCode=()=>{
     const notMe=document.querySelector('.not-me');
-    notMe.onclick=()=> createForgotPasswordDiv();
+    notMe.onclick=()=> {
+        fetchPageContent('/frontend/views/usersClients/logout.php')
+        createForgotPasswordDiv();
+    };
 
     const form=document.querySelector('form');
     form.onsubmit=async(e)=>{
@@ -244,11 +246,11 @@ const handleRetrieveCode=()=>{
 
     document.body.innerHTML=`
         <header>
-        <img src="https://static.xx.fbcdn.net/rsrc.php/y1/r/4lCu2zih0ca.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
+        <img src="/assets/images/facebook.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
         </header>
 
         <div>
-            
+        
         <div>
 
         <form>

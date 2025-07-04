@@ -3,6 +3,9 @@
     require_once 'headers.php';
     require_once 'vendor/autoload.php';
     session_start();
+
+        // var_dump($_SESSION);
+        // exit();
     $uri=explode('/',$_SERVER['REQUEST_URI']);
     if(in_array('api',$uri)){
        new ApiCall()->requestTreatment(); 
@@ -19,8 +22,8 @@
     <link rel="stylesheet" href="assets/styles/root.css" type="text/css">
     <link rel="stylesheet" href="assets/styles/login.css" type="text/css">
     <link rel="stylesheet" href="assets/styles/home.css" type="text/css">
-    <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>   
-    <link href='https://cdn.boxicons.com/fonts/brands/boxicons-brands.min.css' rel='stylesheet'>
+    <!-- <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>   
+    <link href='https://cdn.boxicons.com/fonts/brands/boxicons-brands.min.css' rel='stylesheet'> -->
     
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://unpkg.com/lucide@latest">lucide.createIcons();</script>
@@ -31,7 +34,7 @@
 </head>
 
 <body>
-    <input type="hidden" id="csrf-token" value="<?php echo $_SESSION['csrf_token']??''; ?>">
+    <input type="hidden" id="csrf_token" value="<?php echo $_SESSION['csrf_token']??''; ?>">
 </body>
 
 </html>

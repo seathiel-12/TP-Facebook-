@@ -3,10 +3,10 @@ namespace App;
 use App\Controllers\Controller;
 use App\Controllers\AuthController;
 use App\Models\User;
+use Exception;
 use \PDOException;
   require_once $_SERVER['DOCUMENT_ROOT'].'/headers.php';
 //   header('Content-Type: application/json');
-session_start();
 class ApiCall{
     private $method;
     private $uri;
@@ -19,6 +19,7 @@ class ApiCall{
     
 
     private function verifyCSRFToken(){
+        session_start();
         if(isset($_SESSION['csrf_token']) && !empty($_SESSION['csrf_token'])){
             if($this->method!=='GET'){
                 $request=file_get_contents('php://input');
@@ -47,6 +48,7 @@ class ApiCall{
             return $data;
         }else{
             echo json_encode('Pas de donnée à récupérer via la methode GET.');
+            return;
         }
     }
 
@@ -56,7 +58,7 @@ class ApiCall{
         for($i=0; $i<6; $i++){
             $code.=$letter[rand(0,35)];
         }
-       return $code;
+       return $code; 
     }
 
     private function debug($data){
@@ -66,9 +68,10 @@ class ApiCall{
     }
 
     public function requestTreatment(){
-//Route 'api/{action}'
+    //Route 'api/{action}'
+        
        if(isset($this->method) && isset($this->uri)){
-
+        
             try{
                 switch($this->uri[2]){
                     //Route 'api/user/{case}'
@@ -83,40 +86,61 @@ class ApiCall{
                                         echo json_encode(['success'=>false,'message'=>'Email invalide']);
                                         return;
                                       }
+                                      if(session_status() == PHP_SESSION_ACTIVE){                                        
+                                        new AuthController()->logout();
+                                      }
+                                      session_set_cookie_params([
+                                        'lifetime'=>time()+PASSCODE_LIFETIME+60,
+                                        'secure'=>false,
+                                        'httpOnly'=>true
+                                    ]);
+                                        session_start();
                                       $_SESSION['registerCode']=$this->generateMailerCode();
                                       $_SESSION['registerCode_sent_time']=time();
                                       new AuthController()->generateCSRFToken();
-                                      new AuthController()->mailerSend($data['fullname'],'register');
-                                      echo json_encode(['success'=>true, 'email'=>$data['email'],'csrf_token'=>$_SESSION['csrf_token'],'code'=>$_SESSION['registerCode']]);
+                                      $fullname=$data['fisrtname']. ' ' . $data['lastname'];
+                                      new AuthController()->mailerSend($fullname,'register');
+                                      echo json_encode(['success'=>true, 'data'=>$data,'csrf_token'=>$_SESSION['csrf_token'],'code'=>$_SESSION['registerCode']]);
                                     break;
                                 }
 
                                 if(isset($this->uri[4]) && $this->uri[4]==='codeVerify'){
-                                    
-                                    if(time() - $_SESSION['registerCode_sent_time'] > PASSCODE_LIFETIME){
-                                        echo json_encode(['success'=>false, 'message'=>'Code expiré! Veuillez vous inscrire à nouveau.']);
+                                    session_start();
+                                    if(isset($_SESSION['registerCode_sent_time'])){  
+                                        if(time() - $_SESSION['registerCode_sent_time'] > PASSCODE_LIFETIME){
+                                            echo json_encode(['success'=>false, 'message'=>'Code expiré! Veuillez vous inscrire à nouveau.']);
+                                            return;
+                                        }    
+                                    }else{
+                                        echo json_encode(['success'=>false, 'message'=>'Veuillez demander un nouveau code et réessayer.']);
                                         return;
                                     }
                                     $data=$this->getRequestData();
                                     if($this->verifyCSRFToken()===200){
                                         if(isset($_SESSION['registerCode']) && $_SESSION['registerCode'] === $data['code']){
-                                            echo json_encode(['success'=>true]);
+                                           
+                                            new AuthController()->logout();
+                                            unset($data['code'], $data['csrf_token']);
+
+                                            new AuthController()->register($data);
+                                            return;
+                                        }else{
+                                            new AuthController()->logout();
+                                            echo json_encode(['succes'=>false, 'message'=>'Code invalide! Demandez un nouveau code et réessayer.']);
+
                                             return;
                                         }
                                     }else{
                                         echo json_encode(['success'=>false, 'message'=>'Alerte de securité! Veuillez vous reconnecter!']);
 
-                                        session_unset();
-                                        session_destroy(); 
-                                        if(isset($_COOKIE['PHPSESSID'])){
-                                            setcookie('PHPSESSID','', time()-3600);
-                                        }
+                                        new AuthController()->logout();
+                                        
                                     }
                                     return;
                                 }
                                 
                                 if(isset($this->uri[4]) && $this->uri[4]==='otherInfo'){
-                                    
+
                                 }
                             break;
                             }
@@ -130,6 +154,8 @@ class ApiCall{
                                         return;
                                     }
                                     $userData= new User()->getRequestedUserData($findwith,['id','username', 'email', 'firstname', 'lastname', 'gender','profil_picture']);
+                                    
+                                    session_start();
                                     new AuthController()->generateCSRFToken();
                                     
                                     echo json_encode(
@@ -151,10 +177,26 @@ class ApiCall{
                                             return;
                                         }
                                     }
+                                    
+
+                                    if(session_status() == PHP_SESSION_ACTIVE){
+                                        $sessionTemp=$_SESSION;
+                                        new AuthController()->logout();
+                                    }
+                                    session_set_cookie_params([
+                                        'lifetime'=>time()+PASSCODE_LIFETIME+300,
+                                        'secure'=>false,
+                                        'httpOnly'=>true
+                                    ]);
+
+                                    session_start();
+                                    $_SESSION=$sessionTemp;
+
                                     if($this->verifyCSRFToken()===200){
                                         $_SESSION['resetPassCode']=$this->generateMailerCode();
                                         $_SESSION['id']=$user['id'];
                                         $_SESSION['username']=$user['username']?$user['username']:($user['firstname'].' '.$user['lastname']);
+                                        
 
                                         if($_SESSION['connect'])
                                         unset($_SESSION['connect']);
@@ -167,11 +209,18 @@ class ApiCall{
                                         break;    
                                     }
                                     echo json_encode('Méthode GET ou user non authentifié!');
+                                    break;
                                 } 
 
                                 if(isset($this->uri[4]) && $this->uri[4]==='codeVerify'){
+                                    session_start();
+                                    if(!isset($_SESSION['passCode_sent_time'])){
+                                        echo json_encode(['success'=>false, 'message'=>'Code expiré! Veuillez demander un nouveau code et réessayer!']);
+                                         return;
+                                    }
                                     if(time()-$_SESSION['passCode_sent_time'] > PASSCODE_LIFETIME){
                                         echo json_encode(['success'=>false, 'message'=>'Code expiré! Veuillez demander un nouveau code et réessayer!']);
+                                        new AuthController()->logout();
                                         return;
                                     }
                                     $code=$this->getRequestData();
@@ -179,23 +228,28 @@ class ApiCall{
                                     
                                     if(isset($_SESSION['resetPassCode'])){
                                         if($_SESSION['resetPassCode']===$code['code']){
-                                            new AuthController();
+                                            
                                             echo json_encode(['success'=>true, "fullname"=>$_SESSION['username'], "csrf_token"=>$_SESSION['csrf_token']]);
                                         }
                                         else {
-                                            echo json_encode(['success'=>false, 'message'=>'Code non valide']);
+                                            echo json_encode(['success'=>false, 'message'=>'Code non valide.']);
                                         }
                                         break;
                                     }
-                                    echo json_encode(['success'=>false, 'message'=>'Veuillez demander un nouveau code et rééssayer.']);
+                                    echo json_encode(['success'=>false, 'message'=>'Une erreur esr survenue. Veuillez demander un nouveau code et rééssayer.']);
                                     break;
                                 }
 
                                 if(isset($this->uri[4]) && $this->uri[4]==='reset'){
+                                    session_start();
+                                    if(!isset($_SESSION['resetPassCode'])){
+                                        echo json_encode(['success'=>false, 'message'=>'Timeout! Veuillez demander un nouveau code de reinitialisation.']);
+                                        return;
+                                    }
                                     $password=$this->getRequestData();
                                     if($this->verifyCSRFToken() === 200){
                                         new User()->update(['password'=>$password['newPassword']], $_SESSION['id']);
-                                        unset($_SESSION['resetPassCode'],$_SESSION['passCode_sent_time']);
+                                        unset($_SESSION['resetPassCode'], $_SESSION['passCode_sent_time']);
                                         new AuthController($_SESSION);
                                         echo json_encode(['success'=>true]);
                                     }
@@ -209,6 +263,10 @@ class ApiCall{
                         $data=json_decode(file_get_contents('php://input'),true);
                          new AuthController()->verifyEntries($data);
                          
+                        break;
+                    }
+                    case 'isOnline':{
+                        new AuthController()->verifyOnline();
                         break;
                     }
                     case 'verifyToken':{
