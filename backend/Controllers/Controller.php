@@ -3,11 +3,14 @@
     require_once $_SERVER['DOCUMENT_ROOT'].'/headers.php';
     class Controller {
 
+        protected $method;
+        protected $uri;
+
         public function __contruct(){
 
         }
 
-       public function cleanData($data){
+       protected function cleanData($data){
             if(is_array($data)){
                 foreach($data as $key => $value){
                     if($key!=='csrf_token')
@@ -17,5 +20,41 @@
             } 
             return htmlspecialchars($data, ENT_QUOTES, 'UTF-8');   
        }
+
+       protected function getRequestData(){
+        if($this->method!=='GET'){
+            $data=json_decode(file_get_contents('php://input'),true);
+            $data=$this->cleanData($data);
+            return $data;
+        }else{
+            echo json_encode('Pas de donnée à récupérer via la methode GET.');
+            return;
+        }
+      }
+
+      protected function verifyCSRFToken(){
+        session_start();
+        if(isset($_SESSION['csrf_token']) && !empty($_SESSION['csrf_token'])){
+            if($this->method!=='GET'){
+                $request=file_get_contents('php://input');
+                 $data=json_decode($request,true);
+                if(isset($data['csrf_token'])){
+                    if($data['csrf_token']===$_SESSION['csrf_token']){
+                        return 200;
+                    }
+                    session_start();
+                    session_unset();
+                    session_destroy();
+                    if(isset($_COOKIE['PHPSESSID']))
+                     setcookie('PHPSESSID','', time()-3600);
+                    throw new \Exception("Alerte de securité! Tentative d'envoi de données frauduleuses.");
+                }
+            }
+            return 'Méthode GET!';
+        }
+        return 400;
+    }
+
+
 
     }

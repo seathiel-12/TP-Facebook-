@@ -28,7 +28,7 @@ class User extends Model{
         return Model::deleteEntry($this->table, $id);
     }
 
-    private function find($condition){
+    public function find($condition){
         if(!is_array($condition) || sizeof($condition)>1){
             throw new Exception('An array with one key->value is required');
         }

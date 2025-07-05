@@ -4,6 +4,7 @@
     header('Referrer-Policy: no-referrer');
     header("X-Content-Type-Options: nosniff");
     require_once $_SERVER['DOCUMENT_ROOT'].'/backend/config.php';
+    require_once $_SERVER['DOCUMENT_ROOT'].'/vendor/autoload.php';
     
     
 //     echo '<pre>';

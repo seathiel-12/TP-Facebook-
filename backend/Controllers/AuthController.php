@@ -16,13 +16,131 @@
 
     require_once $_SERVER['DOCUMENT_ROOT'].'/headers.php';
   class AuthController extends Controller{
-        
+        use Auth;
+        use mailer;
+
     public function __construct($sessionInfo=null){
         if(is_array($sessionInfo)){
             $this->startSession($sessionInfo);
         }
     }
 
+    public function forgotPassword($step){
+        //api/{method}/{step}
+
+        //step 1: findUser
+        if(isset($this->uri[4]) && $step==='find'){
+            $findwith=$this->getRequestData();
+            
+            if(!filter_var($findwith['email'],FILTER_VALIDATE_EMAIL)){
+                echo json_encode(['success'=>false,'message'=>"Email invalide"]);
+                return;
+            }
+            $userData= new User()->getRequestedUserData($findwith,['id','username', 'email', 'firstname', 'lastname', 'gender','profil_picture']);
+            
+            session_start();
+            $this->generateCSRFToken();
+            
+            echo json_encode(
+                [
+                    'success'=>true,
+                    'data'=> $userData,
+                    'csrf_token'=>$_SESSION['csrf_token']
+                ]);
+
+            return;
+        }
+
+        // Step 2: send Code
+        if(isset($this->uri[4]) && $this->uri[4]==='retrieveCode'){
+            $user=$this->getRequestData();
+            $userData= new User()->getRequestedUserData(["email"=>$user['email']],['id','username','firstname', 'lastname', 'gender','profil_picture']);
+            
+            foreach($userData as $key=>$data){
+                if($userData[$key]!=$user[$key] || !filter_var($user['email'],FILTER_VALIDATE_EMAIL)){
+                    echo json_encode(['success'=>false, 'message'=>'Données utilisateur non valides!']);
+                    return;
+                }
+            }
+            
+
+            if(session_status() == PHP_SESSION_ACTIVE){
+                $sessionTemp=$_SESSION;
+                $this->logout();
+            }
+            session_set_cookie_params([
+                'lifetime'=>time()+PASSCODE_LIFETIME+300,
+                'secure'=>false,
+                'httpOnly'=>true
+            ]);
+
+            session_start();
+            $_SESSION=$sessionTemp;
+
+            if($this->verifyCSRFToken()===200){
+                $_SESSION['resetPassCode']=$this->generateMailerCode();
+                $_SESSION['id']=$user['id'];
+                $_SESSION['username']=$user['username']?$user['username']:($user['firstname'].' '.$user['lastname']);
+                
+
+                if($_SESSION['connect'])
+                unset($_SESSION['connect']);
+
+                $user['fullname']=$user['firstname'].' '.$user['lastname'];
+                $this->mailerSend($user['fullname'],'resetPassCode');
+
+                $_SESSION['passCode_sent_time']=time();
+                echo json_encode(['success'=>true, 'email'=>$user['email'], "csrf_token"=>$_SESSION['csrf_token']]);
+            }
+            echo json_encode('Méthode GET ou user non authentifié!');
+            return;
+        } 
+
+        //Step 3: Verify Code
+        if(isset($this->uri[4]) && $this->uri[4]==='codeVerify'){
+            session_start();
+            if(!isset($_SESSION['passCode_sent_time'])){
+                echo json_encode(['success'=>false, 'message'=>'Code expiré! Veuillez demander un nouveau code et réessayer!']);
+                 return;
+            }
+            if(time()-$_SESSION['passCode_sent_time'] > PASSCODE_LIFETIME){
+                echo json_encode(['success'=>false, 'message'=>'Code expiré! Veuillez demander un nouveau code et réessayer!']);
+                new AuthController()->logout();
+                return;
+            }
+            $code=$this->getRequestData();
+            $this->verifyCSRFToken();
+            
+            if(isset($_SESSION['resetPassCode'])){
+                if($_SESSION['resetPassCode']===$code['code']){
+                    
+                    echo json_encode(['success'=>true, "fullname"=>$_SESSION['username'], "csrf_token"=>$_SESSION['csrf_token']]);
+                }
+                else {
+                    echo json_encode(['success'=>false, 'message'=>'Code non valide.']);
+                }
+                return;
+            }
+            echo json_encode(['success'=>false, 'message'=>'Une erreur esr survenue. Veuillez demander un nouveau code et rééssayer.']);
+        }
+
+        // Step 4: Reset Password
+        if(isset($this->uri[4]) && $this->uri[4]==='reset'){
+            session_start();
+            if(!isset($_SESSION['resetPassCode'])){
+                echo json_encode(['success'=>false, 'message'=>'Timeout! Veuillez demander un nouveau code de reinitialisation.']);
+                return;
+            }
+            $password=$this->getRequestData();
+            if($this->verifyCSRFToken() === 200){
+                new User()->update(['password'=>$password['newPassword']], $_SESSION['id']);
+                unset($_SESSION['resetPassCode'], $_SESSION['passCode_sent_time']);
+                new AuthController($_SESSION);
+                echo json_encode(['success'=>true]);
+            }
+        }
+    }
+    
     public function verifyOnline(){
         session_start();
         if(isset($_SESSION['connect']) && $_SESSION['connect']){
@@ -35,9 +153,9 @@
     }
 
     public function verifyEntries(array $data){
+        $data=$this->getRequestData();
         try{
             $emailOrPhone=$this->verifyEmailOrPhone($data);
-            $data=$this->cleanData($data);
 
             $db=Database::getDb();
             $query="SELECT * FROM users WHERE $emailOrPhone=?";
@@ -82,104 +200,5 @@
             $_SEssion['token_set_time']=time();    
         }
     }
-
-    public function logout(){
-        session_start();
-        session_unset();
-        session_destroy();
-        setcookie('PHPSESSID','', time()-3600);
-    }
-
-    private function startSession($sessionInfo){
-        if(session_status() == PHP_SESSION_ACTIVE && !isset($_SESSION['connect'])){
-            
-            $this->logout();
-            ini_set('session.cookie_httponly',1);
-            session_set_cookie_params(
-                [
-                    'lifetime'=>time()+SESSION_LIFETIME,
-                    'httponly'=>true,
-                    'secure'=>false,
-                ]
-            );        
-            session_start();
-            
-            $_SESSION['id']=$sessionInfo['id'];
-            $_SESSION['username']=$sessionInfo['username']?$sessionInfo['username']:($sessionInfo['firstname'].' '.$sessionInfo['lastname']);
-            $_SESSION['attempt']=1;
-            $_SESSION['connect']=true;
-            $_SESSION['first_try_time']=new DateTime(date('H:i:s'))->getTimestamp();
-           
-            $this->generateCSRFToken();
-            return true;
-        }
-        session_regenerate_id(true);
-        session_start();
-        $this->generateCSRFToken();
-        $_SESSION['attempt']+=1;
-        $this->limitLogin();
-    }
-
-    private function verifyEmailOrPhone($data){
-        $key=array_key_exists('email',$data)?'email':'phone';
-            if($key==='email' && !filter_var($data['email'],FILTER_VALIDATE_EMAIL)){
-                throw new PDOException('Email invalide');
-            }else if($key==='phone' && !is_numeric(str_replace(' ','',$data['phone']))){
-                throw new PDOException('Numéro invalide');
-            }
-            return $key;
-    }
-
-    public function register($data){
-        try{
-            $data=$this->cleanData($data);
-            if($this->verifyEmailOrPhone($data)){
-                new User($data);
-
-                $user=Model::getEntry('users', ['email'=>$data['email']]);
-                $this->startSession($user);
-                echo json_encode(['success'=>true]);
-            }
-        }catch(PDOException $e){
-            echo json_encode(['success'=>false]);
-            throw new PDOException("Erreur de création de compte: $e");
-        }
-    }
-    
-    public function mailerSend($fullname,$type){
-
-            try{
-                $mail=new PHPMailer();
-                $mail->isSMTP();
-                $mail->Host=$_ENV['MAILER_HOST'];
-                $mail->SMTPAuth=true;
-                $mail->Username=$_ENV['MAILER_USERNAME'];
-                $mail->Password=$_ENV['MAILER_PASSWORD'];
-                $mail->SMTPSecure= 'tls';
-                $mail->Port= $_ENV['MAILER_PORT'];
-    
-                if(isset($_SESSION['resetPassCode']) && $type==="resetPassCode"){
-                    $message="Plus qu'une étape avant de réinitialiser votre mot de passe. $fullname, Nous avons recu votre demande de réinitialisation de mot de passe. Saisissez le code suivant dans le champ requis sur le site pour effectuer la modification: <br> <br> <strong  style='background:rgb(77, 118, 255); width:max-content; border-radius:10px; padding:10px 15px; display:block; margin:auto;'>".$_SESSION['resetPassCode']."</strong>. <br><br>
-                    <p>Vous n'avez pas demandé ce code? Signalez-ce mail.<p>";
-                }else{
-                    if(isset($_SESSION['registerCode']) && $type==="register")
-                    $message="Bienvenue $fullname sur Facebook Clone. Validez votre e-mail avec le code suivant pour accéder à des fonctionnalités uniques et communiquer avec vos amis: <br><br> <strong style='background:rgb(77, 118, 255); width:max-content; border-radius:10px; padding:10px 15px; display:block; margin:auto;'>".$_SESSION['registerCode']."</strong>. <br><br>
-                    Vous n'avez pas demandé ce code? Signalez-ce mail.";
-                }
-                $mail->setFrom($_ENV['MAILER_USERNAME'],'Facebook Clone');
-                $mail->addAddress($_ENV['MAILER_ADMINISTRATOR'],'New Facebook User');
-                
-                $mail->isHTML();
-                $mail->CharSet='UTF-8';
-                $mail->Subject="Code de confirmation.";
-                $mail->Body=$message;
-                // $mail->SMTPDebug=4;
-                // $mail->Debugoutput='html';
-                // $mail->send();
-            }catch(Exception $e){
-                echo json_encode(['message'=>$mail->ErrorInfo]);
-            }
-             
-    }
-    
+        
  }

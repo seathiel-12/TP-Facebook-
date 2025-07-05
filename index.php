@@ -1,7 +1,6 @@
 <?php 
     use App\ApiCall;
     require_once 'headers.php';
-    require_once 'vendor/autoload.php';
     session_start();
 
         // var_dump($_SESSION);
