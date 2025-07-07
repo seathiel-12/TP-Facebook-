@@ -80,15 +80,16 @@ class ApiCall{
                         switch($this->uri[3]){
                             //Route 'api/user/register'
                             case 'register':{
-                                new Register()->{$this->uri};
+                                if(isset($this->uri[4]))
+                                new Register()->registering($this->uri[4]);
                             break;
-                            }
+                            }   
                             //Route 'api/user/forgotPassword'
                             case 'forgotPassword':{
                                 if(isset($this->uri[4])){
-                                    new AuthController()->forgotPassword($this->uri);
+                                    new AuthController()->forgotPassword($this->uri[4]);
                                 }else{
-                                    throw new Exception();
+                                    throw new Exception('Step required!');
                                 }
                                 break;
                             }

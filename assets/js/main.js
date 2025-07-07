@@ -183,11 +183,10 @@ const apiRequest=async (url, method='GET', data)=>{
           }
         },600000);
 
-
+        createIcons();
         // await import('./modules/register.js')
         // .then(module=>{module.showLoadingPage(); lucide.createIcons()})
         // .catch(err=>console.log(err));
-
 
       });
 

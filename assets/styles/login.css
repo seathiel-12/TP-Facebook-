@@ -15,12 +15,6 @@ form div{
 hr{
     margin: 10px;
 }
-.flexDivIcon{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-}
 .flexDivIcon svg{
     transform: translateY(2px);
 }

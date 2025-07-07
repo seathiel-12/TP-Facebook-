@@ -1,13 +1,16 @@
 <?php
     header('Access-Control-Allow-Origin: *');
     header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH');
-    header('Referrer-Policy: no-referrer');
-    header("X-Content-Type-Options: nosniff");
+    header('Referrer-Policy: same-origin');
+    header("X-Content-Type-Options: no-referrer");
     require_once $_SERVER['DOCUMENT_ROOT'].'/backend/config.php';
     require_once $_SERVER['DOCUMENT_ROOT'].'/vendor/autoload.php';
     
     
-//     echo '<pre>';
-//     print_r($_SERVER);
-//     echo '</pre>';
-// exit();
+
+    // session_start();
+    // echo '<pre>';
+    // print_r($_SESSION);
+    // echo '</pre>';
+    // exit();
+

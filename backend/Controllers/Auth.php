@@ -24,8 +24,7 @@ trait Auth{
     }
 
     public function startSession($sessionInfo){
-        if(session_status() == PHP_SESSION_ACTIVE && !isset($_SESSION['connect'])){
-            
+        if(!isset($_SESSION['connect'])){
             $this->logout();
             ini_set('session.cookie_httponly',1);
             session_set_cookie_params(

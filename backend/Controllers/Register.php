@@ -9,35 +9,38 @@ namespace App\Controllers;
         use mailer;
         use Auth;
 
-        public function mailVerify(){
-            if(isset($this->uri[4]) && $this->uri[4]==='mailVerify'){
-                $data=$this->getRequestData();
-                if(!filter_var($data['email'],FILTER_VALIDATE_EMAIL)){
-                  echo json_encode(['success'=>false,'message'=>'Email invalide']);
-                  return;
-                }
-                if(session_status() == PHP_SESSION_ACTIVE){                                        
-                  new AuthController()->logout();
-                }
-                session_set_cookie_params([
-                  'lifetime'=>time()+PASSCODE_LIFETIME+60,
-                  'secure'=>false,
-                  'httpOnly'=>true
-              ]);
-                  session_start();
-                $_SESSION['registerCode']=$this->generateMailerCode();
-                $_SESSION['registerCode_sent_time']=time();
-                new AuthController()->generateCSRFToken();
-                $fullname=$data['fisrtname']. ' ' . $data['lastname'];
+        public function registering($step){
 
-                $this->mailerSend($fullname,'register');
-                
-                echo json_encode(['success'=>true, 'data'=>$data,'csrf_token'=>$_SESSION['csrf_token'],'code'=>$_SESSION['registerCode']]);
-          }
-        }
+            try{
+                // Step 1: Mail verify by sending coding
+                if(isset($step) && $step==='mailVerify'){
+                    $data=$this->getRequestData();
+                    if(!filter_var($data['email'],FILTER_VALIDATE_EMAIL)){
+                      echo json_encode(['success'=>false,'message'=>'Email invalide']);
+                      return;
+                    }
+                    if(session_status() == PHP_SESSION_ACTIVE){                                        
+                      new AuthController()->logout();
+                    }
+                    session_set_cookie_params([
+                      'lifetime'=>time()+PASSCODE_LIFETIME+60,
+                      'secure'=>false,
+                      'httpOnly'=>true
+                  ]);
+                      session_start();
+                    $_SESSION['registerCode']=$this->generateMailerCode();
+                    $_SESSION['registerCode_sent_time']=time();
+                    new AuthController()->generateCSRFToken();
+                    $fullname=$data['fisrtname']. ' ' . $data['lastname'];
+    
+                    $this->mailerSend($fullname,'register');
+                    
+                    echo json_encode(['success'=>true, 'data'=>$data,'csrf_token'=>$_SESSION['csrf_token']]);
+              }
 
-        public function codeVerify(){
-            if(isset($this->uri[4]) && $this->uri[4]==='codeVerify'){
+              //Step 2: code verify
+
+              if(isset($step) && $step==='codeVerify'){
                 session_start();
                 if(isset($_SESSION['registerCode_sent_time'])){  
                     if(time() - $_SESSION['registerCode_sent_time'] > PASSCODE_LIFETIME){
@@ -60,7 +63,6 @@ namespace App\Controllers;
                     }else{
                         $this->logout();
                         echo json_encode(['succes'=>false, 'message'=>'Code invalide! Demandez un nouveau code et réessayer.']);
-
                         return;
                     }
                 }else{
@@ -69,28 +71,31 @@ namespace App\Controllers;
                 }
                 return;
             }
+
+            }catch(PDOException $e){
+                echo json_encode(['success'=>false]);
+                throw new PDOException("Une erreur s'est produite: $e");
+            }
         }
 
         public function register($data){
-            try{
+            try {
                 $data=$this->cleanData($data);
                 if($this->verifyEmailOrPhone($data)){
                     new User($data);
     
                     $user=new User()->find(['email'=>$data['email']]);
+                    $this->logout();
                     new AuthController()->startSession($user);
                     echo json_encode(['success'=>true]);
                 }
-            }catch(PDOException $e){
-                echo json_encode(['success'=>false]);
-                throw new PDOException("Erreur de création de compte: $e");
+            } catch (PDOException $e) {
+                throw new PDOException('Erreur de création de compte: '.$e);
             }
         }
 
         private function otherInfo(){
-            if(isset($this->uri[4]) && $this->uri[4]==='otherInfo'){
-
-            }
+            
         }
 
     }

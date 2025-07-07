@@ -148,10 +148,12 @@ const HandleAskRetrieveCodeBtn=(user)=>{
     const sendCodeBtn=document.querySelector('.sendCode');
     sendCodeBtn.onclick=async ()=>{
         user['csrf_token']=document.getElementById('csrf_token').value;
+        const timeout=setTimeout(()=>fetchPageContent('/frontend/userClients/views/logout.php'),305000);
             await apiRequest('user/forgotPassword/retrieveCode', 'POST', user)
                 .then(response=> {
                     if(response){
                         if(response.success){
+                            clearTimeout(timeout);
                             retrieveCode(response.email,response['csrf_token']);
                         }else{
                             showNotification(response.message);
@@ -213,8 +215,9 @@ export const retrieveCode=(email,token,type=null)=>{
 const handleRetrieveCode=()=>{
     const notMe=document.querySelector('.not-me');
     notMe.onclick=()=> {
-        fetchPageContent('/frontend/views/usersClients/logout.php')
-        createForgotPasswordDiv();
+        fetchPageContent('../frontend/views/usersClients/logout.php')
+        fetchPageContent('../frontend/views/usersClients/auth.php')
+        return;
     };
 
     const form=document.querySelector('form');

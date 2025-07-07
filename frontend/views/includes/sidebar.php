@@ -57,6 +57,7 @@
     aside{
         padding-top: 20px;
         height: 100%;
+        background-color: white;
     }
     .flexDivIcon{
         gap:10px;

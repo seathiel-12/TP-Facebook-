@@ -10,10 +10,10 @@
     <title>Home</title>
 </head>
 <body id="home">
-    <?php require '../includes/header.html'; ?>
+    <?php require '../includes/header.php'; ?>
     <main>
        <?php require '../includes/sidebar.php';?> 
-       <?php require '../includes/chat.html'; ?>
+       <?php require '../includes/chat.php'; ?>
     </main>  
     <input type="hidden" id="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">   
 </body>

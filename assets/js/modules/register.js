@@ -98,7 +98,7 @@ const handleRegisterRetrieveCode=(data)=>{
         await apiRequest('user/register/codeVerify','POST', data)
                 .then(response=>{
                     if(response && response.success){
-                        askFillOtherRegisterInfo();                        
+                        askFillOtherRegisterInfo(); 
                         return;
                     }else{
                         showNotification(response.message);
@@ -240,6 +240,8 @@ const handleRegisterRetrieveCode=(data)=>{
     `
     const completProfil=document.querySelector('.completeProfil');
     completProfil.onclick=()=>completeProfil();
+
+    lucide.createIcons();
 }
 
  const completeProfil=()=>{
@@ -270,12 +272,12 @@ const handleRegisterRetrieveCode=(data)=>{
 
                 <div class="flexDivIcon" style="gap:0;">
                     <i data-lucide="map-pinned" class="otherIcon"></i>
-                    <input style="border-radius:0 5px 5px 0; " name="lives_at" placeholder="Entrez votre adresse..."/>
+                    <input style="border-radius:0 5px 5px 0; " name="lives_at" placeholder="Entrez votre adresse..." required/>
                 </div>
 
                 <div class="flexDivIcon" style="gap:10;">
                     <div class="flexDivIcon" style="gap:0; padding:0;">
-                       <select style="width:100%; height:45px; margin:0;">
+                       <select name="relationship_status" style="width:100%; height:45px; margin:0;" required>
                         <option selected hidden>Situation matrimoniale</option>
                         <option value="single">Célibataire</option>
                         <option value="couple">En couple</option> 
@@ -284,7 +286,7 @@ const handleRegisterRetrieveCode=(data)=>{
                        </select>
                     </div>
                     <div class="flexDivIcon" style="gap:0; padding:0;">
-                        <select style="width:100%; height:45px; margin:0;">
+                        <select name="study_level" style="width:100%; height:45px; margin:0;" required>
                         <option selected hidden>Niveau d'études</option>
                         <option value="cep">Certificat d'Etudes primaires</option>
                         <option value="bepc">Brevet collegial</option> 
@@ -301,11 +303,11 @@ const handleRegisterRetrieveCode=(data)=>{
 
                 <div class="flexDivIcon" style="margin:10px 0;">
                     <div style="width:50%; padding:0;">
-                        <select style="width:100%; height:45px; margin:0 0 10px 0;">
+                        <select name="profession" style="width:100%; height:45px; margin:0 0 10px 0;" required>
                         <option selected hidden>Profession</option>
-                        <option value="single">Ingénieur aéronautique</option>
-                        <option value="couple">Data Analyste</option> 
-                        <option value="married">Infopreneur</option>
+                        <option value="#">Ingénieur aéronautique</option>
+                        <option value="#">Data Analyste</option> 
+                        <option value="#">Infopreneur</option>
                         <option value="#">Génie civil</option>
                         <option value="#">Directeur Informatique</option>
                         <option value="#">Artisan</option>
@@ -313,7 +315,7 @@ const handleRegisterRetrieveCode=(data)=>{
                         
                        <div class="hobbies flexDivIcon" style="justify-content:space-between;"><ul id="hobbiesChoosedList" style="padding:0;"><span>Vos hobbies</span></ul> <i data-lucide="chevron-down" style="transform:scale(0.7) translateX(7px);"></i> </div>
                     </div>
-                    <textarea class="bio" style="height:80px;" placeholder="Parlez nous de vous..."></textarea>
+                    <textarea name="about" class="bio" style="height:80px;" placeholder="Parlez nous de vous..."></textarea>
                 </div>
             </div>
 
@@ -489,10 +491,12 @@ const handleRegisterRetrieveCode=(data)=>{
     `
     document.body.innerHTML=profil.outerHTML;
 
+    lucide.createIcons();
     const skip=document.querySelector('.skip');
     skip.onclick=()=>{
         showLoadingPage();
         setTimeout(()=>fetchPageContent('/frontend/views/templates/homeT.php'),3000);
+        // animation de bienvenue
     }
     const hobbiesList=document.getElementById('hobbiesList');
     const hobbiesChoosedList=document.getElementById('hobbiesChoosedList');

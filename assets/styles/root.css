@@ -106,7 +106,28 @@ input:not([type="radio"]){
     padding: 2px;
     margin-top:10px;
 }
-
+.flexDivIcon,.flexDiv{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+.flexDivBetween{
+    display: flex;
+    justify-content: space-between!important;
+    align-items: center;
+}
+.flexDivAround{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+.flexDivStart{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap:10px;
+}
 @keyframes SlidefadeIn{
     from{
         opacity: 0;

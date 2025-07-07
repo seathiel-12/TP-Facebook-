@@ -29,7 +29,7 @@
         //api/{method}/{step}
 
         //step 1: findUser
-        if(isset($this->uri[4]) && $step==='find'){
+        if(isset($step) && $step==='find'){
             $findwith=$this->getRequestData();
             
             if(!filter_var($findwith['email'],FILTER_VALIDATE_EMAIL)){
@@ -52,7 +52,7 @@
         }
 
         // Step 2: send Code
-        if(isset($this->uri[4]) && $this->uri[4]==='retrieveCode'){
+        if(isset($step) && $step==='retrieveCode'){
             $user=$this->getRequestData();
             $userData= new User()->getRequestedUserData(["email"=>$user['email']],['id','username','firstname', 'lastname', 'gender','profil_picture']);
             
@@ -81,9 +81,8 @@
                 $_SESSION['resetPassCode']=$this->generateMailerCode();
                 $_SESSION['id']=$user['id'];
                 $_SESSION['username']=$user['username']?$user['username']:($user['firstname'].' '.$user['lastname']);
-                
 
-                if($_SESSION['connect'])
+                if(isset($_SESSION['connect']) && $_SESSION['connect'])
                 unset($_SESSION['connect']);
 
                 $user['fullname']=$user['firstname'].' '.$user['lastname'];
@@ -91,13 +90,14 @@
 
                 $_SESSION['passCode_sent_time']=time();
                 echo json_encode(['success'=>true, 'email'=>$user['email'], "csrf_token"=>$_SESSION['csrf_token']]);
+                return;
             }
             echo json_encode('Méthode GET ou user non authentifié!');
             return;
         } 
 
         //Step 3: Verify Code
-        if(isset($this->uri[4]) && $this->uri[4]==='codeVerify'){
+        if(isset($step) && $step==='codeVerify'){
             session_start();
             if(!isset($_SESSION['passCode_sent_time'])){
                 echo json_encode(['success'=>false, 'message'=>'Code expiré! Veuillez demander un nouveau code et réessayer!']);
@@ -125,7 +125,7 @@
         }
 
         // Step 4: Reset Password
-        if(isset($this->uri[4]) && $this->uri[4]==='reset'){
+        if(isset($step) && $step==='reset'){
             session_start();
             if(!isset($_SESSION['resetPassCode'])){
                 echo json_encode(['success'=>false, 'message'=>'Timeout! Veuillez demander un nouveau code de reinitialisation.']);
@@ -143,6 +143,15 @@
     
     public function verifyOnline(){
         session_start();
+
+        if(isset($_SESSION['passCode_sent_time'])){
+            if(time() - $_SESSION['passCode_sent_time'] > PASSCODE_LIFETIME){
+                $this->logout();
+                echo json_encode(['success'=>false,'message'=>'Session expirée! Veuillez demander un nouveau code!']);
+                return;
+            }
+        }
+    
         if(isset($_SESSION['connect']) && $_SESSION['connect']){
             $this->limitLogin();
             $this->generateCSRFToken();
@@ -163,6 +172,7 @@
             $result->execute([$data[$emailOrPhone]]);
             $result=$result->fetch();
             if(password_verify($data['password'],$result['password'])){
+                if($this)
                 $this->startSession($result);
                 
                 echo json_encode(['success'=>true]);
