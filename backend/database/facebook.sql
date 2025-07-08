@@ -67,16 +67,30 @@ CREATE TABLE posts (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
 
+DROP TABLE posts;
+
+CREATE TABLE posts(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    caption TEXT,
+    author INT REFERENCES users (id),
+    file_path VARCHAR(255) DEFAULT NULL,
+    background VARCHAR(255) DEFAULT NULL, 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CHECK(file_path IS NOT NULL AND background IS NULL)
+)
+
+
 CREATE TABLE posts_tags(
     post_id INT REFERENCES posts(id) NOT NULL,
-    tag_id INT REFERENCES tags(id) NOT NULL,
+    tag_id INT REFERENCES tags(id) NOT NULL,    
     PRIMARY KEY (post_id, tag_id)
 )
 
 CREATE TABLE tags (
     id INT AUTO_INCREMENT NOT NULL,
     tag_name VARCHAR(255) NOT NULL,
-    author REFERENCES user(id), 
+    author REFERENCES user(id) 
 );
 DROP TABLE users;
 SELECT * FROM users;

@@ -15,6 +15,7 @@
        <?php require '../includes/sidebar.php';?> 
        <?php require '../includes/chat.php'; ?>
     </main>  
-    <input type="hidden" id="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">   
+    <input type="hidden" id="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
+    <input type="hidden" id="me" value="<?= $_SESSION['id']; ?>">
 </body>
 </html>

@@ -100,13 +100,6 @@ footer ul{
 li{
     list-style-type: none;
 }
-a{
-    text-decoration: none;
-    color: gray;
-}
-a:hover{
-    text-decoration: underline;
-}
 form a{
     color:var(--webkit-link);
 }

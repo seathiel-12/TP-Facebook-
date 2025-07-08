@@ -25,7 +25,7 @@
     feather.replace();
 </script>
 
-<div class="profil-contextuel" style="position: absolute; right:10px; top:50px;">
+<div class="profil-contextuel on-window-click-close">
     <div class='content'>
     <div class="profils">
             <div class="flexDivIcon user">
@@ -40,7 +40,7 @@
             <li class="flexDivBetween" style="padding-right:0; "><div class="flexDivIcon"> <i data-lucide="circle-question-mark"></i><p>Aide et assistance</p></div> <i data-lucide="chevron-right"></i></li>
             <li class="flexDivBetween" style="padding-right:0;"><div class="flexDivIcon"> <i data-lucide="moon"></i><p>Accessibilité et affichage</p></div> <i data-lucide="chevron-right"></i></li>
             <li class="flexDivIcon"><i data-lucide="message-square-warning"></i><p>Donnez votre avis</p></li>
-            <li class="flexDivIcon"><i data-lucide="log-out"></i><p>Se déconnecter</p></li>
+            <li class="flexDivIcon"><i data-lucide="log-out"></i><p class="disconnect" >Se déconnecter</p></li>
         </ul>
     </div>
 </div>
@@ -52,6 +52,9 @@
         border-radius: 15px;
         padding: 20px 10px 10px;
         display: none;
+        position: absolute; 
+        right:10px; top:50px;
+        z-index:1000;
     }
     .top-nav div{
         cursor: pointer;
@@ -81,9 +84,6 @@
         width:30px;
         height: 30px;
         padding: 0 !important;
-    }
-    .visible{
-        display: block!important;
     }
     header{
         position: relative;

@@ -17,7 +17,16 @@ use App\Models\Model;
             Model::updateEntry($this->table, $data, $id);
         }
 
-        public function delete(int $id){
+        public function delete(int $id)
+        {
             Model::deleteEntry($this->table, $id);
+        }
+
+        public function getAllPosts(){
+            return Model::getAllData($this->table);
+        }
+
+        public function get($condition){
+            return Model::getEntry($this->table, $condition);
         }
     }

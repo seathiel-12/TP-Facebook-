@@ -31,9 +31,12 @@ const loadJsModule=async(bodyId)=>{
               .catch(error=>console.error(`Error loading auth module: ${error}`));
           break;
           case 'home':
-            import('./modules/home.js')
+            await import('./modules/home.js')
               .then(module=>{
                 module.initHome();
+                module.handleCreatePostModal();
+                module.handleHomePostDiv();
+                module.changeColor();
               })
               .catch(error=>console.error(`Error loading module home: ${error}`));
           break;
@@ -81,6 +84,7 @@ const apiRequest=async (url, method='GET', data)=>{
         'Content-Type':'application/json',
       }
     }
+
     if(data){
       options.body=JSON.stringify(data);
     }
@@ -151,6 +155,7 @@ const apiRequest=async (url, method='GET', data)=>{
       )
   }
 
+
   window.addEventListener('DOMContentLoaded',async ()=>{
           await apiRequest('isOnline')
         .then(async (data)=> {
@@ -188,6 +193,15 @@ const apiRequest=async (url, method='GET', data)=>{
         // .then(module=>{module.showLoadingPage(); lucide.createIcons()})
         // .catch(err=>console.log(err));
 
+        window.addEventListener('click',(e)=>{
+          const toClose=document.querySelectorAll('.on-window-click-close');
+            toClose.forEach(close=> {
+              if(close.classList.contains('visible') && !close.contains(e.target)){
+                close.classList.remove('visible')
+                document.querySelector('.overlay')?.remove();
+              }
+            });
+         });
       });
 
   

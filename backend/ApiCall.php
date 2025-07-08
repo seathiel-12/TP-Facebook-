@@ -3,9 +3,12 @@ namespace App;
 use App\Controllers\Controller;
 use App\Controllers\AuthController;
 use App\Controllers\Register;
+use App\Controllers\UserController;
 use App\Models\User;
 use Exception;
 use \PDOException;
+use PDORow;
+
   require_once $_SERVER['DOCUMENT_ROOT'].'/headers.php';
 //   header('Content-Type: application/json');
 class ApiCall{
@@ -61,12 +64,16 @@ class ApiCall{
        return $code; 
     }
 
+
     private function debug($data){
         echo '<pre>';
         print_r($data);
         echo '</pre>';
     }
 
+    private function isOnline(){
+
+    }
     public function requestTreatment(){
     //Route 'api/{action}'
         
@@ -89,9 +96,32 @@ class ApiCall{
                                 if(isset($this->uri[4])){
                                     new AuthController()->forgotPassword($this->uri[4]);
                                 }else{
-                                    throw new Exception('Step required!');
+                                    throw new PDOException('Step required!');
                                 }
                                 break;
+                            }
+                            //Route 'api/user/post
+                            case 'post':{
+                                if(!new AuthController()->verifyOnline()){
+                                    throw new PDOException('Non autorisé! Veuillez vous authentifier.',401);
+                                }
+                                if(isset($this->uri[3])){
+                                    if(isset($this->uri[4])){
+                                       $user=new UserController();
+                                       switch($this->uri[4]){
+                                        case 'create':
+                                            $user->createPost();
+                                            break;
+                                       
+                                       case 'update':
+                                            $user->updatePost();
+                                            break;
+                                        case 'delete':
+                                            session_start();
+                                            $user->deletePost($_SESSION['id']);
+                                    }
+                                  }
+                                }
                             }
                         }   
                         break;
@@ -103,7 +133,11 @@ class ApiCall{
                         break;
                     }
                     case 'isOnline':{
-                        new AuthController()->verifyOnline();
+                        if(new AuthController()->verifyOnline()){
+                            echo json_encode(true);
+                            return;
+                        }
+                        echo json_encode(false);
                         break;
                     }
                     case 'verifyToken':{

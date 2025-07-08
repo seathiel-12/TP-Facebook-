@@ -112,6 +112,15 @@ input:not([type="radio"]){
     justify-content: center;
     gap: 5px;
 }
+a{
+    text-decoration: none;
+    color: gray;
+    cursor: pointer;
+}
+a:hover{
+    text-decoration: underline;
+}
+
 .flexDivBetween{
     display: flex;
     justify-content: space-between!important;
@@ -127,6 +136,33 @@ input:not([type="radio"]){
     align-items: center;
     justify-content: flex-start;
     gap:10px;
+}
+.overlay{
+    position: absolute;
+    z-index:10;
+    background-color: rgba(126, 124, 124, 0.57);
+    width:100vw;
+    height:100vh;
+    left:0;
+    top:0;
+    backdrop-filter: blur(3px);
+}
+.visible{
+    display: block!important;
+}
+.standard-hover, .fade-hover{
+    border-radius: 10px;
+    cursor: pointer;
+}
+.standard-hover:hover{
+    background-color: rgba(176, 176, 176, 0.64)!important;
+}
+.fade-hover:hover{
+    background-color: rgba(206, 206, 206, 0.32);
+}
+button:disabled{
+    background-color: rgba(192, 188, 188, 0.57);
+    cursor:not-allowed;
 }
 @keyframes SlidefadeIn{
     from{

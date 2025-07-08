@@ -147,18 +147,16 @@
         if(isset($_SESSION['passCode_sent_time'])){
             if(time() - $_SESSION['passCode_sent_time'] > PASSCODE_LIFETIME){
                 $this->logout();
-                echo json_encode(['success'=>false,'message'=>'Session expirée! Veuillez demander un nouveau code!']);
-                return;
+                return false;
             }
         }
     
-        if(isset($_SESSION['connect']) && $_SESSION['connect']){
+        if(isset($_SESSION['connect']) && $_SESSION['connect'] && isset($_SESSION['id'])    ){ 
             $this->limitLogin();
             $this->generateCSRFToken();
-            echo json_encode(true);
-            return;
+            return true;
         }
-        echo json_encode(false);
+        return false;
     }
 
     public function verifyEntries(array $data){

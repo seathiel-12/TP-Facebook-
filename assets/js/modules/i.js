@@ -11,3 +11,9 @@ function majorityElement(nums=[]) {
     return -1;
 }
 console.log(majorityElement([1,5,3,5,5]))
+
+
+const random=()=>Math.floor(Math.random()*255);
+    for(let i=0; i<14 ; i++){
+        colors.innerHTML+=`<li class="color" onclick="changeColor(this)" style="background:linear-gradient(45deg, rgba(${random()}, ${random()}, ${random()}, ${Math.random() * 0.5 +0.5}),  rgb(${random()}, ${random()}, ${random()}, ${Math.random() * 0.7 +0.7}));"></li>`
+   }

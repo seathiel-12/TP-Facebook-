@@ -1,5 +1,8 @@
 <?php
     namespace  App\Controllers;
+
+use PDOException;
+
     require_once $_SERVER['DOCUMENT_ROOT'].'/headers.php';
     class Controller {
 
@@ -53,8 +56,18 @@
             return 'Méthode GET!';
         }
         return 400;
+     }
+
+     public function verifyRequestMethod($method){
+        if($this->method !== $method){
+            echo json_encode(['success'=>false,'message'=>'Methode non autorisée!'], 405);
+            throw new PDOException("Méthode $method non autorisée pour cette requete!");
+        }
+     }
+
+     protected function debug($data){
+        echo '<pre>';
+        print_r($data);
+        echo '</pre>';
     }
-
-
-
-    }
+}

@@ -112,7 +112,7 @@ const handleRegisterRetrieveCode=(data)=>{
  const askFillOtherRegisterInfo=async()=>{
    document.body.innerHTML=`
         <header>
-        <img src="/assets/images/facebook.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
+        <img src="/assets/media/images/facebook.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
         </header>
 
         <div class='card' style="max-width: 800px; padding: 30px;">
@@ -249,7 +249,7 @@ const handleRegisterRetrieveCode=(data)=>{
 
     profil.innerHTML=`
         <header>
-        <img src="/assets/images/facebook.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
+        <img src="/assets/media/images/facebook.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
         </header>
 
         <form class="profil-form" enctype="multipart/form-data">
@@ -495,7 +495,9 @@ const handleRegisterRetrieveCode=(data)=>{
     const skip=document.querySelector('.skip');
     skip.onclick=()=>{
         showLoadingPage();
-        setTimeout(()=>fetchPageContent('/frontend/views/templates/homeT.php'),3000);
+        setTimeout(async()=>{
+            await fetchPageContent('/frontend/views/templates/homeT.php');
+        },3000);
         // animation de bienvenue
     }
     const hobbiesList=document.getElementById('hobbiesList');
@@ -526,8 +528,8 @@ const handleRegisterRetrieveCode=(data)=>{
 
     const hobbiesElement=document.querySelectorAll('#hobbiesList li');
     hobbiesElement.forEach((hobbie)=>{
-        hobbie.onclick=()=>{
-            hobbiesChoosedList.querySelector('span')?.remove()
+         hobbie.onclick=()=>{
+        hobbiesChoosedList.querySelector('span')?.remove()
           const choosed=document.createElement('li');
           choosed.textContent=hobbie.textContent;
           choosed.className="choosedHobbie";
@@ -622,7 +624,7 @@ const showLoadingPage=()=>{
 
     document.body.innerHTML=`
         <div style="position:absolute; width:100%; top:35%;">
-        <img src="/assets/images/facebook-circle.png" width="100px" height="100px" />
+        <img src="/assets/media/images/facebook-circle.png" width="100px" height="100px" />
         </div>
 
         <p style="font-size:1.2em; position:absolute; bottom:30px; width:100%;">Powered by DevLawer</p>

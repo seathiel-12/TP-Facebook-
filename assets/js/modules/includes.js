@@ -3,7 +3,7 @@
 const createForgotHeader=()=>{
     const header=document.createElement('header');
     header.innerHTML=`
-        <img src="/assets/images/facebook.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
+        <img src="/assets/media/images/facebook.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
 
         <form class="flexDivIcon loginHeaderForm" style=" margin-right:20px;">
             <input type="text" placeholder="E-mail ou numéro de téléphone" style=" font-size:1rem; width:150px; max-height:35px; padding:12px 10px;" required />
@@ -115,7 +115,7 @@ const HandleForgotPasswordButtons=()=>{
             <p style="padding:10px 20px; text-align:left; font-size:1.1em;">Ce compte est asssociée à l'adresse mail précédemment saisie. Appuyez sur continuer pour recevoir le code par mail.</p>
             
             <div>
-                <img src="/assets/images/${user['profil_picture']?user['profil_picture']:(user.gender==='male'?'boy':(user.gender==='female'?'happy':'horse'))}.png" width="100" height="100" class="image"/>
+                <img src="/assets/media/images/${user['profil_picture']?user['profil_picture']:(user.gender==='male'?'boy':(user.gender==='female'?'happy':'horse'))}.png" width="100" height="100" class="image"/>
                 <p>${user.username?user.username:(user.firstname+' '+user.lastname)}</p>
                 <p style="font-size:0.9rem; color:rgb(120, 117, 117); font-weight:500;">${user.gender==='female'?"Utilisatrice":"Utilisateur "} de Facebook</p>
             <div>
@@ -172,7 +172,7 @@ const HandleAskRetrieveCodeBtn=(user)=>{
 export const retrieveCode=(email,token,type=null)=>{
     document.body.innerHTML=`
         <header>
-        <img src="/assets/images/facebook.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
+        <img src="/assets/media/images/facebook.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
         </header>
 
 
@@ -215,8 +215,8 @@ export const retrieveCode=(email,token,type=null)=>{
 const handleRetrieveCode=()=>{
     const notMe=document.querySelector('.not-me');
     notMe.onclick=()=> {
-        fetchPageContent('../frontend/views/usersClients/logout.php')
-        fetchPageContent('../frontend/views/usersClients/auth.php')
+        fetchPageContent('../frontend/views/usersClients/logout.php');
+        fetchPageContent('../frontend/views/usersClients/auth.php');
         return;
     };
 
@@ -249,7 +249,7 @@ const handleRetrieveCode=()=>{
 
     document.body.innerHTML=`
         <header>
-        <img src="/assets/images/facebook.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
+        <img src="/assets/media/images/facebook.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
         </header>
 
         <div>
