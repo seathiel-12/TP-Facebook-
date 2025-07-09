@@ -9,11 +9,12 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/headers.php';
 class Model{
     private static $db;
 
-    public static function getAllData($table){
+    public static function getAllData($table, $condition=null){
       
         try{
             self::$db=Database::getDb();
-            $result=self::$db->query("SELECT * FROM $table");
+            $query= "SELECT * FROM $table " . ($condition ?? ''); 
+            $result=self::$db->query($query);
             $result=$result->fetchAll();
             return $result;
         }catch(PDOException $e){

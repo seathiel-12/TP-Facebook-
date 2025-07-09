@@ -18,6 +18,7 @@
     <p style=" font-size:1.5em; font-weight:600; color:black">Avec Facebook, partagez et restez <br> en contact  avec votre entourage.</p>
 
     <form method="post" id="form-auth">
+    <input type="hidden" id="csrf_token" value="<?php echo $_SESSION['csrf_token']??''; ?>">
         <div>
             <input type="text" placeholder="Adresse e-mail ou numéro de téléphone" required>
             <i class="fa-solid fa-user"></i>

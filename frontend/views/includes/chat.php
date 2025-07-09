@@ -23,6 +23,14 @@
         </div>
     </div>
 
+    <div class="loaded-posts">
+        <div class="home-top-post card">
+            <h2>Tu es probablement notre premier visiteur!"</h2>
+
+            <button>Créeons ensemble notre premier post</button>
+        </div>
+    </div>
+
 </section>
 
 <aside class="right">
@@ -33,9 +41,7 @@
     </div>
 </aside>
 
-
 <!-- includes -->
-
 <form class="noFormRootStyle modal card on-window-click-close" style="max-width:100%!important;" enctype="multipart/form-data">
     <h2 style="padding:10px; width:calc(100% - 20px); position:relative;">Créer une publication <div class="closeModal"><i data-lucide="x" class="standard-hover cancel-icon"></i></div>
     </h2>
@@ -74,137 +80,7 @@
         <button type="submit" id="submit" style="width:calc(100% - 40px); margin:20px;" disabled>Publier</button>
     </div>
 </form>
-
 <script>
     createIcons();
 </script>
-
-<style>
-    .modal #post-text{
-        border:none;
-        resize:none;
-        scrollbar-width: none;
-        width: calc(100% - 40px);
-        padding: 10px 20px;
-        height:80px;
-        font-size:1.5em;
-        outline:none;
-    }
-
-    .changed-color{
-        text-align:center;
-        font-size:2em;
-        margin-top:10px;
-        font-weight:bold;
-        color:white;
-    }
-    .cancel-icon{
-        background:#e2e5e9; 
-        padding:5px; 
-        border-radius:50%; 
-        cursor:pointer; 
-        position: absolute;
-        right:20px; top:25%;
-        z-index:5;
-    }
-    .post-media{
-        border-radius: 10px;
-        margin: 10px 20px;
-        width: calc(100% - 40px);
-        max-height: 290px;
-    }
-    .file-and-caption{
-        max-width: 100%;
-        /* overflow-x: hidden; */
-        max-height: 350px;
-        overflow-y: auto;
-        scrollbar-width: none;
-        margin-bottom: 7px;
-    }
-    .modal #post-text::placeholder{
-        color:rgb(88, 88, 88);
-    }
-    .add-type{
-        border-radius:10px;
-        padding:10px 20px;
-        border:solid 1px gray;
-        width: calc(100% - 80px);
-        margin:20px !important;
-    }
-    .background{
-        border-radius: 5px;
-        background:linear-gradient(to right, rgb(212, 49, 49), rgb(255, 255, 93));
-        height:30px;
-        width: 30px;
-        font-weight: 600;
-        color: purple;
-        box-shadow: 0 0 10px rgb(205, 199, 199);
-        cursor: pointer;
-    }
-    .visibility{
-        width:max-content;
-        padding:5px;
-        background: rgba(190, 189, 189, 0.67);
-        border-radius: 5px;
-        width:100px;
-        height:20px;
-        font-size:0.9em;
-        font-weight:500;
-        transform: scale(0.8) translateX(-8px);
-    }
-    .modal{ 
-        position: absolute;
-        background-color: white;
-        width: 550px!important;
-        left:calc((100vw - 550px)/2);
-        z-index: 15;
-        display: none;
-        margin: auto;   
-    }
-
-    .color{
-        border-radius:5px;
-        padding: 0!important;
-        height: 30px;
-        width: 30px;
-    }
-    .groups{
-        padding: 10px;
-        width: 90%;
-    }
-    aside.right{
-        background-color: var(--bg-secondary);
-    }
-    section.main-section{
-        width: 50%;
-    }
-    .home-top-post, .post{
-        padding: 10px;
-        width: 80%;
-        margin: 20px auto;
-    }
-    .home-top-post .options{
-        padding:10px;
-        cursor: pointer;
-        border-radius: 10px;
-        width: calc(100%/3 - 10px);
-        font-weight: 600;
-        color:rgb(69, 68, 68);
-    }
-    .home-top-post .options:hover{
-        background-color: rgba(176, 176, 176, 0.64);
-    }
-    .home-top-post .story{
-        padding: 7px;
-        border-radius: 10px;
-        cursor: pointer;
-    }
-    .home-top-post .story:hover{
-        background-color: rgba(215, 215, 215, 0.68);
-    }
-    
-</style>
-
-
-<!-- includes -->
 

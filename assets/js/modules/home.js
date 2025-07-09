@@ -1,5 +1,9 @@
-const divIconBorder=document.createElement('div');
 
+
+const divIconBorder=document.createElement('div');
+let allPosts=null;
+
+//Bordure de bas des icones de navigation du header
 const createDivIconBorder=(div,divIconBorder)=>{
     if(div){
         div.firstElementChild.style.stroke='blue';
@@ -9,6 +13,7 @@ const createDivIconBorder=(div,divIconBorder)=>{
     }
 }
 
+// Manipuler la boite de dialogue qui s'affiche au click du bouton icone profil du header 
 const handleProfilContextuelLi=()=>{
     const disconnectBtn=document.querySelector('.disconnect');
     disconnectBtn.onclick=()=>{
@@ -18,24 +23,8 @@ const handleProfilContextuelLi=()=>{
     }
 }
 
-export const changeColor=async (li=null)=>{  
-    console.log(li)
-    if(li){
-        const textareaPost=document.getElementById('post-text');  
 
-        if(textareaPost.style.height !== '250px'){
-            const modal=document.querySelector('.modal');
-            modal.style.transform=`translateY(-85px)`;    
-        }
-        textareaPost.classList.add('changed-color')
-        textareaPost.style.cssText=`
-        background:${li.style.background};
-        height:250px;
-        `;
-        textareaPost.focus();
-    }
-}
-
+// Couleur de fond d'un post
 const createColorList=async()=> {
     const colors=document.createElement('ul');
 
@@ -61,12 +50,33 @@ const createColorList=async()=> {
     return colors;
 }
 
+//Change la couleur de fond d'un post
+export const changeColor=async (li=null)=>{  
+    console.log(li)
+    if(li){
+        const textareaPost=document.getElementById('post-text');  
 
-export const handleCreatePostModal=()=>{
+        if(textareaPost.style.height !== '250px'){
+            const modal=document.querySelector('.modal');
+            modal.style.transform=`translateY(-85px)`;    
+        }
+        textareaPost.classList.add('changed-color')
+        textareaPost.style.cssText=`
+        background:${li.style.background};
+        height:250px;
+        `;
+        textareaPost.focus();
+    }
+}
+
+
+//Modale de creation d'un post
+ const handleCreatePostModal=()=>{
     const closeModal=document.querySelector('.closeModal');
     const modal=document.querySelector('.modal');
     closeModal.addEventListener('click',()=> {
         document.querySelector('.modal').classList.remove('visible');
+        document.body.classList.remove('overflow');
         document.querySelector('.overlay')?.remove();
     });
 
@@ -125,9 +135,11 @@ export const handleCreatePostModal=()=>{
 
 }
 
-export const handleHomePostDiv=()=>{   
+//Gerer les bouton de la section main-section : zone ou se chargnt les posts
+ const handleHomePostDiv=()=>{   
     const modal=document.querySelector('.modal');
     const postInput= document.querySelector('.home-top-post .createPostBtn');
+    const textareaPost=document.getElementById('post-text');  
     
     postInput.onclick=(e)=>{
         console.log('click')
@@ -138,31 +150,29 @@ export const handleHomePostDiv=()=>{
         const overlay=document.createElement('div');
         overlay.className="overlay"; 
         document.body.appendChild(overlay);
+        textareaPost.focus();
+        document.body.classList.add('overflow');
     }
 }
 
-/////////////////////////////////
-const loadPosts=()=>{
-    const posts=[
-        {
-            author:'Vald',
-            profil_picture:'',
-            file_path:'',
-            created_at :'09 Jul 22h03',
-            gender:'male',
-            caption:"C'est bien que vous soyiez venus.",
-            interactions:{
-                like:12,
-                share:15,
-                comments:{
-                    count:9
-                }
-                
-            }
-        }
-    ]
-        
 
+
+/////////////////////////////////
+ export const loadPosts=async()=>{
+    await getAllPostsData();
+    const posts=allPosts;
+    console.dir(posts)
+    if(posts.length === 0) return;
+
+
+    const renderDate=(date)=>{
+        const newDate=new Date(date);
+        const months=['Janv', 'Fev', 'March', 'Avr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const date= newDate.getDate();
+        const month = months[newDate.getMonth()];
+        const year=newDate.getFullYear();
+        const time= (new Date().getHours() - newDate.getHours()) 
+    }
      const renderPosts=()=>{
         const htmlPosts=posts.map(post=>
             `
@@ -170,30 +180,30 @@ const loadPosts=()=>{
                 <div class="flexDivBetween">
                     <div class="flexDivStart">
                     <img src="/assets/media/${post['profil_picture']?'posts/'+post['profil_picture']:'images/'+(post.gender==='male'?'boy':(post.gender==='female'?'happy':'horse'))+'.png'}" width="40" height="40" class="image"/>
-                        <p style="text-align:left;"><strong>${post.author}</strong> <br> <span style="font-size:0.9em;">${post.created_at}</span> </p>
+                        <p style="text-align:left;"><strong>${post.firstname+' '+post.lastname}</strong> <br> <span style="font-size:0.9em;">${renderDate(post.created_at)}</span> </p>
                     </div>
                     <div class="flexDiv">
-                        <i data-lucide="ellipsis" class="standard-hover" stroke="gray" style="padding:5px; border-radius:100%;"></i>
+                        <div class="view-post-options"><i data-lucide="ellipsis" class="standard-hover" stroke="gray" style="padding:5px; border-radius:100%;"></i></div>
                         <i data-lucide="x" class="standard-hover" stroke="gray" style="padding:5px; border-radius:100%;"></i>
                     </div>
                 </div>
 
-                <div class="post-content">
-                    ${post.caption}
+                <div ${post.background?`class="post-colored-background flexDiv" style="background:${post.background};"`:" class='post-content'"} >
+                    <p>${post?.caption}</p>
                 </div>
 
-                <div>
-                    ${post['file_path']?`<img src="/assets/media/posts/${post['file_path']}" />`:''}
+                <div style="width:100%; margin:auto;">
+                    ${post['file_path']?(post['file_path'].includes('image')?`<img class="media-loaded" src="/assets/media/posts/user-${post.author}/${post['file_path']}" />`:`<video class="media-loaded" src="/assets/media/posts/user-${post.author}/${post['file_path']}" controls ></video>`):''}
                 </div>
                 
                 <div class="flexDivBetween post-stats">
                     <div class="">
-                         <a class="flexDiv"><i data-icon="like" width="20" height="20" image></i> ${post.interactions.like}</a>
+                         <a class="flexDiv"><i data-icon="like" width="20" height="20" image></i> ${post['nb_likes']}</a>
                     </div>
 
                     <div class="flexDiv" style="gap:15px;">
-                        <a>${post.interactions.comments.count} commentaires</a>
-                        <a>${post.interactions.share} partages</a>
+                        <a>${post['nb_comments']} commentaires</a>
+                        <a>${post.share?post.share+' '+'partages': ''}</a>
                     </div>
                 </div>
                 <hr style="margin:10px auto 5px;">
@@ -208,13 +218,14 @@ const loadPosts=()=>{
         return htmlPosts;
     }
 
-    const mainSection=document.querySelector('.main-section');
-    mainSection.innerHTML+=renderPosts();
+    const loadedPosts=document.querySelector('.loaded-posts');
+    loadedPosts.innerHTML=renderPosts();
+
     lucide.createIcons();
 }
 ////////////////////////////////
 
-export const handleHomeHeaderIcon=()=>{
+ const handleHomeHeaderIcon= ()=>{
     const homeIcon = document.querySelector('.homeIcon');
     const friendIcon = document.querySelector('.friendsIcon');
     const groupsIcon = document.querySelector('.groupsIcon');
@@ -225,58 +236,80 @@ export const handleHomeHeaderIcon=()=>{
 
     const modal=document.querySelector('.modal')
    
-
     const profilContextuel= document.querySelector('.profil-contextuel');
-    accountIcon.onclick=(e)=> {
+    accountIcon.onclick= (e)=> {
         e.stopPropagation();
         profilContextuel.classList.toggle('visible');
-        // const heightP=profilContextuel.clientHeight-10;
-        // const modalOpen=(modal,height)=>{
-        //     if(height<heightP){
-        //         profilContextuel.style.height=height+'px';
-        //         height++;
-        //     }
-        //     requestAnimationFrame(()=>modalOpen(modal,height));
-        // }
-        // requestAnimationFrame(()=>modalOpen(profilContextuel,0))
 
-    //     profilContextuel.animate([
-    //         {height:0},
-    //         {height:"415px"}
-    //     ],
-    //     {
-    //         duration:1000,
-    //         easing:'ease',
-    //         fill:'forwards'
-    //     }
-    //   )
-
-      
      }
-    
+ 
+
     createIcons();
 }
 
-const handlePosting=()=>{
+export const handlePosting=()=>{
     const modal=document.querySelector('.modal');
     modal.addEventListener('submit',async(e)=>{
         e.preventDefault();
+        const white=['#fff', '#ffffff', 'white', 'hsl(0, 0.00%, 100.00%)', 'rgb(255, 255, 255), rgb(255, 255, 255, 1)',]
+
         const captionField=modal.querySelector('#post-text');
-        const background=captionField.style.background || null;
+        const background=white.find((color)=>captionField.style.background === color)? null: captionField.style.background;
         const author_id= document.getElementById('me').value;
         const token=document.getElementById('csrf_token').value;
         const file=document.getElementById('file');        
 
-       const data=new FormData();
-        data.append('file', file.files[0]);
-        data.append('caption',captionField.value);
-        data.append('author_id',author_id),
-        data.append('csrf_token',token);
-        data.append('background', background || null);
+        if(file.value){
+            const data=new FormData();
+            data.append('file', file.files[0]);
+            data.append('caption',captionField.value);
+            data.append('author',author_id),
+            data.append('csrf_token',token);
+            if(background)
+            data.append('background', background);
+    
+            console.log(data);
+    
+            await fetch('api/user/posts/create', {
+                method:"POST",
+                body: data
+            }).then(data=>data.json())
+              .then(async(response)=> {
+                    if(response && response.success){
+                        await getAllPostsData();
+                        await loadPosts();
+                        createPostOptions();
+                        initHome();
+                        document.querySelector('.modal').classList.remove('visible');
+                        document.querySelector('.overlay')?.remove();
+                        document.body.classList.remove('overflow');
+                        showNotification(response.message, 'success');
+                    }else{
+                        showNotification(response.message);
+                    }
+            })
+            .catch(err=>console.log(err));
+        }else{
+            const data={
+                author:author_id,
+                caption:captionField.value,
+            }
 
-        console.log(data);
+            if(background)
+            data.background=background;
 
-        await apiRequest('user/post/create', 'POST', data, file.value || null);
+            await apiRequest('user/posts/create', 'POST', data).then(async(response)=>{
+                if(response && response.success){
+                    showNotification(response.message, 'success');
+                    await loadPosts();
+                    createPostOptions();
+                    initHome();
+                    document.querySelector('.modal').classList.remove('visible');
+                    document.body.classList.remove('overflow');
+                    document.querySelector('.overlay')?.remove();
+                }
+            })
+        }
     })
 }
 
@@ -316,16 +349,30 @@ const showFile=(file)=>{
 const removeFile=()=>{
     const fileInput=document.getElementById('file');
     fileInput.value=null;
+    file.files=null;
     document.querySelector('.file').innerHTML='';
     document.querySelector('#post-text').style.height='80px';
     document.querySelector('.color-smile').style.display="flex";
 
 }
 
+const getAllPostsData=async()=>{
+    try{
+        const posts=await apiRequest('user/posts/all');
+        if(posts && posts.success){
+            allPosts=posts.data;
+        }else{
+            showNotification(posts.message);
+        }
+    }catch(err){
+        console.error(err);
+    }
+}
+
 export const initHome=async()=>{
     const divIcon=document.querySelectorAll('.top-nav div');
     divIconBorder.className="divIconBorder";
-    document.body.appendChild(divIconBorder);
+    document.querySelector('header').appendChild(divIconBorder);
 
     createDivIconBorder(divIcon[0],divIconBorder);
     divIcon.forEach((div,index)=>{
@@ -334,13 +381,51 @@ export const initHome=async()=>{
             createDivIconBorder(div,divIconBorder);
         }
     });  
-    
+    handleHomePostDiv(); 
     handleHomeHeaderIcon();
-    handleProfilContextuelLi();
-    handleHomePostDiv();
     handleCreatePostModal();
-    loadPosts();
+    handleProfilContextuelLi(); 
     changeColor();
-    handlePosting();
     createIcons();
 }
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+//Gestion des posts
+
+export const createPostOptions=()=>{
+    const ul=document.createElement('ul');
+    const optionsPoints=document.querySelector(".view-post-options");
+    ul.className="options-post on-window-click-close"
+    ul.innerHTML=`
+        <li class="flexDivStart" style="padding-left:15px;"><i data-lucide="bookmark" fill="#000"></i> <p>Enregistrer la vidéo</p></li>
+        <hr style="margin:0 auto; width:90%; border: solid 0.5px rgba(192, 190, 190, 0.45);">
+        <li class="flexDivStart" style="padding-left:15px;"><i data-lucide="user-round-x"></i><p>Bloquer ce profil</p></li>    
+        <li class="flexDivStart" style="padding-left:15px;"><i data-lucide="message-square-warning"></i><p>Signaler la publication</p> </li>
+    `
+
+    document.querySelector('.main-section').appendChild(ul);
+    
+    ul.style.cssText=`
+        position:absolute;
+        top:${optionsPoints?.offsetTop + optionsPoints?.offsetHeight}px;
+        left:${optionsPoints?.offsetLeft - ul.offsetWidth + optionsPoints.offsetWidth - 20}px;
+        display: none;
+    `
+
+    optionsPoints.onclick=(e)=>{
+        e.stopPropagation();
+        ul.classList.toggle('visible');
+    }
+
+    lucide.createIcons();
+}
+
+
+export const handlePostInteractions=()=>{
+
+}
+
+/////////////////////////////////////////////////////////////////////////////

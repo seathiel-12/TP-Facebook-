@@ -10,7 +10,7 @@ use PDOException;
         protected $uri;
 
         public function __contruct(){
-
+            
         }
 
        protected function cleanData($data){

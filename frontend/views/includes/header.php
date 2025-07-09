@@ -40,52 +40,8 @@
             <li class="flexDivBetween" style="padding-right:0; "><div class="flexDivIcon"> <i data-lucide="circle-question-mark"></i><p>Aide et assistance</p></div> <i data-lucide="chevron-right"></i></li>
             <li class="flexDivBetween" style="padding-right:0;"><div class="flexDivIcon"> <i data-lucide="moon"></i><p>Accessibilité et affichage</p></div> <i data-lucide="chevron-right"></i></li>
             <li class="flexDivIcon"><i data-lucide="message-square-warning"></i><p>Donnez votre avis</p></li>
-            <li class="flexDivIcon"><i data-lucide="log-out"></i><p class="disconnect" >Se déconnecter</p></li>
+            <li class="flexDivIcon disconnect"><i data-lucide="log-out"></i><p>Se déconnecter</p></li>
         </ul>
     </div>
 </div>
 
-<style>
-    .profil-contextuel{
-        box-shadow: 0 0 15px 0 rgba(158, 156, 156, 0.64);
-        background: white;
-        border-radius: 15px;
-        padding: 20px 10px 10px;
-        display: none;
-        position: absolute; 
-        right:10px; top:50px;
-        z-index:1000;
-    }
-    .top-nav div{
-        cursor: pointer;
-    }
-    .accoutDivOptions li{
-        padding: 15px 80px 15px 20px;
-    }
-    .accoutDivOptions{
-        margin-top: 10px;
-    }
-    .profils{
-        box-shadow: 0 0 10px 0 rgba(158, 156, 156, 0.64);
-        width: 90%;
-        margin: auto;
-        border-radius: 15px;
-        padding:10px;
-    }
-    .profils .user{
-        padding:10px; 
-        border-radius: 10px;
-        justify-content: flex-start;
-    }
-    .profils .user:hover{
-        background: rgb(215, 215, 215);
-    }
-    .bIcon{
-        width:30px;
-        height: 30px;
-        padding: 0 !important;
-    }
-    header{
-        position: relative;
-    }
-</style>

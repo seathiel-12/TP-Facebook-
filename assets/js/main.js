@@ -32,11 +32,12 @@ const loadJsModule=async(bodyId)=>{
           break;
           case 'home':
             await import('./modules/home.js')
-              .then(module=>{
+              .then(async(module)=>{
+                await module.loadPosts();
+                module.createPostOptions();
                 module.initHome();
-                module.handleCreatePostModal();
-                module.handleHomePostDiv();
                 module.changeColor();
+                module.handlePosting();
               })
               .catch(error=>console.error(`Error loading module home: ${error}`));
           break;
@@ -81,14 +82,22 @@ const apiRequest=async (url, method='GET', data)=>{
     const options={
       method:method,
       headers:{
-        'Content-Type':'application/json',
+        'Content-Type':'application/json'
       }
     }
 
-    if(data){
-      options.body=JSON.stringify(data);
+    if(method !=='GET'){
+      if(data){
+        data['csrf_token']=document.getElementById('csrf_token').value;
+        options.body=JSON.stringify(data);  
+      }else{
+        showNotification("Données manquantes lors de l'envoi vers l'api!");
+        return;
+      }
     }
+
     try{
+      console.log(options);
       const request= 
       await fetch(`/api/${url}`, options)
               .then(response=> response.json())
@@ -145,7 +154,7 @@ const apiRequest=async (url, method='GET', data)=>{
 
       element.animate([
         {transform:"translateX(10%)", opacity:0},
-        {transform:"translateX(0)", opacity:"1"}
+        {transform:"translateX(0)", opacity:1}
        ],
        {
         duration:1000,
@@ -157,6 +166,7 @@ const apiRequest=async (url, method='GET', data)=>{
 
 
   window.addEventListener('DOMContentLoaded',async ()=>{
+    
           await apiRequest('isOnline')
         .then(async (data)=> {
           if(data){
@@ -198,6 +208,7 @@ const apiRequest=async (url, method='GET', data)=>{
             toClose.forEach(close=> {
               if(close.classList.contains('visible') && !close.contains(e.target)){
                 close.classList.remove('visible')
+                document.body.classList.remove('overflow');
                 document.querySelector('.overlay')?.remove();
               }
             });

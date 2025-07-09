@@ -4,6 +4,7 @@ use App\Controllers\Controller;
 use App\Controllers\AuthController;
 use App\Controllers\Register;
 use App\Controllers\UserController;
+use App\Models\Post;
 use App\Models\User;
 use Exception;
 use \PDOException;
@@ -22,17 +23,24 @@ class ApiCall{
     }
     
 
-    private function verifyCSRFToken(){
+    private function verifyCSRFToken($array=null){
         session_start();
         if(isset($_SESSION['csrf_token']) && !empty($_SESSION['csrf_token'])){
             if($this->method!=='GET'){
-                $request=file_get_contents('php://input');
-                 $data=json_decode($request,true);
-                if(isset($data['csrf_token'])){
-                    if($data['csrf_token']===$_SESSION['csrf_token']){
+
+                $data=null;
+
+                if(!$array){
+
+                    $request=file_get_contents('php://input');
+                    $data=json_decode($request,true);
+
+                }else $data=$array;
+
+                    if(isset($data['csrf_token'])){
+                    if($data['csrf_token'] === $_SESSION['csrf_token']){
                         return 200;
                     }
-                    session_start();
                     session_unset();
                     session_destroy();
                     if(isset($_COOKIE['PHPSESSID']))
@@ -44,6 +52,13 @@ class ApiCall{
         }
         return 400;
     }
+
+    public function verifyRequestMethod($method){
+        if($this->method !== $method){
+            echo json_encode(['success'=>false,'message'=>'Methode non autorisée!'], 405);
+            throw new PDOException("Méthode $method non autorisée pour cette requete!");
+        }
+     }
 
     private function getRequestData(){
         if($this->method!=='GET'){
@@ -100,8 +115,8 @@ class ApiCall{
                                 }
                                 break;
                             }
-                            //Route 'api/user/post
-                            case 'post':{
+                            //Route 'api/user/posts
+                            case 'posts':{
                                 if(!new AuthController()->verifyOnline()){
                                     throw new PDOException('Non autorisé! Veuillez vous authentifier.',401);
                                 }
@@ -110,7 +125,13 @@ class ApiCall{
                                        $user=new UserController();
                                        switch($this->uri[4]){
                                         case 'create':
-                                            $user->createPost();
+                                            $this->verifyRequestMethod('POST');
+                                            $data=$_POST ?? null;
+                                            if($this->verifyCSRFToken($data) === 200){
+                                                $user->createPost();
+                                            }else{
+                                                throw new Exception('CSRF not found.');
+                                            }
                                             break;
                                        
                                        case 'update':
@@ -119,7 +140,32 @@ class ApiCall{
                                         case 'delete':
                                             session_start();
                                             $user->deletePost($_SESSION['id']);
-                                    }
+                                            break;
+                                        case 'all':{
+                                            try{
+                                                $data = new Post()->getAllPosts('LIMIT 50');
+                                                echo json_encode(['success'=>true, 'data'=>$data]);
+                                            }catch(PDOException $e){
+                                                throw new PDOException('Erreur lors de la récupération des posts: ',$e->getMessage());
+                                            }
+                                            break;
+                                        }
+                                        default:{
+                                            $this->verifyRequestMethod('POST');
+                                            $data = $_POST ?? null;
+                                            if($this->verifyCSRFToken($data) !== 200){
+                                                echo json_encode(['success'=>false, 'message'=>"CSRF non trouvé/valide!"]);
+                                                return;
+                                            }
+                                            if(is_numeric($this->uri)){
+                                                if(isset($this->uri[5])){
+                                                   $user->posts($this->uri[5]);                                                       
+                                                  }
+                                                }
+                                            break;
+                                        }
+
+                                     }                                    
                                   }
                                 }
                             }

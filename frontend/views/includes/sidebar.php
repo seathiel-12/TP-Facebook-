@@ -1,4 +1,4 @@
-<aside>
+<aside class="sidebar">
     <ul>
         <li class="flexDivIcon"><i data-lucide="circle-user-round"></i>Benaiah Isaac</li>
         <li class="flexDivIcon"><i data-lucide="circle"></i>Meta AI</li>
@@ -30,15 +30,13 @@
         ?>
     </ul>
 </aside>
+
 <script>
     lucide.createIcons();
     // document.querySelector('aside').onmouseenter=(e)=> e.target.style.overflowY="scroll";
     // document.querySelector('aside').onmouseleave=(e)=> e.target.style.overflowY="hidden";
 </script>
 <style>
-    body{
-        /* overflow: hidden; */
-    }
     .bx{
         transform: scale(1.5);
         border: solid 1.5px ;
@@ -51,13 +49,19 @@
         justify-content: start!important;
         cursor: pointer;
     }
+    aside.right{
+        background-color: var(--bg-secondary);   
+        padding-top:15px ;
+        right: 0;
+        top:70px;
+    }
+
     li:hover{
         background: rgb(207, 207, 207);
     }
-    aside{
-        padding-top: 20px;
-        height: 100%;
-        background-color: var(--bg-secondary);
+    .sidebar{
+        left:0;
+        top: 80px;
     }
     .flexDivIcon{
         gap:10px;
