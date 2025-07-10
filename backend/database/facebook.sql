@@ -192,6 +192,7 @@ FROM posts_interactions pi
 INNER JOIN post_id 
 
 
+WITH post AS(
 WITH p AS (
     SELECT * FROM posts LIMIT 50 
 )
@@ -199,8 +200,24 @@ SELECT p.id, p.file_path, p.background, p.created_at, p.caption, u.username, u.f
 COUNT(pi.likes) AS nb_likes, COUNT(comments) AS nb_comments
 FROM users u 
 JOIN p ON  p.author=u.id 
-LEFT JOIN posts_interactions pi ON pi.post_id=p.id GROUP BY(p.id);
+LEFT JOIN posts_interactions pi ON pi.post_id=p.id GROUP BY(p.id)
+) 
+SELECT p.id, p.file_path, p.background, p.created_at, p.caption, p.username, p.firstname, p.lastname, p.gender, p.profile_picture, p.nb_likes, p.nb_comments, (pi.user_id=15) AS is_liked
+FROM post p 
+LEFT JOIN posts_interactions pi 
+ON p.id=pi.post_id GROUP BY id;
 
+SET sql_mode = 'STRICT_TRANS_TABLES';
+
+WITH p AS (
+    SELECT * FROM posts LIMIT 50 
+)
+SELECT p.id, p.author, p.file_path, p.background, p.created_at, p.caption, u.username, u.firstname, u.lastname, u.gender, u.profile_picture,
+COUNT(pi.likes) AS nb_likes, COUNT(comments) AS nb_comments
+FROM users u 
+JOIN p ON  p.author=u.id 
+LEFT JOIN posts_interactions pi ON pi.post_id=p.id GROUP BY(p.id)
+;
 
 
 CREATE TABLE posts (
@@ -214,7 +231,27 @@ CREATE TABLE posts (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
 
-DROP TABLE posts;
+
+CREATE TABLE posts_like (
+    user_id INT REFERENCES users (id),
+    post_id INT REFERENCES posts (id),
+    likes BOOLEAN NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE posts_comments(
+    user_id INT REFERENCES users (id),
+    post_id INT REFERENCES posts (id),
+    comment BOOLEAN NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+
+DROP TABLE  posts_like;
 
 CREATE TABLE posts(
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -233,17 +270,18 @@ CREATE TABLE posts(
     )
 )
 
+DROP TABLE posts_interactions;
 
 CREATE TABLE posts_interactions(
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT REFERENCES users (id),
     post_id INT REFERENCES posts (id),
-    likes BOOLEAN,
-    share_count INT DEFAULT NULL,
+    likes BOOLEAN DEFAULT NULL,
     comments TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP  
 )
+
 
 INSERT INTO posts_interactions (post_id, user_id, likes, share_count, comments) VALUES (34, 15, 1, null, 'Post eclaté au sol!' );
 
@@ -252,8 +290,6 @@ INSERT INTO posts_interactions (post_id, user_id, likes, share_count, comments) 
 INSERT INTO posts_interactions (post_id, user_id, likes, share_count, comments) VALUES (35, 15, 1, null, 'bah ima pass!' );
 
 
-
-DROP TABLE posts_interactions;
 
 CREATE TABLE posts_share(
     sender_id INT REFERENCES users (id),

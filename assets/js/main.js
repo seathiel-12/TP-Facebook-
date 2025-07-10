@@ -35,6 +35,7 @@ const loadJsModule=async(bodyId)=>{
               .then(async(module)=>{
                 await module.loadPosts();
                 module.createPostOptions();
+                module.handlePostInteractions();
                 module.initHome();
                 module.changeColor();
                 module.handlePosting();
@@ -47,13 +48,13 @@ const loadJsModule=async(bodyId)=>{
 const fetchPageContent=async(url)=>{
   await fetch(url)
     .then(response=>response.text())
-        .then(html=> {
+        .then(async(html)=> {
             const parser= new DOMParser();
             html=parser.parseFromString(html,'text/html');
             document.body.innerHTML=html.body.innerHTML;
             document.body.id=html.body.id;
             console.log(document.body.id);
-            loadJsModule(document.body.id);
+            await loadJsModule(document.body.id);
             lucide.createIcons();
          })
     .catch(error=>console.error('Error fetching page content:', error));

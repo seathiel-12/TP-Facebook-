@@ -98,33 +98,31 @@ class ApiCall{
                 switch($this->uri[2]){
                     //Route 'api/user/{case}'
                     case 'user':{
-
-                        switch($this->uri[3]){
-                            //Route 'api/user/register'
-                            case 'register':{
+                        if(isset($this->uri[3])){
+                            if($this->uri[3] === 3){
                                 if(isset($this->uri[4]))
                                 new Register()->registering($this->uri[4]);
-                            break;
-                            }   
-                            //Route 'api/user/forgotPassword'
-                            case 'forgotPassword':{
+                               return;
+                            }
+
+                            if($this->uri[3] === 'forgotPassword'){
                                 if(isset($this->uri[4])){
                                     new AuthController()->forgotPassword($this->uri[4]);
                                 }else{
                                     throw new PDOException('Step required!');
                                 }
-                                break;
+                                return;
                             }
-                            //Route 'api/user/posts
-                            case 'posts':{
+
+                            if($this->uri[3] === 'posts'){
                                 if(!new AuthController()->verifyOnline()){
                                     throw new PDOException('Non autorisé! Veuillez vous authentifier.',401);
                                 }
-                                if(isset($this->uri[3])){
-                                    if(isset($this->uri[4])){
-                                       $user=new UserController();
-                                       switch($this->uri[4]){
-                                        case 'create':
+
+                                if(isset($this->uri[4])){
+                                    $user=new UserController();
+                                    switch($this->uri[4]){
+                                        case 'create':{
                                             $this->verifyRequestMethod('POST');
                                             $data=$_POST ?? null;
                                             if($this->verifyCSRFToken($data) === 200){
@@ -133,18 +131,21 @@ class ApiCall{
                                                 throw new Exception('CSRF not found.');
                                             }
                                             break;
-                                       
-                                       case 'update':
+                                        }                                      
+                                        case 'update':{
                                             $user->updatePost();
                                             break;
-                                        case 'delete':
+                                        }                                            
+                                        case 'delete':{
                                             session_start();
                                             $user->deletePost($_SESSION['id']);
                                             break;
+                                        }                                   
                                         case 'all':{
                                             try{
                                                 $data = new Post()->getAllPosts('LIMIT 50');
                                                 echo json_encode(['success'=>true, 'data'=>$data]);
+                                                return;
                                             }catch(PDOException $e){
                                                 throw new PDOException('Erreur lors de la récupération des posts: ',$e->getMessage());
                                             }
@@ -157,19 +158,28 @@ class ApiCall{
                                                 echo json_encode(['success'=>false, 'message'=>"CSRF non trouvé/valide!"]);
                                                 return;
                                             }
-                                            if(is_numeric($this->uri)){
+                                            // Route api/user/posts/{id}/{action}
+                                            if(is_numeric($this->uri[4])){
                                                 if(isset($this->uri[5])){
-                                                   $user->posts($this->uri[5]);                                                       
-                                                  }
+                                                    $user->posts($this->uri[5]);
+                                                    return;                                                      
+                                                }else{
+                                                    throw new Exception('Méthode required');
                                                 }
+                                            }else{
+                                                throw new Exception('id required');
+                                            }
                                             break;
                                         }
-
-                                     }                                    
-                                  }
+                                        
+                                    }                                    
+                                }else{
+                                    throw new Exception('uri 4');
                                 }
+
+                               return;
                             }
-                        }   
+                        }
                         break;
                     }
                     case 'login':{

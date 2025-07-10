@@ -3,6 +3,7 @@ namespace App\Models;
 require_once $_SERVER['DOCUMENT_ROOT'].'/headers.php';
 
 use Dotenv\Dotenv;
+use PDOException;
 
 $dotenv = Dotenv::createImmutable(__DIR__.'/../../');
 $dotenv->load();
@@ -18,6 +19,14 @@ class Database{
             self::$db=new \PDO(self::$dsn, $_ENV['APP_USER'], $_ENV['APP_PASSWORD']);
             self::$db->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             self::$db->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
+
+            if(self::$db){
+                try{
+                    self::$db->query("SET sql_mode = 'STRICT_TRANS_TABLES';");
+                }catch(PDOException $e){
+                    throw new PDOException($e->getMessage());
+                }
+            }
             return self::$db;
         }catch(\PDOException $e){
             echo "Erreur de connexion à la base de données: ".$e->getMessage();

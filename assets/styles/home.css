@@ -315,6 +315,18 @@ section.main-section{
     transform: translateX(-10px);
 }
 
+.liked{
+    fill: rgb(66, 66, 255);
+    stroke: rgb(66, 66, 255);
+    animation: like 1.5s ease 0s forwards;
+}
+
+@keyframes like {
+    0%{transform: scale(1) rotate(0);}
+    50%{ transform: scale(1.1) rotate(-30deg);}
+    100%{ transform: scale(1) rotate(0)}
+}
+
 /* end main-section */
 @media (max-width: 750px) {
     header{

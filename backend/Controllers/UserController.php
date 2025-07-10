@@ -1,9 +1,12 @@
 <?php
 namespace App\Controllers;
 
+use App\Models\Database;
 use App\Models\Model;
 use App\Models\Post;
+use Exception;
 use PDOException;
+use PHPMailer\PHPMailer\POP3;
 
 class UserController extends Controller{
 
@@ -64,7 +67,7 @@ class UserController extends Controller{
                         unset($_POST['csrf_token']) ;
 
                         $data=$this->cleanData($_POST);
-                        if(new Post($data))
+                        if(new Post(data:$data))
                         echo json_encode(['success'=>true, "message"=>"Nouveau post mis en ligne."]);
                         return;
                     }catch(PDOException $e){
@@ -112,9 +115,45 @@ class UserController extends Controller{
             switch($action){
                 case 'like':{
                     $data=$this->getRequestData();
-                    new Post('posts_interactions',$data);
+                    if(!$data) throw new PDOException('Données manquantes!');
+                    unset($data['csrf_token']);
+                    
+                    if(isset($data['user_id']) && isset($data['post_id']) && isset($data['likes'])){
+                        $data['likes']=$data['likes'] == 1 ? 1 : NULL;
+                        try{
+                            $query="SELECT * FROM posts_interactions WHERE post_id=? AND user_id=? AND likes IS NOT NULL";
+    
+                            $like= Database::getDb()->prepare($query);
+                            $like->execute([$data['post_id'], $data['user_id']]);
+                            $like=$like->fetch();
+                            if($like){
+                                if($like['likes'] === $data['likes']){
+                                    echo json_encode(['no_update'=>true]);
+                                    return;
+                                }
+    
+                                new Post('posts_interactions')->update($like['id'], ['likes'=>$data['likes']]);
+                                echo json_encode(['success'=>true, 'updated'=>true]);
+                                return;
+                            }
+    
+                            new Post('posts_interactions', $data);
+                            echo json_encode(true);
+                            return;
+                        }catch(PDOException $e){
+                            throw new PDOException($e->getMessage());
+                        }
+                    }
+
+                break;
+                }default:{
+                    throw new Exception('Action not found');
+                    break;
                 }
             }
+        }else{
+            echo json_encode('not found');
+            return;
         }
     }
 

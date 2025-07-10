@@ -10,14 +10,15 @@ use PDOException;
         protected $uri;
 
         public function __contruct(){
-            
+
         }
 
        protected function cleanData($data){
             if(is_array($data)){
                 foreach($data as $key => $value){
-                    if($key!=='csrf_token')
-                    $data[$key]=htmlspecialchars($value,ENT_QUOTES,'UTF-8');
+                    if($key!=='csrf_token'){
+                        $data[$key]=htmlspecialchars($value,ENT_QUOTES,'UTF-8');
+                    }
                 }
                 return $data;
             } 

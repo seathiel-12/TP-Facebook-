@@ -52,7 +52,6 @@ const createColorList=async()=> {
 
 //Change la couleur de fond d'un post
 export const changeColor=async (li=null)=>{  
-    console.log(li)
     if(li){
         const textareaPost=document.getElementById('post-text');  
 
@@ -161,17 +160,30 @@ export const changeColor=async (li=null)=>{
  export const loadPosts=async()=>{
     await getAllPostsData();
     const posts=allPosts;
-    console.dir(posts)
     if(posts.length === 0) return;
 
 
     const renderDate=(date)=>{
         const newDate=new Date(date);
         const months=['Janv', 'Fev', 'March', 'Avr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const date= newDate.getDate();
+
+        const today= new Date();
+        const day= newDate.getDate();
         const month = months[newDate.getMonth()];
         const year=newDate.getFullYear();
-        const time= (new Date().getHours() - newDate.getHours()) 
+        let time=  newDate.getHours();
+        let minutes= newDate.getMinutes();
+        let secs= newDate.getSeconds();
+
+        if(today.getDate() === day && today.getMonth() === newDate.getMonth() && today.getFullYear() === year){
+            time= today.getHours() - newDate.getHours();
+            minutes= today.getMinutes() - newDate.getMinutes();
+            secs= today.getSeconds() - newDate.getSeconds();
+
+            return time!==0 ? time + ' h' :(minutes!==0 ? minutes + ' min': secs +'s')
+        } 
+
+        return day + ' ' + month + (year === today.getFullYear()? '' : year) + ', ' + time + ':' + minutes;
     }
      const renderPosts=()=>{
         const htmlPosts=posts.map(post=>
@@ -198,7 +210,7 @@ export const changeColor=async (li=null)=>{
                 
                 <div class="flexDivBetween post-stats">
                     <div class="">
-                         <a class="flexDiv"><i data-icon="like" width="20" height="20" image></i> ${post['nb_likes']}</a>
+                         <a class="flexDiv"><i data-icon="like" width="20" height="20" image></i> <span class="nb-like" post="${post.id}">${post['nb_likes']}</span></a>
                     </div>
 
                     <div class="flexDiv" style="gap:15px;">
@@ -208,9 +220,9 @@ export const changeColor=async (li=null)=>{
                 </div>
                 <hr style="margin:10px auto 5px;">
                 <div class="interactions flexDiv" style="gap:0;">
-                    <div class="flexDiv fade-hover"><i data-lucide="thumbs-up"></i> J'aime</div>
-                    <div class="flexDiv fade-hover"><i data-lucide="message-circle"></i> Commenter</div>
-                    <div class="flexDiv fade-hover"><box-icon name='share' style="transform:rotateY(180deg);"></box-icon> Partager</div>
+                    <div class="flexDiv fade-hover like" post="${post.id}"><i class="like-icon ${post['is_liked']==1?'liked':''}" data-lucide="thumbs-up" post="${post.id}"></i> J'aime</div>
+                    <div class="flexDiv fade-hover comment" post="${post.id}"><i data-lucide="message-circle" post="${post.id}"></i> Commenter</div>
+                    <div class="flexDiv fade-hover share" post="${post.id}"><box-icon name='share' style="transform:rotateY(180deg);" post="${post.id}"></box-icon> Partager</div>
                 </div>
             </div>
             `
@@ -220,7 +232,6 @@ export const changeColor=async (li=null)=>{
 
     const loadedPosts=document.querySelector('.loaded-posts');
     loadedPosts.innerHTML=renderPosts();
-
     lucide.createIcons();
 }
 ////////////////////////////////
@@ -276,7 +287,6 @@ export const handlePosting=()=>{
             }).then(data=>data.json())
               .then(async(response)=> {
                     if(response && response.success){
-                        await getAllPostsData();
                         await loadPosts();
                         createPostOptions();
                         initHome();
@@ -358,12 +368,15 @@ const removeFile=()=>{
 
 const getAllPostsData=async()=>{
     try{
-        const posts=await apiRequest('user/posts/all');
-        if(posts && posts.success){
-            allPosts=posts.data;
-        }else{
-            showNotification(posts.message);
-        }
+        await apiRequest('user/posts/all').then(response=>{
+            if(response && response.success){
+                console.log(response.data);
+                allPosts=response.data;
+            }else{
+                showNotification(response.message);
+            }  
+        });
+        
     }catch(err){
         console.error(err);
     }
@@ -385,6 +398,7 @@ export const initHome=async()=>{
     handleHomeHeaderIcon();
     handleCreatePostModal();
     handleProfilContextuelLi(); 
+    handlePostInteractions();
     changeColor();
     createIcons();
 }
@@ -425,7 +439,46 @@ export const createPostOptions=()=>{
 
 
 export const handlePostInteractions=()=>{
+    const like= document.querySelectorAll('.like');
+    const comment= document.querySelectorAll('.comment');
+    const share=document.querySelectorAll('.share');
 
+
+    like.forEach((btn)=>{
+        btn.onclick=async function (e){
+            const svg= document.querySelector(`svg[post='${e.target.getAttribute('post')}']`);
+
+            if(svg){
+                svg.classList.toggle('liked');
+
+                //Simuler les likes et dislike en front avant la requete
+                const nbLike=document.querySelector(`.nb-like[post="${e.target.getAttribute('post')}"]`);
+                nbLike.textContent=parseInt(nbLike.textContent)+(svg.getAttribute('class').includes('liked') ? 1 : (-1));
+                
+                const key=`Lkp${svg.getAttribute('post')}`;
+                        if(sessionStorage.getItem(key)){
+                       clearTimeout(JSON.parse(sessionStorage.getItem(key)).split[0]);
+
+                       sessionStorage.removeItem(key);
+                       return;
+                    }
+                
+                const dblike=setTimeout(async()=>{
+                
+                await apiRequest(`user/posts/${e.target.getAttribute('post')}/like`,'POST', {
+                    user_id: document.getElementById('me').value,
+                    post_id:this.getAttribute('post'),
+                    likes:JSON.parse(sessionStorage.getItem(key)).split('/')[1]    
+                })
+                sessionStorage.removeItem(`Lkp${this.getAttribute('post')}`); 
+
+            },10000);
+
+            sessionStorage.setItem(`Lkp${svg.getAttribute('post')}`,JSON.stringify(dblike+'/'+ (svg.getAttribute('class').includes('liked')? 1 : 0) ));
+        }
+      }
+    })
+    
 }
 
 /////////////////////////////////////////////////////////////////////////////
