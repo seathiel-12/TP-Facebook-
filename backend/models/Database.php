@@ -22,7 +22,7 @@ class Database{
 
             if(self::$db){
                 try{
-                    self::$db->query("SET sql_mode = 'STRICT_TRANS_TABLES';");
+                    self::$db->query("SET sql_mode = 'STRICT_TRANS_TABLES'");
                 }catch(PDOException $e){
                     throw new PDOException($e->getMessage());
                 }
@@ -32,6 +32,11 @@ class Database{
             echo "Erreur de connexion à la base de données: ".$e->getMessage();
         }
       }
+      try{
+        self::$db->query("SET sql_mode = 'STRICT_TRANS_TABLES'");
+    }catch(PDOException $e){
+        throw new PDOException($e->getMessage());
+    }
        return self::$db;
   }
 }

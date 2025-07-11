@@ -1,4 +1,5 @@
 header{
+    position: fixed;
     display: flex;
     justify-content: space-between;
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
@@ -6,7 +7,9 @@ header{
     left: 0;
     right: 0;
     z-index: 2;
+    background-color: white;
 }
+
 #search{
     border-radius: 50px;
     font-size: 0.9em;
@@ -113,7 +116,7 @@ aside{
     border-radius: 15px;
     padding: 20px 10px 10px;
     display: none;
-    position: absolute; 
+    position: fixed; 
     right:10px; top:50px;
     z-index:1000;
 }
@@ -146,12 +149,6 @@ aside{
     height: 30px;
     padding: 0 !important;
 }
-header{
-    position: fixed;
-    top: 0;
-    z-index:10000;
-    background-color: white;
-}
 
 /* end header */
 
@@ -165,7 +162,6 @@ aside{
     position: fixed;
 }
 
-
 .modal #post-text{
     border:none;
     resize:none;
@@ -176,6 +172,7 @@ aside{
     font-size:1.5em;
     outline:none;
 }
+
 
 .changed-color{
     text-align:center;
@@ -320,6 +317,62 @@ section.main-section{
     stroke: rgb(66, 66, 255);
     animation: like 1.5s ease 0s forwards;
 }
+.post-comment-modal{
+    width: 42% !important;
+    transform: translateX(-20px);
+    position:relative;
+    overflow: hidden;
+    height:max-content;
+    height: 80%;
+    max-height: 700px;
+}
+
+.comment-modal-zone{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width:100%; 
+    z-index:10; 
+    background-color:white; 
+    box-shadow: 0 0 10px 0 rgba(168, 168, 168, 0.34);
+    max-height: 80%;
+}
+.comment-modal-main{
+    transform: translateY(63px);
+    height: calc(100% - 172px);
+    overflow-y: scroll;
+}
+
+.comment-modal-zone .comment-textarea{
+    border: none;
+    resize: none;
+    outline: none;
+    background-color: rgba(186, 184, 184, 0.495);
+    max-height: 500px;
+    border-radius: 10px;
+    width: calc(100% - 40px);
+    padding: 10px 10px 60px;
+    /* scrollbar-width: none; */
+}
+.insert-element-comment{
+    position: absolute;
+    width: calc(100% - 40px);
+    margin: 10px auto 0;
+    z-index: 11!important;
+    bottom: -7px;
+    right: 20px;
+}
+.send-comment{
+    width: max-content;
+    height: max-content;
+    padding: 5px;
+    border-radius: 50%;
+    background-color: white;
+}
+dialog{
+    border: none;
+}
+
 
 @keyframes like {
     0%{transform: scale(1) rotate(0);}

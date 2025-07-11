@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 use App\Models\Model;
+use Exception;
 use PDOException;
 
     class Post extends Model{
@@ -48,7 +49,7 @@ use PDOException;
                                     SELECT p.id, p.author, p.file_path, p.background, p.created_at, p.caption, p.username, p.firstname, p.lastname, p.gender, p.profile_picture, p.nb_likes, p.nb_comments, (pi.user_id=? AND pi.likes=1) AS is_liked
                                     FROM post p 
                                     LEFT JOIN posts_interactions pi 
-                                    ON p.id=pi.post_id GROUP BY id;
+                                    ON p.id=pi.post_id AND pi.comments IS NULL;
                                     ";
                         $result = Database::getDb()->prepare($query);
                         $result->execute([$_SESSION['id']]);
@@ -61,5 +62,24 @@ use PDOException;
 
         public function get($condition){
             return Model::getEntry($this->table, $condition);
+        }
+
+        public function getThisPostComments(int $id){
+            if($this->table !== 'posts_interactions') throw new Exception("Table posts_interaction requise pour cette méthode!");
+            
+            try{
+                $query= "WITH comments AS (
+                    SELECT id, comments, user_id, created_at, updated_at FROM posts_interactions WHERE post_id=? AND comments IS NOT NULL
+                    )
+                SELECT c.id, c.comments, c.user_id, c.created_at, c.updated_at, u.username, u.firstname, u.lastname, u.gender, u.profile_picture FROM comments c JOIN users u ON u.id=c.user_id; ";
+
+                $result=Database::getDb()->prepare($query);
+                $result->execute([$id]);
+                $result=$result->fetchAll();
+                return $result;
+            }catch(PDOException $e){
+                throw new PDOException("Erreur lors de la récupération des commentaires de ce post: ".$e->getMessage());
+            }
+            
         }
     }

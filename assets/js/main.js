@@ -39,6 +39,9 @@ const loadJsModule=async(bodyId)=>{
                 module.initHome();
                 module.changeColor();
                 module.handlePosting();
+                document.querySelector('.sidebar').onmouseenter=(e)=> {e.target.style.overflowY="scroll"; console.log("id")};
+                document.querySelector('.sidebar').onmouseleave=(e)=> e.target.style.overflowY="hidden";
+
               })
               .catch(error=>console.error(`Error loading module home: ${error}`));
           break;
@@ -213,6 +216,15 @@ const apiRequest=async (url, method='GET', data)=>{
                 document.querySelector('.overlay')?.remove();
               }
             });
+
+          const toRemove=document.querySelectorAll('.on-window-click-remove');
+           toRemove.forEach(remove=> {
+            if(remove && !remove.contains(e.target)){
+              remove.remove()
+              document.body.classList.remove('overflow');
+              document.querySelector('.overlay')?.remove();
+            }
+          });
          });
       });
 

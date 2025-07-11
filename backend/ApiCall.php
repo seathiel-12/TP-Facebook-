@@ -152,20 +152,26 @@ class ApiCall{
                                             break;
                                         }
                                         default:{
-                                            $this->verifyRequestMethod('POST');
-                                            $data = $_POST ?? null;
-                                            if($this->verifyCSRFToken($data) !== 200){
-                                                echo json_encode(['success'=>false, 'message'=>"CSRF non trouvé/valide!"]);
-                                                return;
-                                            }
                                             // Route api/user/posts/{id}/{action}
                                             if(is_numeric($this->uri[4])){
                                                 if(isset($this->uri[5])){
-                                                    $user->posts($this->uri[5]);
+                                                    if($this->uri[5] === 'comments'){
+                                                        $comments=new Post('posts_interactions')->getThisPostComments($this->uri[4]);
+                                                        echo json_encode(['success'=>true, 'data'=>$comments]);
+                                                        return;
+                                                    }
+                                                    $this->verifyRequestMethod('POST');
+                                                    $data = $_POST ?? null;
+                                                    if($this->verifyCSRFToken($data) !== 200){
+                                                        echo json_encode(['success'=>false, 'message'=>"CSRF non trouvé/valide!"]);
+                                                        return;
+                                                    }
+                                                    $user->posts($this->uri[5], $this->uri[4]);
                                                     return;                                                      
                                                 }else{
                                                     throw new Exception('Méthode required');
                                                 }
+
                                             }else{
                                                 throw new Exception('id required');
                                             }

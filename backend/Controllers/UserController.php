@@ -110,7 +110,7 @@ class UserController extends Controller{
     }
 
 
-    public function posts($action){
+    public function posts($action, $id=null){
         if(isset($action)){
             switch($action){
                 case 'like':{
@@ -144,9 +144,29 @@ class UserController extends Controller{
                             throw new PDOException($e->getMessage());
                         }
                     }
-
                 break;
-                }default:{
+                }
+                case 'comment':{
+                    if(is_null($id)) throw new Exception('ID de post manquant');
+                    $data=$this->getRequestData();
+                    if(!isset($data['user_id']) || !isset($data['comment']) || empty($data['user_id']) || empty($data['comment'])) throw new Exception('Données de post manquantes');
+
+                    if($data['user_id'] != $_SESSION['id']) throw new Exception('Données fraduleuses!');
+
+                    new Post('posts_interactions', [
+                        'user_id'=>$data['user_id'],
+                        'post_id'=>$id,
+                        'comments'=>$data['comment']
+                    ]);
+
+                    echo json_encode(['success'=>true, 'message'=>'Commentaire ajouté', 'data'=>[
+                        'profile_picture'=>$_SESSION['picture'],
+                        'username'=>$_SESSION['username'],
+                        'comments'=>$data['comment']
+                    ]]);
+                    return;
+                }
+                default:{
                     throw new Exception('Action not found');
                     break;
                 }
@@ -156,5 +176,6 @@ class UserController extends Controller{
             return;
         }
     }
+
 
 }

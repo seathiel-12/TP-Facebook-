@@ -33,8 +33,6 @@
 
 <script>
     lucide.createIcons();
-    // document.querySelector('aside').onmouseenter=(e)=> e.target.style.overflowY="scroll";
-    // document.querySelector('aside').onmouseleave=(e)=> e.target.style.overflowY="hidden";
 </script>
 <style>
     .bx{

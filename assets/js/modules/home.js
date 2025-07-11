@@ -1,8 +1,7 @@
 
-
 const divIconBorder=document.createElement('div');
 let allPosts=null;
-
+let allComments= null;
 //Bordure de bas des icones de navigation du header
 const createDivIconBorder=(div,divIconBorder)=>{
     if(div){
@@ -188,7 +187,7 @@ export const changeColor=async (li=null)=>{
      const renderPosts=()=>{
         const htmlPosts=posts.map(post=>
             `
-            <div class="post card">
+            <div class="post card" data-post-id="${post.id}">
                 <div class="flexDivBetween">
                     <div class="flexDivStart">
                     <img src="/assets/media/${post['profil_picture']?'posts/'+post['profil_picture']:'images/'+(post.gender==='male'?'boy':(post.gender==='female'?'happy':'horse'))+'.png'}" width="40" height="40" class="image"/>
@@ -398,7 +397,7 @@ export const initHome=async()=>{
     handleHomeHeaderIcon();
     handleCreatePostModal();
     handleProfilContextuelLi(); 
-    handlePostInteractions();
+    // handlePostInteractions();
     changeColor();
     createIcons();
 }
@@ -440,8 +439,15 @@ export const createPostOptions=()=>{
 
 export const handlePostInteractions=()=>{
     const like= document.querySelectorAll('.like');
-    const comment= document.querySelectorAll('.comment');
+    const comments= document.querySelectorAll('.comment');
     const share=document.querySelectorAll('.share');
+
+
+/* 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     Like Section
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*/
 
 
     like.forEach((btn)=>{
@@ -477,6 +483,154 @@ export const handlePostInteractions=()=>{
             sessionStorage.setItem(`Lkp${svg.getAttribute('post')}`,JSON.stringify(dblike+'/'+ (svg.getAttribute('class').includes('liked')? 1 : 0) ));
         }
       }
+    })
+
+
+
+/* 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     Comments Section
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*/
+
+    async function getComments(postId){
+       await apiRequest(`user/posts/${postId}/comments`)
+            .then(response=>{
+                if(response && response.data){
+                    allComments= response.data;
+                }
+            }).catch(err=>{console.error(err)
+                return [];
+            });
+    }
+
+    async function renderAllComments(postId,author){
+        await getComments(postId);
+        const commentsSection= document.querySelector('.comments-elements');
+        commentsSection.innerHTML=renderComments(allComments, author);
+    }
+
+    function renderComments(Comments,author){
+
+        const comments=Comments;
+
+        if(comments && comments.length === 0){
+            return `
+                <div class="no-comment">
+                    <p> Pas de commentaires. </p>
+                </div>
+            `
+        }
+       
+        return comments.map(comment=>
+            `
+                <div class="flexDivStart" style="max-width: calc(100% - 20px); margin: 10px; ">
+                    <img width="35" height="35" style="border-radius: 100%; padding:5px; background:rgba(215, 215, 215, 0.64);" src="../assets/media/${comment.profile_picture ? `posts/user-${comment.user_id}/${comment.profile_picture}` : `images/${comment.gender}.png`}"/>
+
+                    <div style="text-align:left; background:rgba(207, 207, 207, 0.72); border-radius:10px; padding:10px;">
+                    <strong>${comment.firstname+ ' ' + comment.lastname}</strong> ${comment.user_id === author ? '<span style="font-size:0.8em; padding-left: 5px; color:rgb(59, 46, 32);">Author</span>' : '' }
+                    <p>${comment.comments} </p>
+                    </div>
+                </div>
+            `
+        ).join('');
+    
+    }
+
+    function animateOnAwaitComments(){
+
+    }
+
+    function openCommentModal (post){
+        const commentModal= document.createElement('dialog');
+
+        const renderThisPost=(postId)=>{
+            const post=document.querySelector(`.post[data-post-id="${postId}"]`).cloneNode(true);
+            post.style.margin="20px 10px";
+            post.style.width="calc(100% - 40px)"
+            return post;
+        }
+        commentModal.innerHTML=`
+
+            <div class="flexDiv" style="position:fixed; top: 0; left: 0; width:100%; z-index:10; background-color:white; box-shadow: 0 0 10px 0 rgba(168, 168, 168, 0.34);">
+                <h2 style="padding:22px; width:calc(100% - 20px); position:relative;">Publication de ${post?.username || (post?.firstname + ' ' + post?.lastname)}<div class="closeModal comment-modal-close"><i data-lucide="x" class="standard-hover cancel-icon"></i></div>
+                </h2>
+            </div>
+            
+            <div class="comment-modal-main">
+                ${(renderThisPost(post.id)).outerHTML}    
+
+                <div style="margin-bottom:20px;" class="comments-elements">
+                    ${animateOnAwaitComments()}
+                </div>
+            </div>
+            
+
+            <div class="comment-modal-zone flexDiv">
+                <i data-icon="account" class="standard-hover" style="transform:translate(5px, -25px) scale(50);"></i>
+                <form class="noFormRootStyle" style="position: relative; width:90%; height:calc(100% - 20px); margin: 10px 0;">
+                    <textarea name="comment" data-post-id="${post.id}" class="comment-textarea" placeholder="Ecrivez un commentaire public..." required></textarea>
+                    
+                    <div class="insert-element-comment flexDivBetween">
+                        <div class="flexDivStart"> 
+                            <i data-lucide="smile" width="20" height="20"></i>
+                            <i data-lucide="camera" width="20" height="20"></i>
+                            <box-icon name='file-gif' type='solid' color='rgb(105, 105, 105)' width="20" height="20" ></box-icon>
+                        </div>
+                        <button type="submit" class="send-comment standard-hover flexDiv">
+                            <i data-lucide="send-horizontal" stroke="rgba(69, 68, 68, 0.72)"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `
+        commentModal.className="card post-comment-modal on-window-click-remove"
+        document.body.appendChild(commentModal);
+        const div=document.createElement('div');
+        div.className="overlay";
+
+        document.body.appendChild(div);
+        document.body.classList.add('overflow');
+
+        lucide.createIcons();
+        commentModal.showModal();
+
+        renderAllComments(post.id, post.author);
+
+        commentModal.style.cssText=`
+            position:fixed;
+            top:calc((100vh - ${commentModal.offsetHeight + 100 +'px'})/2);
+        `
+
+        document.querySelector('.comment-modal-close').onclick=()=>{
+            document.querySelector('.post-comment-modal').remove();
+            document.querySelector('.overlay').remove();
+            document.body.classList.remove('overflow');
+        }
+
+        const form=document.querySelector('.post-comment-modal form');
+        form.onsubmit=async(e)=>{
+        e.preventDefault();
+        const textarea= document.querySelector('.post-comment-modal .comment-textarea');
+        await apiRequest(`user/posts/${textarea.getAttribute('data-post-id')}/comment`, 'POST', {
+            user_id:document.getElementById('me').value,
+            comment: textarea.value
+        }).then(response => {
+       
+           const newComment= renderComments([response.data]);
+           document.querySelector('.no-comment')?.remove();
+           document.querySelector('.comments-elements').insertAdjacentHTML('afterbegin',newComment);
+        })
+      }
+    }
+
+    
+    comments.forEach((comment)=>{
+        comment.onclick=async (e)=>{
+            e.stopPropagation();
+            const post = allPosts.find((post)=>post.id == e.target.getAttribute('post'))
+            openCommentModal(post);
+        }
     })
     
 }

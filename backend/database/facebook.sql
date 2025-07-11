@@ -202,12 +202,12 @@ FROM users u
 JOIN p ON  p.author=u.id 
 LEFT JOIN posts_interactions pi ON pi.post_id=p.id GROUP BY(p.id)
 ) 
-SELECT p.id, p.file_path, p.background, p.created_at, p.caption, p.username, p.firstname, p.lastname, p.gender, p.profile_picture, p.nb_likes, p.nb_comments, (pi.user_id=15) AS is_liked
+SELECT p.id, p.file_path, p.background, p.created_at, p.caption, p.username, p.firstname, p.lastname, p.gender, p.profile_picture, p.nb_likes, p.nb_comments, (pi.user_id=15 AND pi.likes=1) AS is_liked
 FROM post p 
 LEFT JOIN posts_interactions pi 
-ON p.id=pi.post_id GROUP BY id;
+ON p.id=pi.post_id AND pi.comments IS NULL;
 
-SET sql_mode = 'STRICT_TRANS_TABLES';
+SET sql_mode = '';
 
 WITH p AS (
     SELECT * FROM posts LIMIT 50 
@@ -314,3 +314,9 @@ DELETE FROM users;
 INSERT INTO users (firstname, lastname, email, date_of_birth, gender, profile_picture, cover_picture, username, bio, password, work_at,  lives_at, relationship_status) VALUES ('John', 'Doe', 'johndoe@gmail.com' ,'1990-01-01', 'male', 'profile.jpg', 'cover.jpg', 'johndoe', 'I am a software engineer', 'password123', 'Google', 'New York', 'single');
 
 INSERT INTO posts_interactions (post_id, user_id, type, created_at) VALUES (1, 2, 'like', '2024-06-01 10:00:00');
+
+
+WITH comments AS (
+    SELECT id, comments, user_id, created_at, updated_at FROM posts_interactions WHERE post_id=33 AND comments IS NOT NULL
+)
+SELECT c.id, c.comments, c.user_id, c.created_at, c.updated_at, u.username, u.firstname, u.lastname, u.gender, u.profile_picture FROM comments c JOIN users u ON u.id=c.user_id;
