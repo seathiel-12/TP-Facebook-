@@ -171,22 +171,24 @@ const apiRequest=async (url, method='GET', data)=>{
 
   window.addEventListener('DOMContentLoaded',async ()=>{
     
-          await apiRequest('isOnline')
-        .then(async (data)=> {
-          if(data){
-            await fetchPageContent('/frontend/views/templates/homeT.php');
-            lucide.createIcons();
-          }else{
-            showNotification('Veuillez vous reconnecter!', 'error');
-            await fetchPageContent('/frontend/views/usersClients/auth.php');
-            lucide.createIcons();
-          }
-        })
-        .catch(error=>console.error('Erreur de connection:', error));
+      fetchPageContent('/frontend/views/includes/friends.php');
+
+        //   await apiRequest('isOnline')
+        // .then(async (data)=> {
+        //   if(data){
+        //     await fetchPageContent('/frontend/views/templates/homeT.php');
+        //     lucide.createIcons();
+        //   }else{
+        //     showNotification('Veuillez vous reconnecter!', 'error');
+        //     await fetchPageContent('/frontend/views/usersClients/auth.php');
+        //     lucide.createIcons();
+        //   }
+        // })
+        // .catch(error=>console.error('Erreur de connection:', error));
           
         // // Regenerer le csrf chaque 10min
 
-        setInterval(async()=>{
+        // setInterval(async()=>{
 
           // Gérer les collisions lors des requetes
           // const collision=(e)=>{
@@ -195,37 +197,37 @@ const apiRequest=async (url, method='GET', data)=>{
           // const forms=document.querySelectorAll('form');
           // forms.forEach(form=>form.onsubmit=collision)
     
-          const generateCRSF=await apiRequest('generateCSRF');
-          if(generateCRSF && generateCRSF.success){
-            const csrfInput=document.getElementById('csrf_token');
-            csrfInput.value=generateCRSF['csrf_token'];
-          }
-        },600000);
+        //   const generateCRSF=await apiRequest('generateCSRF');
+        //   if(generateCRSF && generateCRSF.success){
+        //     const csrfInput=document.getElementById('csrf_token');
+        //     csrfInput.value=generateCRSF['csrf_token'];
+        //   }
+        // },600000);
 
-        createIcons();
+        // createIcons();
         // await import('./modules/register.js')
-        // .then(module=>{module.showLoadingPage(); lucide.createIcons()})
-        // .catch(err=>console.log(err));
+        //   .then(module=>{module.showLoadingPage(); lucide.createIcons()})
+        //   .catch(err=>console.log(err));
 
-        window.addEventListener('click',(e)=>{
-          const toClose=document.querySelectorAll('.on-window-click-close');
-            toClose.forEach(close=> {
-              if(close.classList.contains('visible') && !close.contains(e.target)){
-                close.classList.remove('visible')
-                document.body.classList.remove('overflow');
-                document.querySelector('.overlay')?.remove();
-              }
-            });
+        // window.addEventListener('click',(e)=>{
+        //   const toClose=document.querySelectorAll('.on-window-click-close');
+        //     toClose.forEach(close=> {
+        //       if(close.classList.contains('visible') && !close.contains(e.target)){
+        //         close.classList.remove('visible')
+        //         document.body.classList.remove('overflow');
+        //         document.querySelector('.overlay')?.remove();
+        //       }
+        //     });
 
-          const toRemove=document.querySelectorAll('.on-window-click-remove');
-           toRemove.forEach(remove=> {
-            if(remove && !remove.contains(e.target)){
-              remove.remove()
-              document.body.classList.remove('overflow');
-              document.querySelector('.overlay')?.remove();
-            }
-          });
-         });
+        //   const toRemove=document.querySelectorAll('.on-window-click-remove');
+        //    toRemove.forEach(remove=> {
+        //     if(remove && !remove.contains(e.target)){
+        //       remove.remove()
+        //       document.body.classList.remove('overflow');
+        //       document.querySelector('.overlay')?.remove();
+        //     }
+        //   });
+        //  });
       });
 
   

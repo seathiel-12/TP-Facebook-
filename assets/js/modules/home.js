@@ -213,7 +213,7 @@ export const changeColor=async (li=null)=>{
                     </div>
 
                     <div class="flexDiv" style="gap:15px;">
-                        <a>${post['nb_comments']} commentaires</a>
+                        <a class="comment" post="${post.id}">${post['nb_comments']} commentaires</a>
                         <a>${post.share?post.share+' '+'partages': ''}</a>
                     </div>
                 </div>
@@ -618,7 +618,7 @@ export const handlePostInteractions=()=>{
         }).then(response => {
        
            const newComment= renderComments([response.data]);
-           document.querySelector('.no-comment')?.remove();
+           document.querySelector('.no-comment')?.remove();z
            document.querySelector('.comments-elements').insertAdjacentHTML('afterbegin',newComment);
         })
       }
