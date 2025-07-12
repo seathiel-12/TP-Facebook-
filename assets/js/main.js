@@ -1,3 +1,4 @@
+
 const DOCUMENT_ROOT={};
 const loadJsModule=async(bodyId)=>{
     switch(bodyId){
@@ -31,6 +32,9 @@ const loadJsModule=async(bodyId)=>{
               .catch(error=>console.error(`Error loading auth module: ${error}`));
           break;
           case 'home':
+            document.title="Acceuil-Home"
+            await import('./modules/header.js')
+                  .then(module=> module.initHeader('home'));
             await import('./modules/home.js')
               .then(async(module)=>{
                 await module.loadPosts();
@@ -39,14 +43,21 @@ const loadJsModule=async(bodyId)=>{
                 module.initHome();
                 module.changeColor();
                 module.handlePosting();
-                document.querySelector('.sidebar').onmouseenter=(e)=> {e.target.style.overflowY="scroll"; console.log("id")};
+                document.querySelector('.sidebar').onmouseenter=(e)=> e.target.style.overflowY="scroll";
                 document.querySelector('.sidebar').onmouseleave=(e)=> e.target.style.overflowY="hidden";
 
               })
               .catch(error=>console.error(`Error loading module home: ${error}`));
           break;
+          case 'friends':{
+            await import('./modules/header.js')
+                  .then(module=> module.initHeader('friends'));
+            await import('./modules/friends.js')
+                  .then(module=> module.initFriendPage(document.body.className));
+          }
     }
 }
+
 
 const fetchPageContent=async(url)=>{
   await fetch(url)
@@ -54,12 +65,25 @@ const fetchPageContent=async(url)=>{
         .then(async(html)=> {
             const parser= new DOMParser();
             html=parser.parseFromString(html,'text/html');
-            document.body.innerHTML=html.body.innerHTML;
-            document.body.id=html.body.id;
-            console.log(document.body.id);
-            await loadJsModule(document.body.id);
-            lucide.createIcons();
-         })
+            
+            const header=html.querySelector('header');
+                  if(header && header.id && header.getAttribute('id') === document.querySelector('header')?.id){
+                      const main= html.querySelector('main');
+                      if(main){
+                        document.body.querySelector('main').innerHTML=main.innerHTML;
+                        document.body.id=html.body.id;
+                        document.body.className=html.body.className;
+                        lucide.createIcons();
+                        return document.body.id;
+                      }
+                  }
+                  document.body.innerHTML=html.body.innerHTML;
+                  document.body.id=html.body.id;
+                  console.log(document.body.id);
+                  lucide.createIcons();
+                  return document.body.id;
+              })
+            .then(async (id)=>  await loadJsModule(id))
     .catch(error=>console.error('Error fetching page content:', error));
 }
 
@@ -92,7 +116,7 @@ const apiRequest=async (url, method='GET', data)=>{
 
     if(method !=='GET'){
       if(data){
-        data['csrf_token']=document.getElementById('csrf_token').value;
+        data['csrf_token']=document.getElementById('csrf_token')?.value;
         options.body=JSON.stringify(data);  
       }else{
         showNotification("Données manquantes lors de l'envoi vers l'api!");
@@ -170,9 +194,9 @@ const apiRequest=async (url, method='GET', data)=>{
 
 
   window.addEventListener('DOMContentLoaded',async ()=>{
-    
-      fetchPageContent('/frontend/views/includes/friends.php');
 
+      await import('./modules/register.js').then((module)=>module.completeProfil());
+    
         //   await apiRequest('isOnline')
         // .then(async (data)=> {
         //   if(data){
@@ -186,16 +210,9 @@ const apiRequest=async (url, method='GET', data)=>{
         // })
         // .catch(error=>console.error('Erreur de connection:', error));
           
-        // // Regenerer le csrf chaque 10min
+        // // // Regenerer le csrf chaque 10min
 
         // setInterval(async()=>{
-
-          // Gérer les collisions lors des requetes
-          // const collision=(e)=>{
-          //   e.preventDefault();
-          // }
-          // const forms=document.querySelectorAll('form');
-          // forms.forEach(form=>form.onsubmit=collision)
     
         //   const generateCRSF=await apiRequest('generateCSRF');
         //   if(generateCRSF && generateCRSF.success){

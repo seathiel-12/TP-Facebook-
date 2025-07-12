@@ -1,4 +1,4 @@
-<header>
+<header id="standard-header">
     <div class="flexDivIcon searchZone">
         <img src="https://www.facebook.com/images/fb_icon_325x325.png" alt="facecook-logo" width="30">
         <p style="position: relative;">
@@ -7,7 +7,7 @@
         </p>
     </div>
     <div class="top-nav flexDivIcon" style="gap:0;">
-        <div clas="homeIcon"><i data-lucide="home"></i></div>
+        <div class="homeIcon"><i data-lucide="home"></i></div>
         <div class="friendsIcon"><i data-lucide="users"></i></div>
         <div class="groupsIcon""><i data-lucide="user-circle"></i></div>
     </div>
@@ -39,9 +39,10 @@
             <li class="flexDivBetween" style="padding-right:0; gap: 170px;"><div class="flexDivIcon"><i data-lucide="settings"></i><p>Paramètres</p></div> <i data-lucide="chevron-right"></i></li>
             <li class="flexDivBetween" style="padding-right:0; "><div class="flexDivIcon"> <i data-lucide="circle-question-mark"></i><p>Aide et assistance</p></div> <i data-lucide="chevron-right"></i></li>
             <li class="flexDivBetween" style="padding-right:0;"><div class="flexDivIcon"> <i data-lucide="moon"></i><p>Accessibilité et affichage</p></div> <i data-lucide="chevron-right"></i></li>
-            <li class="flexDivIcon"><i data-lucide="message-square-warning"></i><p>Donnez votre avis</p></li>
-            <li class="flexDivIcon disconnect"><i data-lucide="log-out"></i><p>Se déconnecter</p></li>
+            <li class="flexDivStart"><i data-lucide="message-square-warning"></i><p>Donnez votre avis</p></li>
+            <li class="flexDivStart disconnect"><i data-lucide="log-out"></i><p>Se déconnecter</p></li>
         </ul>
     </div>
 </div>
+
 

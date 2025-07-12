@@ -12,15 +12,13 @@ CREATE TABLE users (
     profile_picture VARCHAR(255) DEFAULT NULL,
     cover_picture VARCHAR(255) DEFAULT NULL,
     bio VARCHAR(255) DEFAULT null,
-    work_at VARCHAR(255) DEFAULT NULL,
+    profession VARCHAR(255) DEFAULT NULL,
     lives_at VARCHAR(255) DEFAULT NULL,
     relationship_status ENUM('single', 'couple', 'married', 'divorced') DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CHECK (email LIKE '%@%.%'), CHECK (email IS NOT NULL OR phone IS NOT NULL)
 );
-
-ALTER TABLE users ADD COLUMN worked_at VARCHAR(255) DEFAULT NULL, ;
 
 CREATE TABLE managers(
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -36,38 +34,6 @@ CREATE TABLE managers(
     CHECK (email LIKE '%@%.%')
 );
 
-
-CREATE TABLE security_log (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    action ENUM('banned', 'unbanned', 'disabled', 'enabled') NOT NULL,
-    reason VARCHAR(255) DEFAULT NULL,
-    time_disabled INT DEFAULT NULL,
-    ip_address VARCHAR(255) NOT NULL,
-    user_agent VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id), 
-    CHECK(
-        (time_disabled IS NOT NULL AND action='disabled') 
-            OR
-         (time_disabled IS NULL AND action!= 'disabled')
-         )
-);
-
-
-CREATE TABLE posts (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    type ENUM('post', 'story', 'reel') NOT NULL,
-    media_type ENUM('text', 'image', 'video') NOT NULL, 
-    path VARCHAR(255) NOT NULL,
-    caption TEXT,
-    author INT REFERENCES users (id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-)
-
-DROP TABLE posts;
 
 CREATE TABLE posts(
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -92,11 +58,61 @@ CREATE TABLE posts_interactions(
     user_id INT REFERENCES users (id),
     post_id INT REFERENCES posts (id),
     likes BOOLEAN,
-    share_count INT DEFAULT NULL,
     comments TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
+
+
+
+CREATE TABLE security_log (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    action ENUM('banned', 'unbanned', 'disabled', 'enabled') NOT NULL,
+    reason VARCHAR(255) DEFAULT NULL,
+    time_disabled INT DEFAULT NULL,
+    ip_address VARCHAR(255) NOT NULL,
+    user_agent VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id), 
+    CHECK(
+        (time_disabled IS NOT NULL AND action='disabled') 
+            OR
+         (time_disabled IS NULL AND action!= 'disabled')
+         )
+);
+
+
+
+ALTER TABLE users ADD COLUMN worked_at VARCHAR(255) DEFAULT NULL ;
+ALTER TABLE users RENAME COLUMN work_at TO profession;
+
+CREATE TABLE profession (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+
+)
+
+
+
+
+
+CREATE TABLE posts (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    type ENUM('post', 'story', 'reel') NOT NULL,
+    media_type ENUM('text', 'image', 'video') NOT NULL, 
+    path VARCHAR(255) NOT NULL,
+    caption TEXT,
+    author INT REFERENCES users (id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)
+
+DROP TABLE posts;
+
+
+
 
 
 SELECT * FROM users u JOIN posts p ON u.id=p.author JOIN posts_interactions pi ON pi.id=p.id
@@ -192,20 +208,20 @@ FROM posts_interactions pi
 INNER JOIN post_id 
 
 
-WITH post AS(
-WITH p AS (
-    SELECT * FROM posts LIMIT 50 
-)
-SELECT p.id, p.file_path, p.background, p.created_at, p.caption, u.username, u.firstname, u.lastname, u.gender, u.profile_picture,
-COUNT(pi.likes) AS nb_likes, COUNT(comments) AS nb_comments
-FROM users u 
-JOIN p ON  p.author=u.id 
-LEFT JOIN posts_interactions pi ON pi.post_id=p.id GROUP BY(p.id)
-) 
-SELECT p.id, p.file_path, p.background, p.created_at, p.caption, p.username, p.firstname, p.lastname, p.gender, p.profile_picture, p.nb_likes, p.nb_comments, (pi.user_id=15 AND pi.likes=1) AS is_liked
-FROM post p 
-LEFT JOIN posts_interactions pi 
-ON p.id=pi.post_id AND pi.comments IS NULL;
+    WITH post AS(
+    WITH p AS (
+        SELECT * FROM posts LIMIT 50 
+    )
+    SELECT p.id, p.file_path, p.background, p.created_at, p.caption, u.username, u.firstname, u.lastname, u.gender, u.profile_picture,
+    COUNT(pi.likes) AS nb_likes, COUNT(comments) AS nb_comments
+    FROM users u 
+    JOIN p ON  p.author=u.id 
+    LEFT JOIN posts_interactions pi ON pi.post_id=p.id GROUP BY(p.id)
+    ) 
+    SELECT p.id, p.file_path, p.background, p.created_at, p.caption, p.username, p.firstname, p.lastname, p.gender, p.profile_picture, p.nb_likes, p.nb_comments, (pi.user_id=15 AND pi.likes=1) AS is_liked
+    FROM post p 
+    LEFT JOIN posts_interactions pi 
+    ON p.id=pi.post_id AND pi.comments IS NULL;
 
 SET sql_mode = '';
 

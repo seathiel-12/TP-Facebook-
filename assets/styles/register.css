@@ -1,0 +1,152 @@
+#hobbiesList{
+    box-shadow:0 0 10px rgba(238, 238, 238, 0.89); 
+    width:max-content;
+    border-radius:10px;   
+    position:absolute;    
+    background:white;
+    border:solid 1px rgb(166, 162, 162);
+}
+#hobbiesList li{
+    padding:5px;
+    border-bottom:solid 1px rgba(99, 98, 98, 0.22);
+    cursor:pointer;
+}
+#hobbiesList li:hover{
+    background:rgba(132, 132, 132, 0.32);
+}
+button{
+    margin:0;
+    height:45px;
+}
+#hobbiesChoosedList{
+    display:flex;
+    overflow:hidden;
+    gap:7px;
+    max-width:250px;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+}
+#hobbiesChoosedList:-webkit-scrollbar{
+display:none;
+}
+
+.otherIcon{
+    box-shadow: 0 0 2px 0 rgb(54, 53, 53,0.8);
+    border-right:none;
+    border:solid 3px transparent;
+    padding:8px;
+    transform:translateY(0px)!important;
+    border-radius:5px 0 0 5px;
+}
+.hobbies{
+    border:solid 3px transparent;
+    border-radius: 5px;
+    padding:8px 0 8px 8px!important;
+    box-shadow: 0 0 2px 0 rgb(54, 53, 53,0.8);
+    width:94%;
+    text-align:left;
+    cursor:pointer;
+}
+.hobbies:hover{
+    opacity:0.7;
+    background:rgba(214, 214, 214, 0.58);
+}
+.cover{
+    position:relative;
+    background-color:rgba(122, 118, 118, 0.10);
+    height:250px;
+    width:100%;
+    border-radius:8px;
+    font-size:1.2em;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin-bottom: 10px;
+    border:2px dashed #c3c3c3;
+    transition: border 0.2s;
+}
+.cover:hover {
+    border-color: #1877f2;
+}
+.profil{
+    border-radius:50%;
+    width:80px;
+    height:80px;
+    background:rgb(249, 249, 249);
+    border:solid 4px rgba(174, 174, 174, 0.33);
+    position:absolute;
+    bottom:25px;
+    right:-20px;
+    transform:translateX(-50%);
+    filter:brightness(1.1) drop-shadow(0 0 5px rgb(110, 126, 158));
+    font-size:2em;
+    cursor:pointer;
+    transition: border 0.2s;
+}
+.profil:hover {
+    border:solid 4px #0056b3;
+}
+textarea.bio{
+    border-radius:10px;
+    width:97%!important;
+    resize:none;
+    height:100px;
+    padding:10px;
+    margin:0 auto;
+    display:block;
+    font-size:1em;
+    border:2px solid rgb(165, 163, 163);
+    color:#333;
+    outline:none;
+}
+.profil-form input[type="text"],
+.profil-form input[type="url"] {
+    outline:none;
+    transition: border 0.2s;
+}
+.profil-form input[type="text"]:focus,
+.profil-form input[type="url"]:focus,
+.profil-form textarea:focus {
+    border-color: #1877f2;
+    background: #fff;
+}
+.profil-form button[type="submit"]:hover {
+    background: #0056b3;
+}
+.profilImg, .coverImg{
+    width:100%;
+    height:100%;
+    position:absolute;
+}
+form{
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 0px; 
+    width: 700px !important;                 
+    margin: 50px auto 100px!important; 
+    max-width:100%!important;
+    background: #fff; 
+    border-radius: 16px; 
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08); 
+    padding: 32px 24px;
+}
+.choosedHobbie{
+    padding:5px 20px;
+    border-radius:15px;
+    box-shadow: 0 0 20px 0 rgba(198, 193, 193, 0.4);
+    background:linear-gradient(45deg, rgb(163, 158, 158), rgba(189, 189, 189, 0.59));
+}
+body{
+    height:max-content;
+}
+@media (max-width: 600px) {
+.profil-form {
+    padding: 18px 4px;
+}
+.card, .profil-form {
+    width: 98% !important;
+  }
+}

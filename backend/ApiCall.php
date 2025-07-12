@@ -99,7 +99,7 @@ class ApiCall{
                     //Route 'api/user/{case}'
                     case 'user':{
                         if(isset($this->uri[3])){
-                            if($this->uri[3] === 3){
+                            if($this->uri[3] === 'register'){
                                 if(isset($this->uri[4]))
                                 new Register()->registering($this->uri[4]);
                                return;

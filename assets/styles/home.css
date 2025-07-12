@@ -74,10 +74,10 @@ header{
     display: none;
 } 
 
-main{
+#home main{
     display: flex;
 }
-aside{
+ aside{
     height: 100%;
     width: 25%;
 }
@@ -153,10 +153,48 @@ aside{
 /* end header */
 
 
+/* sidebar */
+
+.bx{
+    transform: scale(1.5);
+    border: solid 1.5px ;
+    border-radius: 20px;
+}
+#home li{
+    list-style-type: none;
+    border-radius: 5px;
+    padding: 10px 25px;
+    justify-content: start!important;
+    cursor: pointer;
+}
+aside.right{
+    background-color: var(--bg-secondary);   
+    padding-top:15px ;
+    right: 0;
+    top:70px;
+}
+
+#home li:hover{
+    background: rgb(207, 207, 207);
+}
+#home .sidebar{
+    left:0;
+    margin: 49px 0  20px;
+    padding-top: 25px;
+}
+.flexDivIcon{
+    gap:10px;
+}
+#home .sidebar li{
+    width: calc(100% - 70px)!important;
+    margin: auto;
+}
+/* end sidebar  */
+
 /* main-section */
 
-aside{
-    height: 100%;
+#home aside{
+    height: calc(100% + 20px);
     background-color: var(--bg-secondary);
     width: 25%!important;
     position: fixed;

@@ -176,7 +176,7 @@ export const retrieveCode=(email,token,type=null)=>{
         </header>
 
 
-        <div class="card">
+        <div class="card" style="padding-top: 250px;">
             <h3 style="text-align:left; padding:20px ;">Entrez le code sécurité</h3>
             <hr style="margin:0 auto; border:0.5px solid rgba(52, 52, 52, 0.12); width:100%;">
 

@@ -4,6 +4,7 @@
     --bg-tertiary: #272222;
     --bg-button-primary:rgb(77, 118, 255);
     --bg-button-secondary:rgb(39, 181, 60);
+    --bg-button-tertiary:rgba(229, 230, 233, 0.85);
     --webkit-link:#385898;
 }
 *{

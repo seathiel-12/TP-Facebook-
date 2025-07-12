@@ -13,7 +13,7 @@
     <?php require '../includes/header.php'; ?>
     <main>
        <?php require '../includes/sidebar.php';?> 
-       <?php require '../includes/chat.php'; ?>
+       <?php require '../includes/homeInc.php'; ?>
     </main>  
     <input type="hidden" id="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
     <input type="hidden" id="me" value="<?= $_SESSION['id']; ?>">

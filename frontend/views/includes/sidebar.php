@@ -1,17 +1,19 @@
 <aside class="sidebar">
     <ul>
-        <li class="flexDivIcon"><i data-lucide="circle-user-round"></i>Benaiah Isaac</li>
-        <li class="flexDivIcon"><i data-lucide="circle"></i>Meta AI</li>
-        <li class="flexDivIcon"><i data-lucide="users"></i>Ami(e)s</li>
-        <li class="flexDivIcon"><box-icon name='facebook-circle' type='logo' ></box-icon> Bienvenue</li>
-        <li class="flexDivIcon"><i data-lucide="clock-arrow-up"></i>Souvenirs</li>
-        <li class="flexDivIcon"><i data-lucide="bookmark"></i>Enregistrements   </li>
-        <li class="flexDivIcon" style="gap:15px; margin-left: 3px;"><i class='bx bx-community'></i>Groupes</li>
-        <li class="flexDivIcon"><i data-lucide="tv-minimal-play"></i>Reels</li>
-        <li class="flexDivIcon"><i data-lucide="store"></i>Marketplace</li>
-        <li class="flexDivIcon"><i class='bxl bx-messenger'></i>Messenger</li>
-        <li class="flexDivIcon"><box-icon name='credit-card'></box-icon>Commandes et Paiements</li>
-        <li class="flexDivIcon"><i data-lucide="calendar-check"></i>Evenements</li>
+        <li class="flexDivIcon" style="padding:20px; border-left: solid 5px dimgray; margin:0 5px; width: calc(100% - 60px)!important;"><i data-lucide="circle-user-round"></i><?= $_SESSION['username'] ?></li>
+        <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/meta.png" alt="" width="30" height="30" >Meta AI</li>
+        <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/amis_home.png" alt="" width="30" height="30" >Ami(e)s</li>
+        <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/facebook-circle.png" alt="" width="28" height="28" > Bienvenue</li>
+        <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/souvenirs.png" alt="" width="30" height="30" >Souvenirs</li>
+        <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/enregistrements.png" alt="" width="30" height="30" >Enregistrements   </li>
+        <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/groupes.png" alt="" width="30" height="30" >Groupes</li>
+        <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/reels.png" alt="" width="30" height="30" >Reels</li>
+        <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/marketplace.png" alt="" width="30" height="30" >Marketplace</li>
+        <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/messenger_logo.png" alt="" width="30" height="30" >Messenger</li>
+        <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/commandes.png" alt="" width="30" height="30" >Commandes et Paiements</li>
+        <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/evenements.png" alt="" width="30" height="30" >Evenements</li>
+        <!-- <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/amis_home.png" alt="" width="30" height="30" >scroll</li>
+        <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/amis_home.png" alt="" width="30" height="30" ></i>scroll</li> -->
         <!-- <li class="flexDivIcon"><i data-lucide="user"></i>scroll</li>
         <li class="flexDivIcon"><i data-lucide="user"></i>scroll</li>
         <li class="flexDivIcon"><i data-lucide="user"></i>scroll</li>
@@ -20,9 +22,9 @@
         <li class="flexDivIcon"><i data-lucide="user"></i>scroll</li>
         <li class="flexDivIcon"><i data-lucide="user"></i>scroll</li>
         <li class="flexDivIcon"><i data-lucide="user"></i>scroll</li>
-        <li class="flexDivIcon"><i data-lucide="user"></i>scroll</li>
-        <li class="flexDivIcon"><i data-lucide="user"></i>scroll</li> -->
-
+ -->    <hr>
+        <h3 style="text-align: left; padding: 0 30px; color:dimgray;" >Vos raccourcis</h3>
+        <li></li>
         <?php
         // foreach($sidebarContent as $item){
         //     echo $item;
@@ -34,34 +36,3 @@
 <script>
     lucide.createIcons();
 </script>
-<style>
-    .bx{
-        transform: scale(1.5);
-        border: solid 1.5px ;
-        border-radius: 20px;
-    }
-    li{
-        list-style-type: none;
-        border-radius: 5px;
-        padding: 15px 30px;
-        justify-content: start!important;
-        cursor: pointer;
-    }
-    aside.right{
-        background-color: var(--bg-secondary);   
-        padding-top:15px ;
-        right: 0;
-        top:70px;
-    }
-
-    li:hover{
-        background: rgb(207, 207, 207);
-    }
-    .sidebar{
-        left:0;
-        top: 80px;
-    }
-    .flexDivIcon{
-        gap:10px;
-    }
-</style>

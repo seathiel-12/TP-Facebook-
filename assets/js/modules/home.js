@@ -1,27 +1,6 @@
 
-const divIconBorder=document.createElement('div');
 let allPosts=null;
 let allComments= null;
-//Bordure de bas des icones de navigation du header
-const createDivIconBorder=(div,divIconBorder)=>{
-    if(div){
-        div.firstElementChild.style.stroke='blue';
-        divIconBorder.style.top=div.offsetTop + div.offsetHeight - 4 + 'px';
-        divIconBorder.style.left=div.offsetLeft + 'px';
-        divIconBorder.style.display="block";    
-    }
-}
-
-// Manipuler la boite de dialogue qui s'affiche au click du bouton icone profil du header 
-const handleProfilContextuelLi=()=>{
-    const disconnectBtn=document.querySelector('.disconnect');
-    disconnectBtn.onclick=()=>{
-        fetchPageContent('/frontend/views/usersClients/logout.php');
-        fetchPageContent('/frontend/views/usersClients/auth.php');
-        return;
-    }
-}
-
 
 // Couleur de fond d'un post
 const createColorList=async()=> {
@@ -191,7 +170,7 @@ export const changeColor=async (li=null)=>{
                 <div class="flexDivBetween">
                     <div class="flexDivStart">
                     <img src="/assets/media/${post['profil_picture']?'posts/'+post['profil_picture']:'images/'+(post.gender==='male'?'boy':(post.gender==='female'?'happy':'horse'))+'.png'}" width="40" height="40" class="image"/>
-                        <p style="text-align:left;"><strong>${post.firstname+' '+post.lastname}</strong> <br> <span style="font-size:0.9em;">${renderDate(post.created_at)}</span> </p>
+                        <p style="text-align:left;"><a class="profiling" style="color:black;"><strong>${post.firstname+' '+post.lastname}</strong></a> <br> <span style="font-size:0.9em;">${renderDate(post.created_at)}</span> </p>
                     </div>
                     <div class="flexDiv">
                         <div class="view-post-options"><i data-lucide="ellipsis" class="standard-hover" stroke="gray" style="padding:5px; border-radius:100%;"></i></div>
@@ -235,27 +214,6 @@ export const changeColor=async (li=null)=>{
 }
 ////////////////////////////////
 
- const handleHomeHeaderIcon= ()=>{
-    const homeIcon = document.querySelector('.homeIcon');
-    const friendIcon = document.querySelector('.friendsIcon');
-    const groupsIcon = document.querySelector('.groupsIcon');
-
-    const accountIcon = document.querySelector('.accountIcon');
-    const notificationIcon = document.querySelector('.notificationIcon');
-    const messengerIcon= document.querySelector('.messengerIcon');
-
-    const modal=document.querySelector('.modal')
-   
-    const profilContextuel= document.querySelector('.profil-contextuel');
-    accountIcon.onclick= (e)=> {
-        e.stopPropagation();
-        profilContextuel.classList.toggle('visible');
-
-     }
- 
-
-    createIcons();
-}
 
 export const handlePosting=()=>{
     const modal=document.querySelector('.modal');
@@ -381,22 +339,9 @@ const getAllPostsData=async()=>{
     }
 }
 
-export const initHome=async()=>{
-    const divIcon=document.querySelectorAll('.top-nav div');
-    divIconBorder.className="divIconBorder";
-    document.querySelector('header').appendChild(divIconBorder);
-
-    createDivIconBorder(divIcon[0],divIconBorder);
-    divIcon.forEach((div,index)=>{
-        div.onclick=()=>{
-            divIcon.forEach(div=>div.firstElementChild.style.stroke="");
-            createDivIconBorder(div,divIconBorder);
-        }
-    });  
+export const initHome=async()=>{ 
     handleHomePostDiv(); 
-    handleHomeHeaderIcon();
     handleCreatePostModal();
-    handleProfilContextuelLi(); 
     // handlePostInteractions();
     changeColor();
     createIcons();
@@ -636,3 +581,16 @@ export const handlePostInteractions=()=>{
 }
 
 /////////////////////////////////////////////////////////////////////////////
+
+
+//profiling
+const createProfilingDiv=(userId)=>{
+    const div=document.createElement('div');
+    div.innerHTML=`
+
+    `
+}
+
+const createProfilPage=()=>{
+    profilPage=""
+}
