@@ -36,17 +36,24 @@ use PDOException;
         }
       }
 
-      protected function verifyCSRFToken(){
+      protected function verifyCSRFToken($array=null){
         session_start();
         if(isset($_SESSION['csrf_token']) && !empty($_SESSION['csrf_token'])){
             if($this->method!=='GET'){
-                $request=file_get_contents('php://input');
-                 $data=json_decode($request,true);
-                if(isset($data['csrf_token'])){
-                    if($data['csrf_token']===$_SESSION['csrf_token']){
+
+                $data=null;
+
+                if(!$array){
+
+                    $request=file_get_contents('php://input');
+                    $data=json_decode($request,true);
+
+                }else $data=$array;
+
+                    if(isset($data['csrf_token'])){
+                    if($data['csrf_token'] === $_SESSION['csrf_token']){
                         return 200;
                     }
-                    session_start();
                     session_unset();
                     session_destroy();
                     if(isset($_COOKIE['PHPSESSID']))
@@ -57,7 +64,7 @@ use PDOException;
             return 'Méthode GET!';
         }
         return 400;
-     }
+    }
 
      public function verifyRequestMethod($method){
         if($this->method !== $method){

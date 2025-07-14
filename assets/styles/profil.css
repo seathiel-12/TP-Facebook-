@@ -7,7 +7,7 @@
 #profil .profil-pictures{
     width: 100%;
     margin: auto;
-    background-color: white;
+    background-color: rgba(202, 202, 202, 0.731);
 }
 
 #profil .profil-cover{
@@ -17,6 +17,8 @@
     border-radius: 0 0 10px 10px;
     background: linear-gradient(180deg, rgba(237, 237, 237, 0.858) , rgba(54, 54, 54, 0.571));
     filter: brightness(1.2);
+    box-shadow: 0 0 10px 0 rgba(40, 39, 39, 0.66);
+    cursor: pointer;
 }
 
 #profil .profil-pictures .profil-photo{
@@ -73,20 +75,48 @@
 #profil .main-profil{
     width: calc(73% - 65px);
     margin: auto;
-    gap: 2%;
+    gap: 2.5%;
     padding: 0 45px 0 20px;
 }
+
 #profil .main-profil .left{
-    width: calc(55% - 20px);
-    padding: 10px;
-    margin: 20px 0;
-    background-color: white;
+    width: calc(65% - 30px);
+    margin: 0 auto;
+    align-self:  baseline;
 }
 #profil .main-profil .left .card{
-    width: 100%;
+    width: calc(100% - 20px);
     background: none;
 }
 #profil .main-profil .publications{
     width: 100%;
     padding: 10px 0 10px 0;
+    align-self: baseline!important;
+    align-items: first baseline;
+}
+#profil .home-top-post{
+    width: 98%;
+}
+#profil .profil-div-photo-change{
+    position: absolute; 
+    border-radius: 10px;
+    background: white;
+    width: max-content;
+}
+#profil .profil-div-photo-change label{
+    padding: 15px 10px;
+    width: calc(100% - 20px);
+    display: block;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#profil .profil-div-photo-change label:hover{
+    background-color: rgba(101, 101, 101, 0.73);
+}
+#profil .publications-done{
+    width: 100%;
+}
+#profil .publications-done .post{
+    margin: 0!important;
+    width: 98%!important;
 }

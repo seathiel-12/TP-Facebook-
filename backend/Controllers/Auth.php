@@ -2,7 +2,7 @@
 namespace App\Controllers;
 use \PDOException;
 use \DateTime;
-
+use App\Models\User;
 require $_SERVER['DOCUMENT_ROOT'].'/headers.php';
 
 trait Auth{
@@ -39,6 +39,15 @@ trait Auth{
             $_SESSION['id']=$sessionInfo['id'];
             $_SESSION['username']=$sessionInfo['username']?$sessionInfo['username']:($sessionInfo['firstname'].' '.$sessionInfo['lastname']);
             $_SESSION['attempt']=1;
+            try{
+                $user=new User()->getRequestedUserData(['id'=>$_SESSION['id']],['cover_picture', 'profile_picture', 'gender']);
+
+            }catch(PDOException $e){
+                throw $e;
+            }
+            $_SESSION['profile_picture']= $user['profile_picture'] ? 'posts/user-' . $_SESSION['id'] . '/' .$user['profile_picture'] : 'images/' . $user['gender'] . '.png';
+            $_SESSION['cover_picture']= 'posts/user-' . $_SESSION['id'] . '/' . $user['cover_picture'];
+
             $_SESSION['connect']=true;
             $_SESSION['first_try_time']=new DateTime(date('H:i:s'))->getTimestamp();
            

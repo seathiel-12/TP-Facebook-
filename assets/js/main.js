@@ -38,7 +38,6 @@ const loadJsModule=async(bodyId)=>{
             await import('./modules/home.js')
               .then(async(module)=>{
                 await module.loadPosts();
-                module.createPostOptions();
                 module.handlePostInteractions();
                 module.initHome();
                 module.changeColor();
@@ -54,6 +53,14 @@ const loadJsModule=async(bodyId)=>{
                   .then(module=> module.initHeader('friends'));
             await import('./modules/friends.js')
                   .then(module=> module.initFriendPage(document.body.className));
+
+                break;
+          }
+          case 'profil':{
+            await import('./modules/profil.js')
+                  .then(module=>{
+                    module.initProfil();
+                  });
           }
     }
 }
@@ -136,6 +143,14 @@ const apiRequest=async (url, method='GET', data)=>{
     } 
   }
 
+
+const loadUrlPage=async(url)=>{
+   history.pushState({},'', url );
+   await fetchPageContent(url);
+}
+
+
+
   const showNotification=(message,type='error', duration=5000)=>{
     const notification=document.createElement('div');
     notification.classList.add('borderOnNotification');
@@ -195,56 +210,58 @@ const apiRequest=async (url, method='GET', data)=>{
 
   window.addEventListener('DOMContentLoaded',async ()=>{
 
-      await import('./modules/register.js').then((module)=>module.completeProfil());
+      // await import('./modules/includes.js').then((module)=>module.resetPassword());
     
-        //   await apiRequest('isOnline')
-        // .then(async (data)=> {
-        //   if(data){
-        //     await fetchPageContent('/frontend/views/templates/homeT.php');
-        //     lucide.createIcons();
-        //   }else{
-        //     showNotification('Veuillez vous reconnecter!', 'error');
-        //     await fetchPageContent('/frontend/views/usersClients/auth.php');
-        //     lucide.createIcons();
-        //   }
-        // })
-        // .catch(error=>console.error('Erreur de connection:', error));
+          await apiRequest('isOnline')
+        .then(async (data)=> {
+          if(data){
+            await fetchPageContent('/frontend/views/templates/homeT.php');
+            lucide.createIcons();
+          }else{
+            showNotification('Veuillez vous reconnecter!', 'error');
+            await fetchPageContent('/frontend/views/usersClients/auth.php');
+            lucide.createIcons();
+          }
+        })
+        .catch(error=>console.error('Erreur de connection:', error));
           
-        // // // Regenerer le csrf chaque 10min
+        // // Regenerer le csrf chaque 10min
 
-        // setInterval(async()=>{
+        setInterval(async()=>{
     
-        //   const generateCRSF=await apiRequest('generateCSRF');
-        //   if(generateCRSF && generateCRSF.success){
-        //     const csrfInput=document.getElementById('csrf_token');
-        //     csrfInput.value=generateCRSF['csrf_token'];
-        //   }
-        // },600000);
+          const generateCRSF=await apiRequest('generateCSRF');
+          if(generateCRSF && generateCRSF.success){
+            const csrfInput=document.getElementById('csrf_token');
+            csrfInput.value=generateCRSF['csrf_token'];
+          }
+        },600000);
 
-        // createIcons();
-        // await import('./modules/register.js')
-        //   .then(module=>{module.showLoadingPage(); lucide.createIcons()})
-        //   .catch(err=>console.log(err));
+        createIcons();
 
-        // window.addEventListener('click',(e)=>{
-        //   const toClose=document.querySelectorAll('.on-window-click-close');
-        //     toClose.forEach(close=> {
-        //       if(close.classList.contains('visible') && !close.contains(e.target)){
-        //         close.classList.remove('visible')
-        //         document.body.classList.remove('overflow');
-        //         document.querySelector('.overlay')?.remove();
-        //       }
-        //     });
+        window.addEventListener('click',(e)=>{
+          const toClose=document.querySelectorAll('.on-window-click-close');
+            toClose.forEach(close=> {
+              if(close.className.includes('visible')  && !close.contains(e.target)){
+                close.classList.remove('visible')
+                document.body.classList.remove('overflow');
+                document.querySelector('.overlay')?.remove();
+              }
+            });
 
-        //   const toRemove=document.querySelectorAll('.on-window-click-remove');
-        //    toRemove.forEach(remove=> {
-        //     if(remove && !remove.contains(e.target)){
-        //       remove.remove()
-        //       document.body.classList.remove('overflow');
-        //       document.querySelector('.overlay')?.remove();
-        //     }
-        //   });
-        //  });
+          const toRemove=document.querySelectorAll('.on-window-click-remove');
+           toRemove.forEach(remove=> {
+            if(remove && !remove.contains(e.target)){
+              remove.remove()
+              document.body.classList.remove('overflow');
+              document.querySelector('.overlay')?.remove();
+            }
+          });
+
+          const optionsDivToclose=document.querySelector('.option-window-click-close')
+          if(optionsDivToclose && !optionsDivToclose.contains(e.target)){
+            optionsDivToclose.remove();
+          }
+         });
       });
 
   

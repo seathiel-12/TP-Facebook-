@@ -3,8 +3,9 @@
 const createForgotHeader=()=>{
     const header=document.createElement('header');
     header.innerHTML=`
-        <img src="/assets/media/images/facebook.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
-
+     <div style="padding-left: 50px ;">
+        <img src="/assets/media/images/facebook.svg" width="100px"  style="transform:scale(1.5); margin:15px 0;"/>
+     </div>
         <form class="flexDivIcon loginHeaderForm" style=" margin-right:20px;">
             <input type="text" placeholder="E-mail ou numéro de téléphone" style=" font-size:1rem; width:150px; max-height:35px; padding:12px 10px;" required />
             <input type="password" placeholder="Mot de passe" style=" font-size:1rem; width:150px; max-height:35px; padding:12px 10px;" required/>
@@ -12,10 +13,16 @@ const createForgotHeader=()=>{
         </form>
 
     `;
-    header.style.background="#f0f2f5;"
-    header.style.justifyContent="space-between";
-    header.style.alignItems="center";
+    
+    header.style.cssText=`
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
+        background-color: #f0f2f5;
+    }
 
+    `
     return header;
 }
 
@@ -45,9 +52,14 @@ export const createForgotPasswordDiv=()=>{
         </div>
         </form>
 
+        <style>
+            body{
+                overflow: hidden;
+            }
+        </style>
     `
     forgotPasswordDiv.style.transform="scale(0.9)"
-    forgotPasswordDiv.style.marginTop="90px"
+    forgotPasswordDiv.style.marginTop="120px"
 
     const mainAuthContent=document.querySelector('.main-auth-content')?document.querySelector('.main-auth-content'):document.body;
 
@@ -101,14 +113,14 @@ const HandleForgotPasswordButtons=()=>{
 }
 
 //Div qui affiche le compte associé à l'e-mail envoyé et demande à envoyer le code  
- const askRetrieveCode=(user={},token)=>{
+  const askRetrieveCode=(user={},token)=>{
     const codeVerifDiv=document.createElement('div');
     const header=createForgotHeader();
     header.querySelector('img').style="transform:scale(1.5); margin:10px auto 0;";
     codeVerifDiv.innerHTML=`
         ${header.outerHTML}
 
-        <div class="card">
+        <div class="card" style="">
             <h3 style="text-align:left; padding:20px;">Réinitialiser votre mot de passe</h3>
             <hr style="margin:0 auto 10px; border:0.5px solid rgba(52, 52, 52, 0.12); width:100%;">
 
@@ -129,6 +141,20 @@ const HandleForgotPasswordButtons=()=>{
                 <input type="hidden" id="csrf_token" value="${token}" />
             </form>
         </div>
+
+        <style>
+            body{
+                overflow: hidden;
+            }
+
+            header{
+                display: flex;
+                justify-content: space-between;
+                box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
+                background-color: white;
+            }
+
+        </style>
     `    
     document.body.innerHTML=codeVerifDiv.outerHTML;
 
@@ -176,7 +202,7 @@ export const retrieveCode=(email,token,type=null)=>{
         </header>
 
 
-        <div class="card" style="padding-top: 250px;">
+        <div class="card" style="">
             <h3 style="text-align:left; padding:20px ;">Entrez le code sécurité</h3>
             <hr style="margin:0 auto; border:0.5px solid rgba(52, 52, 52, 0.12); width:100%;">
 
@@ -205,6 +231,19 @@ export const retrieveCode=(email,token,type=null)=>{
 
             </form>
         </div>
+
+        <style>
+            body{
+                overflow:hidden;
+            }
+            header{
+                display: flex;
+                justify-content: space-between;
+                box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
+                background-color: white;
+            }
+
+        </style>
     `
 
     if(!type){
@@ -245,7 +284,7 @@ const handleRetrieveCode=()=>{
 
 }
 
- const resetPassword=(fullname, token)=>{
+ export const resetPassword=(fullname, token)=>{
 
     document.body.innerHTML=`
         <header>
@@ -256,7 +295,7 @@ const handleRetrieveCode=()=>{
         
         <div>
 
-        <form>
+        <form style="">
             <h3>Reinitialiser votre mot de passe</h3>
 
             <hr style="margin:20px auto 20px; border:0.5px solid rgba(52, 52, 52, 0.22); width:110%; transform:translateX(-5%);">
@@ -268,6 +307,19 @@ const handleRetrieveCode=()=>{
             <button style="width:60%; margin:5px auto 0;">Mettre à jour</button>
 
         </form>
+
+        <style>
+            body{
+                overflow: hidden;
+            }
+            header{
+                display: flex;
+                justify-content: space-between;
+                box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
+                background-color: white;
+            }
+
+        </style>
     `
     const form=document.querySelector('form');
         form.onsubmit= async (e)=>{

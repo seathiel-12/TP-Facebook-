@@ -4,6 +4,7 @@ use App\Controllers\Controller;
 use App\Controllers\AuthController;
 use App\Controllers\Register;
 use App\Controllers\UserController;
+use App\Models\Model;
 use App\Models\Post;
 use App\Models\User;
 use Exception;
@@ -99,10 +100,12 @@ class ApiCall{
                     //Route 'api/user/{case}'
                     case 'user':{
                         if(isset($this->uri[3])){
+                            
                             if($this->uri[3] === 'register'){
-                                if(isset($this->uri[4]))
-                                new Register()->registering($this->uri[4]);
-                               return;
+                                if(isset($this->uri[4])){
+                                    new Register()->registering($this->uri[4]);
+                                    return;
+                                }
                             }
 
                             if($this->uri[3] === 'forgotPassword'){
@@ -138,7 +141,7 @@ class ApiCall{
                                         }                                            
                                         case 'delete':{
                                             session_start();
-                                            $user->deletePost($_SESSION['id']);
+                                            $user->deletePost(3);
                                             break;
                                         }                                   
                                         case 'all':{
@@ -151,9 +154,30 @@ class ApiCall{
                                             }
                                             break;
                                         }
+                                        case 'comment':{
+                                            $this->verifyRequestMethod('POST');
+                                            if(isset($this->uri[5])){
+                                                $user->comment($this->uri[5]);
+                                                return;
+                                            }
+                                            break;
+                                        }
+                                        case 'get':{
+                                            if(isset($this->uri[5])){
+                                                try{
+                                                    $posts = new Post()->getAllPosts(user: $this->uri[5]);
+                                                    echo json_encode(['success'=>true, 'data'=>$posts]);
+                                                    return;
+                                                }catch(PDOException $e){
+                                                    throw $e;
+                                                }
+                                            }else{
+                                                throw new Exception('User required!');
+                                            }
+                                        }
                                         default:{
                                             // Route api/user/posts/{id}/{action}
-                                            if(is_numeric($this->uri[4])){
+                                            if(is_numeric($this->uri[4])){  
                                                 if(isset($this->uri[5])){
                                                     if($this->uri[5] === 'comments'){
                                                         $comments=new Post('posts_interactions')->getThisPostComments($this->uri[4]);
@@ -188,6 +212,7 @@ class ApiCall{
                         }
                         break;
                     }
+                    
                     case 'login':{
                         $data=json_decode(file_get_contents('php://input'),true);
                          new AuthController()->verifyEntries($data);

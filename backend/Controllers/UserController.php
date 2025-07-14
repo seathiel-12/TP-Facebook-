@@ -159,11 +159,14 @@ class UserController extends Controller{
                         'comments'=>$data['comment']
                     ]);
 
+                    $author=(new Post()->get(['id'=>$id]))['author'];
+                    
+
                     echo json_encode(['success'=>true, 'message'=>'Commentaire ajouté', 'data'=>[
                         'profile_picture'=>$_SESSION['picture'],
                         'username'=>$_SESSION['username'],
-                        'comments'=>$data['comment']
-                    ]]);
+                        'comments'=>$data['comment'],
+                    ], 'author'=>$author]);
                     return;
                 }
                 default:{
@@ -177,5 +180,33 @@ class UserController extends Controller{
         }
     }
 
+
+    public function comment($action){
+        if(isset($action)){
+            if($action === 'update'){
+                $data=$this->getRequestData();
+                try{
+                    new Post('posts_interactions')->update($data['id'],['comments'=>$data['comments']]);
+                    echo json_encode(['success'=>true]);
+                    
+                    return;
+                }catch(PDOException $e){
+                    throw $e;
+                }
+
+            }
+
+            if($action === 'delete'){
+                $id=$this->getRequestData();
+                try{
+                    new Post('posts_interactions')->delete($id['id']);
+                    echo json_encode(['success'=>true]); 
+                    return;
+                }catch(PDOException $e){
+                    throw $e;
+                }
+            }
+        }
+    }
 
 }

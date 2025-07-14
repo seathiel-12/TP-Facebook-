@@ -6,22 +6,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="../../../assets/styles/root.css" type="text/css">
-    <link rel="stylesheet" href="../../../assets/styles/login.css" type="text/css">
-    <link rel="stylesheet" href="../../../assets/styles/home.css" type="text/css">
-    <link rel="stylesheet" href="../../../assets/styles/friends.css" type="text/css">
-    <link rel="stylesheet" href="../../../assets/styles/profil.css" type="text/css">
 
 
     <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>   
     <link href='https://cdn.boxicons.com/fonts/brands/boxicons-brands.min.css' rel='stylesheet'>
     
-    <!-- <script src="https://unpkg.com/feather-icons"></script>
+     <script src="https://unpkg.com/feather-icons"></script>
     <!-- <script src="https://code.iconify.design/3/iconify.min.js"></script> --> 
     <script src="https://unpkg.com/lucide@latest">lucide.createIcons();</script>
     <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
     <script src="../../../assets/js/modules/auth.js" defer type="module"></script>
     <script src="../../../assets/js/icons.js" defer></script>
+    <script src="../../../assets/js/modules/profil.js" defer></script>
+
 
 </head>
 <body id="profil">
@@ -32,16 +29,27 @@
         <section class="profil-pictures">
             
                 <form class="noFormRootStyle" style="max-width: 100%!important; width:73%; margin:auto; position:relative;">
-                    <label for="cover" class="profil-cover">
-                        <input type="file" id="cover" hidden>
-                    </label>
+                    <div class="profil-cover" 
+                        <?php 
+                        if($_SESSION['profile_picture']);  
+                        echo "style='background-image: url(\"/assets/media/". $_SESSION['cover_picture'] . "\");
+                            background-size: cover;
+                            background-repeat: no-repeat;
+                          '  
+                        ";
+                        ?>
+                    ;">
+                    
+                </div>
 
-                    <label for="profile_picture" class="profil-photo flexDiv">
-                            <input type="file" hidden id="profile_picture">
+                    <div class="profil-photo flexDiv">   
+                             <?php 
+                                if($_SESSION['profile_picture']);  
+                                echo "<img width='170' height='170' style='border-radius:100%; background:white;' src='/assets/media/". $_SESSION['profile_picture'] . "'/>";
+                            ?>
 
-                            <img src="../../../assets/media/images/female.png" width="170" height="170" style="border-radius:100%; background:white;" alt="">
                         <div class="rounded-icon camera flexDiv standard-hover"><i data-lucide="camera"></i></div>
-                    </label>
+                    </div>
                 </form>
 
                 <div class="username">
@@ -63,20 +71,47 @@
         </section>
 
         <section class="flexDiv main-profil">
-            <div class="left">
-                <div class="">
+            <div class="left"> 
+                <div class="card" style="border-radius: 10px; background: white; padding:10px; margin: 0 0 10px !important;">
                     <h2 style="text-align: left;">Intro</h2>
-
                     <button style="width: calc(100% - 30px); padding: 10px; color: black; background: var(--bg-button-tertiary);">Ajouter une bio</button>
                     <button style="width: calc(100% - 30px); padding: 10px; color: black; background: var(--bg-button-tertiary);">Modifier les infos</button>
                 </div>
+                <div class="flexDivBetween card" style="border-radius: 10px; background: white; padding:10px 20px; margin:  15px 0 !important; width: calc(100% - 40px);">
+                    <h3>Ami(e)s</h3>
+                    <a style="color:var(--bg-button-primary);">Tou(te)s les ami(e)s</a>
+                </div>
+                <div class="">
+                    
+                </div>
             </div>
             
-            <div class="publications">
-                <h2>Publi</h2>
+            <div class="publications flexDiv" style="flex-direction:column;">
+                <div class="home-top-post card">
+                    <div>
+                        <div class="noFormRootStyle flexDiv" style="width:95%; padding:0 10px;">
+                             <?php 
+                                if($_SESSION['profile_picture']);  
+                                echo "<img width='50' height='50' style='border-radius:100%; background:white;' src='/assets/media/". $_SESSION['profile_picture'] . "'/>";
+                            ?>
+                            <div style="background-color:rgba(212, 212, 212, 0.74); width:100%; padding: 12px 10px 10px; margin:10px; text-align:left; border-radius:50px;" class="standard-hover createPostBtn">Quoi de neuf, <?= $_SESSION['username'] ?>?</div>
+                        </div>
+                        <hr style="border-color:rgba(210, 210, 210, 0.32); margin:5px 0; ">
+                    </div>
+                    <div class="flexDivIcon">
+                        <div class="flexDivIcon options standard-hover"><i data-lucide="video" fill="red" stroke="red"></i> <p>Video en direct</p></div>
+                        <div class="flexDivIcon options standard-hover"><i data-lucide="images" stroke="rgb(115, 227, 145)" ></i> <p>Photo et Video</p></div>
+                        <div class="flexDivIcon options standard-hover"><i data-lucide="smile" stroke="rgb(215, 224, 90)"></i> <p>Humeur/Activité</p></div>
+                    </div>
+                </div>
+                
+                <div class="publications-done">
+
+                </div>
             </div>
+
         </section>
-        
+        <input type="hidden" id="me" value="<?= $_SESSION['id']?>">
     </main>
 
 </body>

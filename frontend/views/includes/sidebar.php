@@ -1,6 +1,11 @@
 <aside class="sidebar">
     <ul>
-        <li class="flexDivIcon" style="padding:20px; border-left: solid 5px dimgray; margin:0 5px; width: calc(100% - 60px)!important;"><i data-lucide="circle-user-round"></i><?= $_SESSION['username'] ?></li>
+        <li class="flexDivIcon profiling" style="padding:20px; border-left: solid 5px dimgray; margin:0 5px; width: calc(100% - 60px)!important;">
+        <?php session_start();
+                if($_SESSION['profile_picture']);  
+                echo "<img width='40 height='40' style='border-radius:100%;' src='/assets/media/". $_SESSION['profile_picture'] . "'/>";
+        ?>
+        </i><?= $_SESSION['username'] ?></li>
         <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/meta.png" alt="" width="30" height="30" >Meta AI</li>
         <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/amis_home.png" alt="" width="30" height="30" >Ami(e)s</li>
         <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/facebook-circle.png" alt="" width="28" height="28" > Bienvenue</li>

@@ -32,27 +32,29 @@ use PDOException;
             Model::deleteEntry($this->table, $id);
         }
 
-        public function getAllPosts($condition=null){
+        public function getAllPosts($condition=null, $user=null){
             
                 try{
+                    $binding= $user ? "WHERE author = ?" : '';
+                    $with= $user ? [$_SESSION['id'], $_SESSION['id']] : [$_SESSION['id']];
                         $query=  
                             "WITH post AS(
                                     WITH p AS (
-                                        SELECT * FROM posts LIMIT 50 
+                                        SELECT * FROM posts $binding LIMIT 50 
                                     )
-                                    SELECT p.id, p.author, p.file_path, p.background, p.created_at, p.caption, u.username, u.firstname, u.lastname, u.gender, u.profile_picture,
+                                    SELECT p.id, p.author, p.file_path, p.background, p.created_at, p.caption, u.username, u.firstname, u.lastname, u.gender, u.profile_picture, p.updated_at,
                                     COUNT(pi.likes) AS nb_likes, COUNT(comments) AS nb_comments
                                     FROM users u 
                                     JOIN p ON  p.author=u.id 
                                     LEFT JOIN posts_interactions pi ON pi.post_id=p.id GROUP BY(p.id)
                                     ) 
-                                    SELECT p.id, p.author, p.file_path, p.background, p.created_at, p.caption, p.username, p.firstname, p.lastname, p.gender, p.profile_picture, p.nb_likes, p.nb_comments, (pi.user_id=? AND pi.likes=1) AS is_liked
+                                    SELECT p.id, p.author, p.file_path, p.background, p.updated_at, p.created_at, p.caption, p.username, p.firstname, p.lastname, p.gender, p.profile_picture, p.nb_likes, p.nb_comments, (pi.user_id=? AND pi.likes=1) AS is_liked
                                     FROM post p 
                                     LEFT JOIN posts_interactions pi 
                                     ON p.id=pi.post_id AND pi.comments IS NULL;
                                     ";
                         $result = Database::getDb()->prepare($query);
-                        $result->execute([$_SESSION['id']]);
+                        $result->execute($with);
                         $result = $result->fetchAll();
                           return $result;
                 }catch(PDOException $e){
@@ -76,6 +78,13 @@ use PDOException;
                 $result=Database::getDb()->prepare($query);
                 $result->execute([$id]);
                 $result=$result->fetchAll();
+
+                $author=(new Post()->get(['id'=>$id]))['author'];
+                foreach($result as $key => $value){
+                    $result[$key]['username'] = $result[$key]['username'] ?? $result[$key]['firstname'] . ' ' . $result[$key]['lastname'];
+                }
+                $result[]['author']=$author;
+
                 return $result;
             }catch(PDOException $e){
                 throw new PDOException("Erreur lors de la récupération des commentaires de ce post: ".$e->getMessage());

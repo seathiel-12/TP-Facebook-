@@ -1,7 +1,7 @@
 
 let allPosts=null;
 let allComments= null;
-
+let me=null;
 // Couleur de fond d'un post
 const createColorList=async()=> {
     const colors=document.createElement('ul');
@@ -129,6 +129,7 @@ export const changeColor=async (li=null)=>{
         document.body.appendChild(overlay);
         textareaPost.focus();
         document.body.classList.add('overflow');
+        handleCreatePostModal();
     }
 }
 
@@ -139,8 +140,14 @@ export const changeColor=async (li=null)=>{
     await getAllPostsData();
     const posts=allPosts;
     if(posts.length === 0) return;
+    
+    const loadedPosts=document.querySelector('.loaded-posts');
+    loadedPosts.innerHTML=renderPosts(posts);
+    lucide.createIcons();
+}
+////////////////////////////////
 
-
+export const renderPosts=(posts)=>{
     const renderDate=(date)=>{
         const newDate=new Date(date);
         const months=['Janv', 'Fev', 'March', 'Avr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -163,56 +170,51 @@ export const changeColor=async (li=null)=>{
 
         return day + ' ' + month + (year === today.getFullYear()? '' : year) + ', ' + time + ':' + minutes;
     }
-     const renderPosts=()=>{
-        const htmlPosts=posts.map(post=>
-            `
-            <div class="post card" data-post-id="${post.id}">
-                <div class="flexDivBetween">
-                    <div class="flexDivStart">
-                    <img src="/assets/media/${post['profil_picture']?'posts/'+post['profil_picture']:'images/'+(post.gender==='male'?'boy':(post.gender==='female'?'happy':'horse'))+'.png'}" width="40" height="40" class="image"/>
-                        <p style="text-align:left;"><a class="profiling" style="color:black;"><strong>${post.firstname+' '+post.lastname}</strong></a> <br> <span style="font-size:0.9em;">${renderDate(post.created_at)}</span> </p>
-                    </div>
-                    <div class="flexDiv">
-                        <div class="view-post-options"><i data-lucide="ellipsis" class="standard-hover" stroke="gray" style="padding:5px; border-radius:100%;"></i></div>
-                        <i data-lucide="x" class="standard-hover" stroke="gray" style="padding:5px; border-radius:100%;"></i>
-                    </div>
-                </div>
 
-                <div ${post.background?`class="post-colored-background flexDiv" style="background:${post.background};"`:" class='post-content'"} >
-                    <p>${post?.caption}</p>
-                </div>
 
-                <div style="width:100%; margin:auto;">
-                    ${post['file_path']?(post['file_path'].includes('image')?`<img class="media-loaded" src="/assets/media/posts/user-${post.author}/${post['file_path']}" />`:`<video class="media-loaded" src="/assets/media/posts/user-${post.author}/${post['file_path']}" controls ></video>`):''}
+    const htmlPosts=posts.map(post=>
+        `
+        <div class="post card" data-post-id="${post.id}">
+            <div class="flexDivBetween">
+                <div class="flexDivStart">
+                <img src="/assets/media/${post['profile_picture'] ? 'posts/user-'+post.author+'/'+post['profile_picture'] : 'images/'+(post.gender==='male' ? 'boy' : (post.gender==='female' ? 'happy' : 'horse'))+'.png'}" width="40" height="40" class="image"/>
+                    <p style="text-align:left;"><a class="profiling" style="color:black;"><strong>${post.firstname+' '+post.lastname}</strong></a> <br> <span style="font-size:0.9em;">${renderDate(post.created_at)}</span> </p>
                 </div>
-                
-                <div class="flexDivBetween post-stats">
-                    <div class="">
-                         <a class="flexDiv"><i data-icon="like" width="20" height="20" image></i> <span class="nb-like" post="${post.id}">${post['nb_likes']}</span></a>
-                    </div>
-
-                    <div class="flexDiv" style="gap:15px;">
-                        <a class="comment" post="${post.id}">${post['nb_comments']} commentaires</a>
-                        <a>${post.share?post.share+' '+'partages': ''}</a>
-                    </div>
-                </div>
-                <hr style="margin:10px auto 5px;">
-                <div class="interactions flexDiv" style="gap:0;">
-                    <div class="flexDiv fade-hover like" post="${post.id}"><i class="like-icon ${post['is_liked']==1?'liked':''}" data-lucide="thumbs-up" post="${post.id}"></i> J'aime</div>
-                    <div class="flexDiv fade-hover comment" post="${post.id}"><i data-lucide="message-circle" post="${post.id}"></i> Commenter</div>
-                    <div class="flexDiv fade-hover share" post="${post.id}"><box-icon name='share' style="transform:rotateY(180deg);" post="${post.id}"></box-icon> Partager</div>
+                <div class="flexDiv">
+                    <div class="view-post-options"><i data-lucide="ellipsis" class="standard-hover" stroke="gray" style="padding:5px; border-radius:100%;"></i></div>
+                    <i data-lucide="x" class="standard-hover" stroke="gray" style="padding:5px; border-radius:100%;"></i>
                 </div>
             </div>
-            `
-        ).join('');
-        return htmlPosts;
-    }
 
-    const loadedPosts=document.querySelector('.loaded-posts');
-    loadedPosts.innerHTML=renderPosts();
-    lucide.createIcons();
+            <div ${post.background?`class="post-colored-background flexDiv" style="background:${post.background};"`:" class='post-content'"} >
+                <p>${post?.caption}</p>
+            </div>
+
+            <div style="width:100%; margin:auto;">
+                ${post['file_path']?(post['file_path'].includes('image')?`<img class="media-loaded" src="/assets/media/posts/user-${post.author}/${post['file_path']}" />`:`<video class="media-loaded" src="/assets/media/posts/user-${post.author}/${post['file_path']}" controls ></video>`):''}
+            </div>
+            
+            <div class="flexDivBetween post-stats">
+                <div class="">
+                     <a class="flexDiv"><i data-icon="like" width="20" height="20" image></i> <span class="nb-like" post="${post.id}">${post['nb_likes']}</span></a>
+                </div>
+
+                <div class="flexDiv" style="gap:15px;">
+                    <a class="comment" post="${post.id}">${post['nb_comments']} commentaires</a>
+                    <a>${post.share?post.share+' '+'partages': ''}</a>
+                </div>
+            </div>
+            <hr style="margin:10px auto 5px;">
+            <div class="interactions flexDiv" style="gap:0;">
+                <div class="flexDiv fade-hover like" post="${post.id}"><i class="like-icon ${post['is_liked']==1?'liked':''}" data-lucide="thumbs-up" post="${post.id}"></i> J'aime</div>
+                <div class="flexDiv fade-hover comment" post="${post.id}"><i data-lucide="message-circle" post="${post.id}"></i> Commenter</div>
+                <div class="flexDiv fade-hover share" post="${post.id}"><box-icon name='share' style="transform:rotateY(180deg);" post="${post.id}"></box-icon> Partager</div>
+            </div>
+        </div>
+        `
+    ).join('');
+    return htmlPosts;
 }
-////////////////////////////////
 
 
 export const handlePosting=()=>{
@@ -246,6 +248,8 @@ export const handlePosting=()=>{
                     if(response && response.success){
                         await loadPosts();
                         createPostOptions();
+                        document.querySelector("#post-text").value=""
+                        document.querySelector("#post-text").style.height="80px"
                         initHome();
                         document.querySelector('.modal').classList.remove('visible');
                         document.querySelector('.overlay')?.remove();
@@ -271,6 +275,8 @@ export const handlePosting=()=>{
                     await loadPosts();
                     createPostOptions();
                     initHome();
+                    document.querySelector("#post-text").value=""
+                    document.querySelector("#post-text").style.height="80px"
                     document.querySelector('.modal').classList.remove('visible');
                     document.body.classList.remove('overflow');
                     document.querySelector('.overlay')?.remove();
@@ -341,10 +347,17 @@ const getAllPostsData=async()=>{
 
 export const initHome=async()=>{ 
     handleHomePostDiv(); 
-    handleCreatePostModal();
-    // handlePostInteractions();
+    // handleCreatePostModal();
+    handlePostInteractions();
     changeColor();
     createIcons();
+    me=document.getElementById('me').value;
+    const profilingBtns=document.querySelectorAll('.profiling');
+    profilingBtns.forEach(btn=>
+        btn.onclick=()=>{
+            fetchPageContent('/frontend/views/templates/profilPage.php')
+        }
+    )
 }
 
 
@@ -353,7 +366,7 @@ export const initHome=async()=>{
 //////////////////////////////////////////////////////////////////////////////
 //Gestion des posts
 
-export const createPostOptions=()=>{
+ const createPostOptions=()=>{
     const ul=document.createElement('ul');
     const optionsPoints=document.querySelector(".view-post-options");
     ul.className="options-post on-window-click-close"
@@ -381,6 +394,147 @@ export const createPostOptions=()=>{
     lucide.createIcons();
 }
 
+/**
+ * 
+ * @param {*} element l'element option Points pour definir a zone d'option proche des optionsPoints
+ * @param {*} commentId id du commentaire associé
+ * @returns la zone d'options
+ */
+export function createCommentOptions(element,commentId){
+    const options=document.createElement('ul');
+    options.innerHTML=`
+        <li class="flexDivBetween modify-comment" comment-id="${commentId}"><p comment-id="${commentId}">Modifier</p> <i data-lucide="pencil" comment-id="${commentId}" width="20" height="20"></i></li>
+        <li class="flexDivBetween delete-comment backhere" comment-id="${commentId}"><p comment-id="${commentId}">Supprimer</p> <i data-lucide="trash-2" comment-id="${commentId}" width="20" height="20"></i></li>
+    `
+    options.style.cssText=`
+        width: 160px;
+        border-radius: 10px;
+        background: white;
+        box-shadow: 0 0 10px 0 rgba(181, 181, 181, 0.63);
+        position: absolute;
+        top : ${element.offsetTop - 25}px;
+        left: ${element.offsetLeft + element.offsetWidth + 5}px;
+    `
+    options.onclick=(e)=>e.stopPropagation();
+    options.className="option-window-click-close"
+    return options; 
+}
+
+    function handlingComment(){
+        const optionsPoints=document.querySelectorAll('.comment-options-points');
+             optionsPoints.forEach(thisOptionPoints=>
+            thisOptionPoints.onclick=(e)=> { 
+                e.stopPropagation();
+            if(!document.querySelector('.option-window-click-close')){
+                thisOptionPoints.parentNode.appendChild(createCommentOptions(thisOptionPoints, thisOptionPoints.parentNode.getAttribute('comment-id')));
+
+                const modifyComment=document.querySelector('.modify-comment');
+                 modifyComment.onclick=(e)=>{
+                const textarea=document.querySelector('.comment-textarea');
+                const comment=document.querySelector(`p[comment-id="${e.target.getAttribute('comment-id')}"]`)
+                textarea.value=comment.textContent;
+    
+                const editAttrValue=e.target.getAttribute('comment-id')+'/'+e.target.getAttribute('comment-id');
+                textarea.setAttribute('edit',editAttrValue);
+    
+                createOnEditDiv();
+                lucide.createIcons();
+            }
+            
+            const deleteC= document.querySelector('.delete-comment');
+            deleteC.onclick=(e)=>{
+                e.stopPropagation();
+                confirmDeleteComment();
+            }
+                lucide.createIcons();
+            }else{
+                document.querySelector('.option-window-click-close').remove();
+            }     
+
+    });
+}
+
+function confirmDeleteComment(){
+    const deleteC= document.querySelector('.delete-comment');
+    deleteC.onclick=()=>{};
+    deleteC.innerHTML=`
+    <div style="width:100%; margin:0;">
+        <button class="cancel-delete-comment" style="background: rgba(186, 186, 186, 0.61); display: block; width: 95%; padding: 10px; margin:5px auto; color:black;">Annuler</button>
+        <button class="delete-comment" comment-id="${deleteC.getAttribute('comment-id')}" style="background: rgba(255, 49, 49, 0.67); display: block; width:95%; padding: 10px; margin:5px auto">Supprimer</button>
+    </div>
+    `
+    deleteC.style.padding="5px"
+    deleteC.style.background="white";
+    deleteC.classList.remove('delete-comment');
+
+    document.querySelector('.cancel-delete-comment').onclick=(e)=> {
+        e.stopPropagation();
+        const back=document.querySelector('.backhere');
+        back.innerHTML=`
+            <p comment-id="${document.querySelector('.modify-comment').getAttribute('.modify-comment')}">Supprimer</p> <i data-lucide="trash-2" comment-id="${document.querySelector('.modify-comment').getAttribute('comment-id')}" width="20" height="20"></i>
+       `
+
+       back.classList.add('delete-comment');
+       back.style.background=""
+       back.style.padding="10px 25px";
+       lucide.createIcons();
+    }
+
+    const confirmDelete=document.querySelector('.delete-comment');
+    confirmDelete.onclick=async()=>{        
+        await apiRequest(`user/posts/comment/delete`, 'POST', {
+            id:document.querySelector('.delete-comment').getAttribute('comment-id')
+        }).then(response=>{
+            if(response && response.success){
+                showNotification('Commentaire supprimé.', 'success');
+                initCommentTextarea();
+                return;
+            }
+        }).catch(err=>{
+            showNotification('Erreur survenue!');
+            console.error(err);
+        })
+    }
+}
+
+
+function createOnEditDiv(){
+    const onedition=document.createElement('div');
+    onedition.innerHTML=`
+        <p >Edition</p>
+        <div class="flexDiv standard-hover stop-edit" style="justify-content: end; width:max-content;"><i style=' transform:translateY(2px);'  data-lucide="x"></i></div>
+    `
+    onedition.className="flexDivBetween onedition";
+    onedition.style.cssText=`
+        position: absolute;
+        border-radius:20px;
+        padding:5px 10px;
+        box-shadow: 0 0 5px rgba(101, 82, 82, 0.59);
+        top:10px;
+        right:10px;
+        width: 100px;
+        background:linear-gradient(45deg, rgba(172, 148, 148, 0.62), rgba(222, 185, 135, 0.77));
+        transform:scale(0.7) translateY(-10px);
+    `
+    const textarea=document.querySelector('.comment-textarea');
+
+    document.querySelectorAll('.onedition').forEach(edit=>edit.remove())
+    textarea.parentNode.appendChild(onedition);
+
+    onedition.querySelector('.stop-edit').onclick=(e)=>{
+        e.stopPropagation();
+        initCommentTextarea()
+    }
+
+}
+
+function initCommentTextarea(){
+    const textarea=document.querySelector('.comment-textarea');
+        textarea.value=""
+        textarea.removeAttribute('edit');
+        document.querySelector('.send-comment').disabled=false;
+        document.querySelector('.onedition')?.remove();
+}
 
 export const handlePostInteractions=()=>{
     const like= document.querySelectorAll('.like');
@@ -407,8 +561,8 @@ export const handlePostInteractions=()=>{
                 nbLike.textContent=parseInt(nbLike.textContent)+(svg.getAttribute('class').includes('liked') ? 1 : (-1));
                 
                 const key=`Lkp${svg.getAttribute('post')}`;
-                        if(sessionStorage.getItem(key)){
-                       clearTimeout(JSON.parse(sessionStorage.getItem(key)).split[0]);
+                    if(sessionStorage.getItem(key)){
+                       clearTimeout(JSON.parse(sessionStorage.getItem(key)).split('/')[0]);
 
                        sessionStorage.removeItem(key);
                        return;
@@ -424,8 +578,8 @@ export const handlePostInteractions=()=>{
                 sessionStorage.removeItem(`Lkp${this.getAttribute('post')}`); 
 
             },10000);
-
             sessionStorage.setItem(`Lkp${svg.getAttribute('post')}`,JSON.stringify(dblike+'/'+ (svg.getAttribute('class').includes('liked')? 1 : 0) ));
+
         }
       }
     })
@@ -444,21 +598,28 @@ export const handlePostInteractions=()=>{
                 if(response && response.data){
                     allComments= response.data;
                 }
-            }).catch(err=>{console.error(err)
+            }).catch(err=>{
+                console.error(err)
                 return [];
             });
     }
 
-    async function renderAllComments(postId,author){
+
+
+    async function renderAllComments(postId){
         await getComments(postId);
+        const author=allComments.pop().author;
         const commentsSection= document.querySelector('.comments-elements');
         commentsSection.innerHTML=renderComments(allComments, author);
+        
+        handlingComment();
+        lucide.createIcons();
     }
 
     function renderComments(Comments,author){
 
         const comments=Comments;
-
+        const me =document.getElementById('me').value;
         if(comments && comments.length === 0){
             return `
                 <div class="no-comment">
@@ -468,19 +629,25 @@ export const handlePostInteractions=()=>{
         }
        
         return comments.map(comment=>
-            `
-                <div class="flexDivStart" style="max-width: calc(100% - 20px); margin: 10px; ">
+            `   
+              <div class="flexDivStart" style="align" style="position:relative;" comment-id="${comment.id}">
+                <div class="flexDivStart" style="max-width: calc(100% - 20px); margin: 5px; ">
                     <img width="35" height="35" style="border-radius: 100%; padding:5px; background:rgba(215, 215, 215, 0.64);" src="../assets/media/${comment.profile_picture ? `posts/user-${comment.user_id}/${comment.profile_picture}` : `images/${comment.gender}.png`}"/>
 
-                    <div style="text-align:left; background:rgba(207, 207, 207, 0.72); border-radius:10px; padding:10px;">
-                    <strong>${comment.firstname+ ' ' + comment.lastname}</strong> ${comment.user_id === author ? '<span style="font-size:0.8em; padding-left: 5px; color:rgb(59, 46, 32);">Author</span>' : '' }
-                    <p>${comment.comments} </p>
+                    <div style="text-align:left; background:rgba(207, 207, 207, 0.72); border-radius:15px; padding:10px;">
+                    <strong>${comment.username}</strong> ${parseInt(comment.user_id) === author ? '<span style="font-size:0.8em; padding-left: 5px; color:rgb(89, 64, 37);">Author</span>' : '' }
+                    ${comment.created_at !== comment.updated_at ? '<span>(edited)</span>' : ''}
+                    <p comment-id="${comment.id}">${comment.comments} </p>
                     </div>
                 </div>
-            `
+
+                ${parseInt(me) === comment.user_id ? `<div class="comment-options-points rounded-icon fade-hover flexDiv" style="width:20px; height: 20px; transform: translate(-5px, -5px);"><i data-lucide="ellipsis" stroke="rgba(132, 132, 132, 0.96)" width="15" height="15"></i></div>` : ''}
+            </div>
+            `   
         ).join('');
     
     }
+
 
     function animateOnAwaitComments(){
 
@@ -537,10 +704,9 @@ export const handlePostInteractions=()=>{
         document.body.appendChild(div);
         document.body.classList.add('overflow');
 
-        lucide.createIcons();
         commentModal.showModal();
 
-        renderAllComments(post.id, post.author);
+        renderAllComments(post.id);
 
         commentModal.style.cssText=`
             position:fixed;
@@ -548,24 +714,60 @@ export const handlePostInteractions=()=>{
         `
 
         document.querySelector('.comment-modal-close').onclick=()=>{
-            document.querySelector('.post-comment-modal').remove();
-            document.querySelector('.overlay').remove();
+            // console.log('ici')
+            document.querySelector('.post-comment-modal')?.remove();
+            document.querySelector('.overlay')?.remove();
             document.body.classList.remove('overflow');
         }
 
         const form=document.querySelector('.post-comment-modal form');
         form.onsubmit=async(e)=>{
         e.preventDefault();
+
         const textarea= document.querySelector('.post-comment-modal .comment-textarea');
-        await apiRequest(`user/posts/${textarea.getAttribute('data-post-id')}/comment`, 'POST', {
-            user_id:document.getElementById('me').value,
-            comment: textarea.value
-        }).then(response => {
-       
-           const newComment= renderComments([response.data]);
-           document.querySelector('.no-comment')?.remove();z
-           document.querySelector('.comments-elements').insertAdjacentHTML('afterbegin',newComment);
-        })
+
+        if(!textarea.hasAttribute('edit')){
+            await apiRequest(`user/posts/${textarea.getAttribute('data-post-id')}/comment`, 'POST', {
+                user_id:document.getElementById('me').value,
+                comment: textarea.value
+            }).then(response => {
+                console.log(response);
+               const newComment= renderComments([response.data], response.author);
+               document.querySelector('.no-comment')?.remove();
+               document.querySelector('.comments-elements').insertAdjacentHTML('afterbegin',newComment);
+            });
+        }else{
+
+            const ids=textarea.getAttribute('edit').split('/');
+            const comment=document.querySelector(`p[comment-id="${ids[1]}"]`);
+
+            if(comment.textContent == textarea.value){
+                showNotification('Aucune modification effectué.');
+                return;
+            }else{
+                await apiRequest(`user/posts/comment/update`, 'POST', {
+                    id:ids[1],
+                    comments:textarea.value
+                }).then(response=> {
+                    if(response && response.success){
+                        showNotification('Modification effectuée.','success');
+                        comment.textContent=textarea.value;
+
+                        if(!comment.parentNode.innerText.includes('(edited)')){
+                            const span=document.createElement('span');
+                            span.textContent="(edited)"
+                            comment.insertAdjacentElement('beforebegin', span);    
+                        }
+
+                        initCommentTextarea();
+                        return;
+                    }
+                }).catch(err => {
+                    showNotification('Erreur survenue!'); 
+                    console.error(err);
+            })
+            }
+        }
       }
     }
 

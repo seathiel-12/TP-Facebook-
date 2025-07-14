@@ -50,7 +50,7 @@ const handleHomeHeaderIcon= ()=>{
 
     friendIcon.onclick=()=>{
         if(document.body.id !== 'friends')
-            fetchPageContent('/frontend/views/templates/friendsT.php');  
+            loadUrlPage('/frontend/views/templates/friendsT.php');  
     }
 }
 
@@ -65,6 +65,5 @@ export const initHeader=(page)=>{
 
     handleProfilContextuelLi();
     handleHomeHeaderIcon();
-    window.onresize=()=> initHeader();
 }
 

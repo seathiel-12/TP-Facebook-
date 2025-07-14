@@ -20,6 +20,8 @@ body{
     background: var(--bg-secondary);
     overflow-x: hidden; 
 }
+
+
 button, .cancelForgotBtn{
     display: block;
     border: none;

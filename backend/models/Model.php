@@ -45,7 +45,7 @@ class Model{
             $keys=implode('=?,', array_keys($data));
             $keys.= count($data)>=1 ? '=? ':'';
             self::$db=Database::getDb();
-            if($table==='users') {
+            if($table === 'users' && isset($data['password'])) {
                 $data['password']=password_hash($data['password'], PASSWORD_DEFAULT);
             }
             $query="UPDATE $table SET $keys WHERE id=?";
@@ -78,7 +78,7 @@ class Model{
             $query="SELECT * FROM $table WHERE $binding";
             $result=$db->prepare($query);
             $result->execute(array_values($condition));
-            return $result->rowCount() > 0 ? $result->fetch() : false;
+            return $result->rowCount() > 0 ? $result->fetchAll() : false;
         }catch(PDOException $e){
             throw new PDOException("Erreur lors de la récupération de la donnée: $e");
         }

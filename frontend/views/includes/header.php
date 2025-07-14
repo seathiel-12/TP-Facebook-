@@ -16,7 +16,12 @@
         <div class=""><box-icon type='solid' name='grid' style="transform: scale(1.4);"></box-icon></div>
         <div class="notificationIcon"><box-icon name='bell' type='solid' animation='' style="transform: scale(1.4) translateY(2px);"></box-icon></div>
         <div class="messengerIcon"><i class='bxl bx-messenger'></i></div>
-        <div id="disconnect" class="accountIcon"><box-icon type='solid' name='user-circle' style="transform: scale(1.4) translateY(2px);"></box-icon></div> 
+        <div class="accountIcon flexDiv">
+            <?php session_start();
+                if($_SESSION['profile_picture']);  
+                echo "<img width='50' height='50' style='border-radius:100%;' src='/assets/media/". $_SESSION['profile_picture'] . "'/>";
+            ?>
+        </div> 
    </div>
 </header>
 
@@ -28,19 +33,35 @@
 <div class="profil-contextuel on-window-click-close">
     <div class='content'>
     <div class="profils">
-            <div class="flexDivIcon user">
+            <div class="flexDivIcon user profiling">
                 <i data-icon="account" width="30" height="30" class="bIcon flexDivIcon"></i> <p><?= $_SESSION['username']??'Unknown' ?></p>
             </div>
             <hr style="width:95%; border:solid 0.3px rgba(79, 79, 79, 0.37); margin: 10px auto;">
             <button style="margin: 10px auto 0; width:100%;">Voir tous les profils</button>
-        </div>
+    </div>
 
         <ul class="accoutDivOptions">
-            <li class="flexDivBetween" style="padding-right:0; gap: 170px;"><div class="flexDivIcon"><i data-lucide="settings"></i><p>Paramètres</p></div> <i data-lucide="chevron-right"></i></li>
-            <li class="flexDivBetween" style="padding-right:0; "><div class="flexDivIcon"> <i data-lucide="circle-question-mark"></i><p>Aide et assistance</p></div> <i data-lucide="chevron-right"></i></li>
-            <li class="flexDivBetween" style="padding-right:0;"><div class="flexDivIcon"> <i data-lucide="moon"></i><p>Accessibilité et affichage</p></div> <i data-lucide="chevron-right"></i></li>
-            <li class="flexDivStart"><i data-lucide="message-square-warning"></i><p>Donnez votre avis</p></li>
-            <li class="flexDivStart disconnect"><i data-lucide="log-out"></i><p>Se déconnecter</p></li>
+            <li class="flexDivBetween" style="padding-right:0; ">
+                <div class="flexDiv"><i data-lucide="settings"></i><p>Paramètres</p></div>
+                <div class="flexDiv"> <i data-lucide="chevron-right"></i></div>
+            </li>
+
+            <li class="flexDivBetween" style="padding-right:0; ">
+                <div class="flexDivIcon"> <i data-lucide="circle-question-mark"></i><p>Aide et assistance</p></div> 
+                <div><i data-lucide="chevron-right"></i></div>
+            </li>
+
+            <li class="flexDivBetween" style="padding-right:0;">
+                <div class="flexDivIcon"> <i data-lucide="moon"></i><p>Accessibilité et affichage</p></div> <i data-lucide="chevron-right"></i>
+            </li>
+
+            <li class="flexDivStart">
+                <i data-lucide="message-square-warning"></i><p>Donnez votre avis</p>
+            </li>
+
+            <li class="flexDivStart disconnect">
+                <i data-lucide="log-out"></i><p>Se déconnecter</p>
+            </li>
         </ul>
     </div>
 </div>

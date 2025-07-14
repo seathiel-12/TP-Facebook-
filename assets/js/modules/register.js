@@ -98,7 +98,7 @@ const handleRegisterRetrieveCode=(data)=>{
         await apiRequest('user/register/codeVerify','POST', data)
                 .then(response=>{
                     if(response && response.success){
-                        askFillOtherRegisterInfo(); 
+                        askFillOtherRegisterInfo(response?.csrf_token); 
                         return;
                     }else{
                         showNotification(response.message);
@@ -109,13 +109,13 @@ const handleRegisterRetrieveCode=(data)=>{
     }
 }
 
- const askFillOtherRegisterInfo=async()=>{
+ const askFillOtherRegisterInfo=async(token)=>{
    document.body.innerHTML=`
         <header>
         <img src="/assets/media/images/facebook.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
         </header>
 
-        <div class='card' style="max-width: 800px; padding: 30px;">
+        <div class='card' style="max-width: 1000px; padding: 30px; margin-top:50px;">
             <h2 style="padding:20px 0; text-align: center; color: #1877f2; font-size: 28px;">Bienvenue sur Facebook Clone!</h2>
             <p style="text-align: center; color: #65676b; margin-bottom: 30px; font-size: 16px;">Découvrez tout ce que vous pouvez faire sur notre plateforme</p>
 
@@ -236,23 +236,39 @@ const handleRegisterRetrieveCode=(data)=>{
                 border-radius: 20px;
                 box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             }
+            header{
+                display: flex;
+                justify-content: space-between;
+                box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
+                background-color: white;
+            }
         </style>
     `
     const completProfil=document.querySelector('.completeProfil');
-    completProfil.onclick=()=>completeProfil();
+    completProfil.onclick=async()=>{
+        await apiRequest('user/register/select-data')
+                                .then(response=>{
+                                    if(response && response.success){
+                                        completeProfil(token, response.data);
+                                    }
+                                })
+    }
 
     lucide.createIcons();
 }
 
- export const completeProfil=()=>{
+const completeProfil= (token, selectData)=>{
     const profil= document.createElement('div');
-
+    console.log(selectData);
     profil.innerHTML=`
         <header>
         <img src="/assets/media/images/facebook.svg" width="100px"  style="transform:scale(1.5) translateX(30%); margin:15px 0;"/>
         </header>
 
+
+        <h1 style="margin-top: 50px;"> Complétez votre profil pour une expérience<br> personalisée <span style=" background: linear-gradient(to right, #ff6a00, #ee0979); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">by META</span></h1>
         <form class="profil-form" enctype="multipart/form-data">
+            <input type="hidden" id="csrf_token" value="${token}"/>
             <div style="position:relative; width:100%; display:flex; flex-direction:column; align-items:center; gap:20px;">
                 <label class="cover flexDivIcon" for="cover">
                     <span style="font-size: 2.5em; color: #1877f2; transform:translateY(-10%);">+</span> <span style="font-size:1.1em;">Ajouter une cover</span>
@@ -264,6 +280,10 @@ const handleRegisterRetrieveCode=(data)=>{
                 </label>
                 <input type="file" name="profile_picture" id="profil" hidden/>
             </div>
+
+            <div>
+                <input type="text" name="username" placeholder="Un username pour paraitre plus cool? ...">
+            </div>
             <textarea class="bio" placeholder="Ajoutez une bio..." name="bio" ></textarea>
 
             <h3 style="text-align:left; color:rgb(139, 152, 164); width:100%; margin:20px 20px 0;">Situation & Etudes</h3>
@@ -272,12 +292,15 @@ const handleRegisterRetrieveCode=(data)=>{
 
                 <div class="flexDivIcon" style="gap:0;">
                     <i data-lucide="map-pinned" class="otherIcon"></i>
-                    <input style="border-radius:0 5px 5px 0; " name="lives_at" placeholder="Entrez votre adresse..." required/>
+                    <select id="lives_at" required>
+                        <option value="" hidden selected style="height: 45px; width: 100%;">Pays de résidence</option>
+                        ${selectData.country.map(country=>`<option value="${country.id}">${country.name}</option>`).join('')}
+                    </select>
                 </div>
 
                 <div class="flexDivIcon" style="gap:10;">
                     <div class="flexDivIcon" style="gap:0; padding:0;">
-                       <select name="relationship_status" style="width:100%; height:45px; margin:0;" required>
+                       <select name="relationship_status" style="width:100%; height:45px; margin:0;">
                         <option selected hidden>Situation matrimoniale</option>
                         <option value="single">Célibataire</option>
                         <option value="couple">En couple</option> 
@@ -294,6 +317,8 @@ const handleRegisterRetrieveCode=(data)=>{
                         <option value="licence">Licence</option>
                         <option value="master">Master</option>
                         <option value="doctorat">Doctorat</option>
+                        <option value="dti">DTI</option>
+                        <option value="cap">CAP</option>
                        </select>
                     </div>
                 </div>
@@ -304,13 +329,8 @@ const handleRegisterRetrieveCode=(data)=>{
                 <div class="flexDivIcon" style="margin:10px 0;">
                     <div style="width:50%; padding:0;">
                         <select name="profession" style="width:100%; height:45px; margin:0 0 10px 0;" required>
-                        <option selected hidden>Profession</option>
-                        <option value="#">Ingénieur aéronautique</option>
-                        <option value="#">Data Analyste</option> 
-                        <option value="#">Infopreneur</option>
-                        <option value="#">Génie civil</option>
-                        <option value="#">Directeur Informatique</option>
-                        <option value="#">Artisan</option>
+                            <option value="" hidden selected>Profession</option>
+                            ${selectData.professions.map(profession=> `<option value="${profession.id}">${profession.name}</option>`).join('')}
                        </select>
                         
                        <div class="hobbies flexDivIcon" style="justify-content:space-between;"><ul id="hobbiesChoosedList" style="padding:0;"><span>Vos hobbies</span></ul> <i data-lucide="chevron-down" style="transform:scale(0.7) translateX(7px);"></i> </div>
@@ -474,7 +494,12 @@ form{
 }
 body{
     height:max-content;
-    margin-top: 100px;
+}
+header{
+    display: flex;
+    justify-content: space-between;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
+    background-color: white;
 }
 @media (max-width: 600px) {
 .profil-form {
@@ -559,7 +584,48 @@ body{
         }
     }
 
+    const form=document.querySelector('form.profil-form');
+    form.onsubmit=async (e)=>{
+        e.preventDefault();
+        const profilPic=document.getElementById('profil');
+        const coverPic=document.getElementById('cover');
 
+        
+            const data = new FormData(e.target);
+
+            if(profilPic.value)
+            data.append('profile_picture', profilPic.files[0]); 
+
+            if(coverPic.value)
+            data.append('cover_picture', coverPic.files[0]);
+            
+            data.append('bio', document.querySelector('textarea[name="bio"]').value.trim() || null);
+            data.append('lives_at', parseInt(document.getElementById('lives_at').value) || null);
+            data.append('relationship_status', document.querySelector('select[name="relationship_status"]').value || null);
+            data.append('study_level', document.querySelector('select[name="study_level"]').value || null)
+            data.append('username', document.querySelector('input[name="username"]').value || null);
+            data.append('profession', parseInt(document.querySelector('select[name="profession"]').value) || null);
+            data.append('about', document.querySelector('textarea[name="about"]').value || null);   
+            data.append('csrf_token', document.getElementById('csrf_token').value || null)
+            await fetch('/api/user/register/otherInfo', {
+                method:'POST',
+                body: data
+            }).then(response => response.json())
+              .then(result=>{
+                if(result && result.success){
+                    showNotification('Info ajoutés avec succès', 'success');
+                    setTimeout(()=> {
+                        showLoadingPage();
+                        setTimeout(async()=>await fetchPageContent('/frontend/views/templates/homeT.php')
+                        , 3000);
+                    },2000);
+                }else{
+                    showNotification('Erreur'+response?.message);
+                }
+              })
+              .catch(error=>console.error('Une erreur est survenue: '+ error));
+        
+    }
 }
 
 window.addEventListener('click',(e)=>{

@@ -1,4 +1,4 @@
-header{
+#standard-header{
     position: fixed;
     display: flex;
     justify-content: space-between;
@@ -119,6 +119,7 @@ header{
     position: fixed; 
     right:10px; top:50px;
     z-index:1000;
+    width: 300px;
 }
 .top-nav div{
     cursor: pointer;
@@ -127,6 +128,7 @@ header{
     padding: 15px 80px 15px 20px;
 }
 .accoutDivOptions{
+    width: 100%;
     margin-top: 10px;
 }
 .profils{
@@ -164,7 +166,7 @@ header{
     list-style-type: none;
     border-radius: 5px;
     padding: 10px 25px;
-    justify-content: start!important;
+    justify-content: start;
     cursor: pointer;
 }
 aside.right{
@@ -349,7 +351,16 @@ section.main-section{
     width: calc(100% - 20px);
     transform: translateX(-10px);
 }
-
+.accountIcon{
+    padding: 0!important;
+    width: max-content;
+    height: max-content;
+    border: solid 5px rgba(178, 28, 28, 0.717);
+    border-radius: 100%;
+}
+.delete-comment:hover{
+    background: rgba(255, 49, 49, 0.67)!important;
+}
 .liked{
     fill: rgb(66, 66, 255);
     stroke: rgb(66, 66, 255);

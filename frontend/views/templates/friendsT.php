@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="../../../assets/styles/root.css" type="text/css">
+    <link rel="stylesheet" href="../../../assets/styles/friends.css" type="text/css">
+    <script src="https://unpkg.com/lucide@latest">lucide.createIcons();</script>
+    <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="../../../assets/js/icons.js" defer></script>
+    <script src="../../../assets/js/main.js" defer></script>
+
 </head>
 <body id="friends" class="friends-home">
     <?php require '../includes/header.php'; ?>
