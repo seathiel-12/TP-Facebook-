@@ -72,8 +72,7 @@ const fetchPageContent=async(url)=>{
         .then(async(html)=> {
             const parser= new DOMParser();
             html=parser.parseFromString(html,'text/html');
-            
-            const header=html.querySelector('header');
+             const header=html.querySelector('header');
                   if(header && header.id && header.getAttribute('id') === document.querySelector('header')?.id){
                       const main= html.querySelector('main');
                       if(main){
@@ -222,6 +221,7 @@ const loadUrlPage=async(url)=>{
               await fetchPageContent('/frontend/views/templates/homeT.php');
             }else{
               await fetchPageContent('/frontend/views/templates/homeT.php');
+              handleTopNavdivClick();
             }
             lucide.createIcons();
           }else{
@@ -233,7 +233,7 @@ const loadUrlPage=async(url)=>{
         .catch(error=>console.error('Erreur de connection:', error));
           
         // // Regenerer le csrf chaque 10min
-
+  
         setInterval(async()=>{
     
           const generateCRSF=await apiRequest('generateCSRF');

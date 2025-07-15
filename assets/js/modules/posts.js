@@ -1,54 +1,62 @@
-
 let allPosts=null;
 let allComments= null;
 let me=null;
-// Couleur de fond d'un post
-const createColorList=async()=> {
-    const colors=document.createElement('ul');
 
-    colors.innerHTML=`
-        <li class="color" style="background:linear-gradient(45deg, rgba(255, 55, 55, 0.76),  rgb(255, 70, 70));"></li>
-        <li class="color" style="background:linear-gradient(45deg, rgb(255, 220, 45), rgba(216, 230, 27, 0.63));"></li>
-        <li class="color" style="background:linear-gradient(45deg, rgb(56, 255, 89), rgba(24, 160, 28, 0.71));"></li>
-        <li class="color" style="background:linear-gradient(45deg, rgb(55, 40, 192), rgba(61, 88, 195, 0.47)) ;"></li>
-        <li class="color" style="background:linear-gradient(45deg, rgba(56, 219, 255, 0.86), rgba(4, 84, 92, 0.34));"></li>
-        <li class="color" style="background:linear-gradient(45deg, rgb(166, 22, 198), rgba(68, 12, 92, 0.65));"></li>
-        <li class="color" style="background:linear-gradient(45deg, rgb(255, 165, 0), rgba(255, 140, 0, 0.57));"></li>
-        <li class="color" style="background:linear-gradient(45deg, rgb(255, 20, 147), rgba(219, 112, 147, 0.43));"></li>
-        <li class="color" style="background:linear-gradient(45deg, rgb(0, 255, 127), rgba(46, 139, 87, 0.2));"></li>
-        <li class="color" style="background:linear-gradient(45deg, rgb(138, 43, 226), rgba(75, 0, 130, 0.5));"></li>
-        <li class="color" style="background:linear-gradient(45deg, rgb(255, 69, 0), rgba(255, 99, 71, 0.6));"></li>
-        <li class="color" onclick="changeColor(this)" style="background:linear-gradient(45deg, rgb(0, 191, 255), rgba(30, 144, 255, 0.4));"></li>
-        <li class="color" style="background:linear-gradient(45deg, rgb(255, 215, 0), rgba(255, 223, 0, 0.7));"></li>
-        <li
-    `
-    colors.classList.add('flexDiv');
-    colors.classList.add('colors');
-    
-    return colors;
+
+export const loadPosts=async(posts, elementClass)=>{
+    if(!posts){
+        await getAllPostsData();
+        posts=allPosts;
+    }
+    allPosts=posts;
+    const loadedPosts=document.querySelector('.'+ elementClass);
+    loadedPosts.innerHTML=renderPosts(posts);
+    createPostOptions();
+    lucide.createIcons();
 }
 
-//Change la couleur de fond d'un post
-export const changeColor=async (li=null)=>{  
-    if(li){
-        const textareaPost=document.getElementById('post-text');  
-
-        if(textareaPost.style.height !== '250px'){
-            const modal=document.querySelector('.modal');
-            modal.style.transform=`translateY(-85px)`;    
-        }
-        textareaPost.classList.add('changed-color')
-        textareaPost.style.cssText=`
-        background:${li.style.background};
-        height:250px;
-        `;
-        textareaPost.focus();
+const getAllPostsData=async()=>{
+    try{
+        await apiRequest('user/posts/all').then(response=>{
+            if(response && response.success){
+                console.log(response.data);
+                allPosts=response.data;
+            }else{
+                showNotification(response.message);
+            }  
+        });
+        
+    }catch(err){
+        console.error(err);
     }
 }
 
 
+const handleHomePostDiv=()=>{   
+    const modal=document.querySelector('.modal');
+    const postInput= document.querySelectorAll('.home-top-post .createPostBtn');
+    const textareaPost=document.getElementById('post-text');  
+    
+    postInput.forEach(postInp=>{
+        postInp.onclick=(e)=>{
+            console.log('click')
+            e.stopPropagation();
+            modal.classList.add('visible');
+            modal.style.top=`calc((100vh - ${modal.offsetHeight+'px'})/2)`;
+            modal.style.transform='translate(0)';
+            const overlay=document.createElement('div');
+            overlay.className="overlay"; 
+            document.body.appendChild(overlay);
+            textareaPost.focus();
+            document.body.classList.add('overflow');
+            handleCreatePostModal();
+        }
+    })
+}
+
+
 //Modale de creation d'un post
- const handleCreatePostModal=()=>{
+const handleCreatePostModal=()=>{
     const closeModal=document.querySelector('.closeModal');
     const modal=document.querySelector('.modal');
     closeModal.addEventListener('click',()=> {
@@ -112,42 +120,32 @@ export const changeColor=async (li=null)=>{
 
 }
 
-//Gerer les bouton de la section main-section : zone ou se chargnt les posts
- const handleHomePostDiv=()=>{   
-    const modal=document.querySelector('.modal');
-    const postInput= document.querySelectorAll('.home-top-post .createPostBtn');
-    const textareaPost=document.getElementById('post-text');  
+// Couleur de fond d'un post
+const createColorList=async()=> {
+    const colors=document.createElement('ul');
+
+    colors.innerHTML=`
+        <li class="color" style="background:linear-gradient(45deg, rgba(255, 55, 55, 0.76),  rgb(255, 70, 70));"></li>
+        <li class="color" style="background:linear-gradient(45deg, rgb(255, 220, 45), rgba(216, 230, 27, 0.63));"></li>
+        <li class="color" style="background:linear-gradient(45deg, rgb(56, 255, 89), rgba(24, 160, 28, 0.71));"></li>
+        <li class="color" style="background:linear-gradient(45deg, rgb(55, 40, 192), rgba(61, 88, 195, 0.47)) ;"></li>
+        <li class="color" style="background:linear-gradient(45deg, rgba(56, 219, 255, 0.86), rgba(4, 84, 92, 0.34));"></li>
+        <li class="color" style="background:linear-gradient(45deg, rgb(166, 22, 198), rgba(68, 12, 92, 0.65));"></li>
+        <li class="color" style="background:linear-gradient(45deg, rgb(255, 165, 0), rgba(255, 140, 0, 0.57));"></li>
+        <li class="color" style="background:linear-gradient(45deg, rgb(255, 20, 147), rgba(219, 112, 147, 0.43));"></li>
+        <li class="color" style="background:linear-gradient(45deg, rgb(0, 255, 127), rgba(46, 139, 87, 0.2));"></li>
+        <li class="color" style="background:linear-gradient(45deg, rgb(138, 43, 226), rgba(75, 0, 130, 0.5));"></li>
+        <li class="color" style="background:linear-gradient(45deg, rgb(255, 69, 0), rgba(255, 99, 71, 0.6));"></li>
+        <li class="color" onclick="changeColor(this)" style="background:linear-gradient(45deg, rgb(0, 191, 255), rgba(30, 144, 255, 0.4));"></li>
+        <li class="color" style="background:linear-gradient(45deg, rgb(255, 215, 0), rgba(255, 223, 0, 0.7));"></li>
+        <li
+    `
+    colors.classList.add('flexDiv');
+    colors.classList.add('colors');
     
-    postInput.forEach(postInp=>{
-        postInp.onclick=(e)=>{
-            console.log('click')
-            e.stopPropagation();
-            modal.classList.add('visible');
-            modal.style.top=`calc((100vh - ${modal.offsetHeight+'px'})/2)`;
-            modal.style.transform='translate(0)';
-            const overlay=document.createElement('div');
-            overlay.className="overlay"; 
-            document.body.appendChild(overlay);
-            textareaPost.focus();
-            document.body.classList.add('overflow');
-            handleCreatePostModal();
-        }
-    })
+    return colors;
 }
 
-
-
-/////////////////////////////////
- export const loadPosts=async()=>{
-    await getAllPostsData();
-    const posts=allPosts;
-    
-    const loadedPosts=document.querySelector('.loaded-posts');
-    loadedPosts.innerHTML=renderPosts(posts);
-    createPostOptions();
-    lucide.createIcons();
-}
-////////////////////////////////
 
 export const renderPosts=(posts)=>{
     const renderDate=(date)=>{
@@ -297,6 +295,7 @@ export const handlePosting=()=>{
     })
 }
 
+
 const showFile=(file)=>{
     const blob= new Blob(file.files);
     const url=URL.createObjectURL(blob);
@@ -340,45 +339,8 @@ const removeFile=()=>{
 
 }
 
-const getAllPostsData=async()=>{
-    try{
-        await apiRequest('user/posts/all').then(response=>{
-            if(response && response.success){
-                console.log(response.data);
-                allPosts=response.data;
-            }else{
-                showNotification(response.message);
-            }  
-        });
-        
-    }catch(err){
-        console.error(err);
-    }
-}
 
-export const initHome=async()=>{ 
-    handleHomePostDiv(); 
-    // handleCreatePostModal();
-    handlePostInteractions();
-    changeColor();
-    createIcons();
-    me=document.getElementById('me').value;
-    const profilingBtns=document.querySelectorAll('.profiling');
-    profilingBtns.forEach(btn=>
-        btn.onclick=()=>{
-            fetchPageContent('/frontend/views/templates/profilPage.php')
-            document.querySelector('.profil-contextuel')?.classList.remove('visible')
-        }
-    )
-}
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-//Gestion des posts
-
- const createPostOptions=(post)=>{
+const createPostOptions=(post)=>{
     const optionsPoints=document.querySelectorAll(".view-post-options");
 
     optionsPoints.forEach(option=>{
@@ -399,7 +361,7 @@ export const initHome=async()=>{
                 `
                 }
             `
-            document.querySelector('.main-section').appendChild(ul);
+            document.body.appendChild(ul);
             lucide.createIcons();
 
             if(author == document.getElementById('me').value)
@@ -480,6 +442,7 @@ const handleConfirmDeletePost=()=>{
     cancel.onclick=()=>closeDeletePostModale();
     deleteThisPost.onclick=(e)=>deletePosts(e.target.getAttribute('post'));
 }
+
 
 /**
  * 
@@ -865,21 +828,30 @@ export const handlePostInteractions=()=>{
             const post = allPosts.find((post)=>post.id == e.target.getAttribute('post'))
             openCommentModal(post);
         }
-    })
-    
+    })   
 }
 
-/////////////////////////////////////////////////////////////////////////////
+export const changeColor=async (li=null)=>{  
+    if(li){
+        const textareaPost=document.getElementById('post-text');  
 
-
-//profiling
-const createProfilingDiv=(userId)=>{
-    const div=document.createElement('div');
-    div.innerHTML=`
-
-    `
+        if(textareaPost.style.height !== '250px'){
+            const modal=document.querySelector('.modal');
+            modal.style.transform=`translateY(-85px)`;    
+        }
+        textareaPost.classList.add('changed-color')
+        textareaPost.style.cssText=`
+        background:${li.style.background};
+        height:250px;
+        `;
+        textareaPost.focus();
+    }
 }
 
-const createProfilPage=()=>{
-    profilPage=""
+
+export function initPosts(){
+    handleHomePostDiv();
+    handlePostInteractions();
+    changeColor();
+    createIcons();
 }

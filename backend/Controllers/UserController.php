@@ -9,8 +9,8 @@ use Exception;
 use PDOException;
 use PHPMailer\PHPMailer\POP3;
 
-class UserController extends Controller{
-
+class UserController extends Controller{    
+    private $known_as=['uuid_uID', 'uuid_pID', 'uuid_fID', 'uuid_pIID'];
 
     public function __construct()
     {   
@@ -242,7 +242,8 @@ class UserController extends Controller{
                     $id=$action ? ($action==='me' ? $_SESSION['id'] : $action) : null;
                     if(!$id) throw new Exception('User required');
                     $friends=new User()->getFriends($id);
-                    echo json_encode(['success'=>true, 'friends'=>$friends]);
+                    $friends=$this->getValidUserData($friends);
+                    echo json_encode(['success'=>true, 'data'=>$friends]);
                     return;
                 }
                 case 'invit': {
@@ -279,12 +280,7 @@ class UserController extends Controller{
         if(isset($action)){
             if($action === 'get'){
                 $suggestions=new User()->getSuggestions();
-                foreach($suggestions as $key=>$value){
-                    $suggestions[$key]['profile_picture']= $suggestions[$key]['profile_picture'] ? (PICTURE_PATH . $suggestions[$key]['id'] .'/' . $suggestions[$key]['profile_picture']) : GENDER_PATH . $suggestions[$key]['gender'] .'.png';
-                    
-                    $suggestions[$key]['username']= $value['username'] ?? $value['firstname'] . ' ' . $value['lastname'];
-                    unset($suggestions[$key]['gender'], $suggestions[$key]['firstname'], $suggestions['key']['lastname']);
-                }
+                $suggestions=$this->getValidUserData($suggestions);
                 echo json_encode(['success'=>true, 'data'=>$suggestions]);
                 return;
             }
@@ -307,12 +303,22 @@ class UserController extends Controller{
 
     public function getValidUserData($data){
         foreach($data as $key=>$value){
-            $data[$key]['profile_picture']= $data[$key]['profile_picture'] ? (PICTURE_PATH . $data[$key]['id'] .'/' . $data[$key]['profile_picture']) : GENDER_PATH . $data[$key]['gender'] .'.png';
             
-            $data[$key]['username']= $value['username'] ?? $value['firstname'] . ' ' . $value['lastname'];
-            unset($data[$key]['gender'], $data[$key]['firstname'], $data['key']['lastname']);
+                $data[$key]['profile_picture']= $data[$key]['profile_picture'] ? (PICTURE_PATH . $data[$key]['id'] .'/' . $data[$key]['profile_picture']) : GENDER_PATH . $data[$key]['gender'] .'.png';      
+
+                $data[$key]['username']= $value['username'] ?? $value['firstname'] . ' ' . $value['lastname'];
+                
+                $data[$key]['valid']=$data[$key]['uuid_uID'];
+                unset($data[$key]['gender'], $data[$key]['firstname'], $data[$key]['lastname'], $data[$key]['id'], $data[$key]['uuid_uID']); 
+                
         }
         return $data;
+    }
+
+    private function getValidateDataToSend($data){
+        if(array_keys($data, $this->known_as)){
+            
+        }
     }
 
     public function manageInvits($action){
@@ -324,19 +330,40 @@ class UserController extends Controller{
                     $type = $action === 'get&sent' ? 'sent' : 'received';
                     $invits=new User()->getInvits($type);
                     $invits=$this->getValidUserData($invits);
+
+                    foreach($invits as $key => $value){
+                        if(isset($value['uuid_fID'])){
+                            $invits[$key]['ID']=$invits[$key]['uuid_fID'];
+                            unset($invits[$key]['uuid_fID']);
+                        }
+                    }
+                    
                     echo json_encode(['success'=>true, 'data'=>$invits]);
                     return;
                 } 
-                case 'accept' :{
+                case 'accept':
+                case 'reject':
+                case 'cancel':{
+                    session_start();
                     $this->verifyRequestMethod('POST');
-                    $user=$this->getRequestData();
+                    $data=$this->getRequestData();
                     if($this->verifyCSRFToken() === 200){
-                        new User()->manageInvits($user);
-                        echo json_encode(['success'=>true]);
+                        if($action === 'cancel'){
+                            new User()->manageInvits($data['ID'], null, 'cancel');
+                            echo json_encode(true);
+                            return;
+                        }
+
+                        $response=new User()->manageInvits($data['ID'], $data['valid'], $action);
+
+                        if($response ==='noUpdate'){
+                            echo json_encode(['success'=>false]);
+                        }else{
+                            echo json_encode(['success'=>true]);
+                        }                        
                     }
                     return;
-                }
-                default:{
+                }default:{
                     throw new Exception('Action required for this method!');
                 } 
             }

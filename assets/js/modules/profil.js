@@ -28,14 +28,13 @@ async function loadThisUserPosts(user){
     await apiRequest(`user/posts/get/${me}`)
             .then(async(response)=>{
                 if(response && response.success){
-                    const publications=document.querySelector('.publications-done')
                     if(response.data){
-                        await import('./home.js')
-                        .then(module => module.renderPosts(response.data))
-                        .then(posts=> {
-                            publications.innerHTML=posts;
+                        await import('./posts.js')
+                        .then(module => {
+                            module.loadPosts(response.data, 'publications-done');
                             lucide.createIcons();
-                        })
+                            module.initPosts();
+                    })
                     }else{
                         publications.innerHTML=`
                             <p>Aucune publication.</p>
@@ -45,7 +44,7 @@ async function loadThisUserPosts(user){
             })
 }
 
-export async function initProfil(){
+export async function initProfil(thisUser){
     handleHeaderClicks()
     await loadThisUserPosts();
 }

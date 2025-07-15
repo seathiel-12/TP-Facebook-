@@ -27,7 +27,7 @@
                 <p style="font-weight: 600; margin-bottom: 5px;">Amis</p>
 
                 <div class="all-friends">
-                 <p style="font-size: 0.9em; font-weight: 600; color: rgba(130, 130, 130, 0.74);"> Aucun ami à afficher </p>
+
                 </div>
 
             </div>

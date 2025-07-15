@@ -7,7 +7,7 @@
         ?>
         </i><?= $_SESSION['username'] ?></li>
         <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/meta.png" alt="" width="30" height="30" >Meta AI</li>
-        <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/amis_home.png" alt="" width="30" height="30" >Ami(e)s</li>
+        <li onclick="fetchPageContent('/frontend/views/templates/friendsT.php')" class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/amis_home.png" alt="" width="30" height="30" >Ami(e)s</li>
         <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/facebook-circle.png" alt="" width="28" height="28" > Bienvenue</li>
         <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/souvenirs.png" alt="" width="30" height="30" >Souvenirs</li>
         <li class="flexDivIcon"><img src="/assets/media/images/svgIcon/home/enregistrements.png" alt="" width="30" height="30" >Enregistrements   </li>

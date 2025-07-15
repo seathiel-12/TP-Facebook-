@@ -63,18 +63,36 @@ function renderInvits(invits,type){
         }
     }
 
-    return invits.map(invit=>`
-        <div class="flexDivBetween invitation">
+    if(type === 'sent'){
+            return invits.map((invit,index)=>`
+        <div class="flexDivBetween cancel-parent-${index}">
             <div class="flexDivStart">
                 <img src="${invit.profile_picture}" style="border-radius:100%; border:solid 3px rgba(50, 50, 50, 0.67);" width="50" height="50" alt="">
                 <p>${invit.username}</p>
             </div>
             <div class="flexDivEnd">
-              <button style="width:max-content; data-as="${invit.uuid}" padding:10px; background:${typeSet[type].btnBgc}; color:black;">${typeSet[type].btnText}</button>
-              ${typeSet[type]?.refuseBtn ? `'<button class="reject-received-invit" style="width:max-content; data-as="${invit?.ID}" data-valid="${invit?.valid}" padding:10px; background: rgba(255, 49, 49, 0.67); color:white;">Refuser</button>'` : ''}
+              <button class="cancel-sent-invit" ref="${index}" style="width:max-content;" data-as="${invit.ID}" valid="${invit.valid}" padding:10px; background:${typeSet[type].btnBgc}; color:black;">${typeSet[type].btnText}</button>
             </div>
         </div>    
     `).join('');
+    } 
+
+    if(type === 'received'){
+        return invits=invits.map((invit, index)=>
+            `<div class="flexDivStart invit-parent-${index}">
+                <img src="${invit['profile_picture']}" width="60" height="60" style="border-radius: 100%;" alt="">
+                <div>
+                    <p style="text-align: left;">${invit.username}</p>
+                    <div class="flexDiv" style="width: 100%">
+                        <button class="accept-received-invit" ref="${index}" data-as="${invit.ID}" valid="${invit.valid}" style="width:130px; padding: 10px;">Accepter</button>
+                        <button class="reject-received-invit" ref="${index}" data-as="${invit.ID}" style="background: rgba(132, 129, 129, 0.64); width:130px; color:rgba(44, 44, 44, 0.77);">Rejeter</button>
+                    </div>
+                </div>
+            </div>
+        `
+    ).join('');
+    }
+
 }
 
 function handleLoadedInvits(){
@@ -82,12 +100,14 @@ function handleLoadedInvits(){
 
     if(cancelSentInvit)
     cancelSentInvit.forEach(cancel=>{
-        cancel.onclick=async function (){
+        cancel.onclick=async function (e){
             await apiRequest('user/friends/invit/cancel','POST', {
-                ID: cancel.getAttribute('data-as')
+                ID: e.target.getAttribute('data-as').trim()
             }).then(response=>{
-                if(response && response.success){
-                    this.remove();
+                if(response){
+                    const count=document.querySelector('.invit-sent-count');
+                    count.textContent=parseInt(count.textContent)-1;
+                    document.querySelector(`.cancel-parent-${this.getAttribute("ref")}`)?.remove();
                 }else{
                     showNotification('Une erreur est survenue!');
                 }
@@ -100,17 +120,17 @@ function handleLoadedInvits(){
 
     if(acceptReceivedInvit)
     acceptReceivedInvit.forEach(accept=>{
+        accept.onmouseover=(e)=>e.stopPropagation();
         accept.onclick=async function(){
             await apiRequest('user/friends/invit/accept', 'POST', {
                 ID:accept.getAttribute('data-as'),
-                user:e.getAttribute('data-valid')
+                valid:accept.getAttribute('valid'),
             }).then(response=>{
                 if(response && response.success){
-                    if(!Object.hasOwn(response, 'noUpdate'))
-                    showNotification('Vous êtes maintenant amis.')
-                    else showNotification('Vous êtes déja amis!');
-                    this.remove();
-                }
+                    showNotification('Vous êtes maintenant amis.', 'success');
+                }else showNotification('Vous êtes déja amis!');
+
+                document.querySelector(`.invit-parent-${this.getAttribute("ref")}`)?.remove();
             }).catch(err=>console.error(err));
         }
     });
@@ -119,13 +139,13 @@ function handleLoadedInvits(){
 
     if(rejectReceivedInvit)
     rejectReceivedInvit.forEach(reject=>{
+        reject.onmouseover=(e)=>e.stopPropagation();
         reject.onclick=async function () {
             await apiRequest('user/friends/invit/reject', 'POST', {
                 ID: reject.getAttribute('data-as'),
-                user:reject.getAttribute('data-valid')
             }).then(response=>{
                 if(response && response.success){
-                    this.remove();
+                    document.querySelector(`.invit-parent-${this.getAttribute("ref")}`)?.remove();
                 }else{
                     showNotification('Une erreur est survenue!');
                 }
@@ -145,7 +165,6 @@ async function loadInvits(type){
                             const count = document.querySelector('.invit-'+type+'-count');
                             count.textContent=response.data.length;
                             count.style.width=count.style.height=20 + 'px';
-
                             handleLoadedInvits();
                         }
                     }
@@ -173,8 +192,12 @@ const handleAllFriendsPageButtons=()=>{
 }
 
 function renderAllFriends(friends){
-   friends= friends.map(friend=>{
-        `
+    if(friends.length === 0){
+        return `<p style="font-size: 0.9em; font-weight: 600; color: rgba(130, 130, 130, 0.74);"> Aucun ami à afficher </p>
+`
+    }
+
+   friends= friends.map(friend=>`
         <div class="flexDivBetween friend">
             <div class="flexDivStart">
                 <img src="${friend['profile_picture']}" width="60" height="60" style="border-radius: 100%;" alt="">
@@ -185,7 +208,7 @@ function renderAllFriends(friends){
             </div>
         </div>
         `
-    }).join('');
+    ).join('');
 
     return friends;
 }
@@ -197,9 +220,10 @@ async function loadAllFriends(){
                     if(response.data){
                         const allfriendsDiv=document.querySelector('.all-friends');
                         allfriendsDiv.innerHTML=renderAllFriends(response.data);
+                        lucide.createIcons();
                     }
                 }
-            })
+            }).catch(err=>console.error(err));
 }
 
  function initAllFriends(){
@@ -242,14 +266,14 @@ function renderSuggestions(suggestions){
         return `<p>Pas de suggestions.</p>`;
     }
 
-    suggestions=suggestions.map(suggestion=>
-            `<div class="flexDivStart" friend-no="${suggestion.id}">
+    suggestions=suggestions.map((suggestion,index)=>
+            `<div class="flexDivStart suggestion-parent-${index}" valid="${suggestion.valid}">
                 <img src="${suggestion['profile_picture']}" width="60" height="60" style="border-radius: 100%;" alt="">
                 <div>
                     <p style="text-align: left;">${suggestion.username}</p>
                     <div class="flexDiv" style="width: 100%">
-                        <button class="accept-suggestion" friend-no="${suggestion.id}" style="width:130px; padding: 10px;">Ajouter ami(e)</button>
-                        <button class="remove-suggestion" friend-no="${suggestion.id}" style="background: rgba(198, 198, 198, 0.64); width:130px; color:rgba(44, 44, 44, 0.77);">Retirer</button>
+                        <button index=${index} class="accept-suggestion" style="width:130px; padding: 10px;">Ajouter ami(e)</button>
+                        <button index=${index} class="remove-suggestion" style="background: rgba(198, 198, 198, 0.64); width:130px; color:rgba(44, 44, 44, 0.77);">Retirer</button>
                     </div>
                 </div>
             </div>
@@ -272,17 +296,17 @@ const handleSuggestions=()=>{
     const acceptBtn=document.querySelectorAll('.accept-suggestion');
     const remove=document.querySelectorAll('.remove-suggestion');
 
-    acceptBtn.forEach(btn=>{
+    acceptBtn.forEach(function (btn,index){
         btn.onclick=async(e)=>{
             await apiRequest('user/friends/suggestions/add','POST', {
-                id: e.target.getAttribute('friend-no')
+                id: document.querySelector(`.suggestion-parent-${btn.getAttribute('index')}`).getAttribute('valid')
             }).then(response=>{
                 if(response && response.success){
                     showNotification(response.message, 'success');
-                    document.querySelector(`div[friend-no="${e.target.getAttribute('friend-no')}"]`)?.remove();
+                    document.querySelector(`.suggestion-parent-${btn.getAttribute('index')}`)?.remove();
                     return;
                 }
-            })   
+            }).catch(err=>console.error(err));
         }
     })
     

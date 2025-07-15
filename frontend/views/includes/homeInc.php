@@ -24,11 +24,7 @@
     </div>
 
     <div class="loaded-posts">
-        <div class="home-top-post card">
-            <h2>Tu es probablement notre premier visiteur!"</h2>
-
-            <button>Créeons ensemble notre premier post</button>
-        </div>
+        
     </div>
 
 </section>

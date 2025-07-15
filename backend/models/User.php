@@ -45,8 +45,11 @@ class User extends Model{
             foreach($attributes as $attribute){
                 $requestedData[$attribute]=$user[$attribute];
             }
-            return $requestedData;
         }
+        if(is_string($attributes)){
+            $requestedData=$user[$attributes];
+        }
+        return $requestedData;
     }   
 
     public function getFriends($id){
@@ -64,7 +67,7 @@ class User extends Model{
                         END AS id 
                         FROM friends_r
                         )
-                SELECT u.firstname
+                SELECT u.firstname, u.firstname, u.lastname, u.profile_picture, u.gender
                 FROM users u
                 JOIN friends f ON f.id = u.id;
                 ";
@@ -79,12 +82,16 @@ class User extends Model{
 
     public function getSuggestions(){
         try{    
-        $query="SELECT id, firstname, lastname, username, profile_picture, gender FROM users WHERE id!=?
-                    AND id NOT IN(
+        $query="SELECT id, uuid_uID, firstname, lastname, username, profile_picture, gender FROM users WHERE id!=?
+                    AND (id NOT IN(
                         SELECT receiver_id FROM friends_requests WHERE requester_id = ? AND status != 'rejected'
-                    ) LIMIT 50" ;
+                    )
+                    AND id NOT IN (
+                        SELECT requester_id FROM friends_requests WHERE receiver_id = ? AND (status = 'accepted' OR status='rejected' AND DATEDIFF(NOW() , updated_at) < 30) 
+                    )
+                ) LIMIT 50" ;
         $result=Database::getDb()->prepare($query);
-        $result->execute(array_fill(0,2,$_SESSION['id']));
+        $result->execute(array_fill(0,3,$_SESSION['id']));
         
         if($result->rowCount() > 0){
             if(rand(0, 1) === 1){
@@ -103,16 +110,17 @@ class User extends Model{
 
     public function manageSuggestion($data){
         try {
+            $user=$this->getRequestedUserData(['uuid_uID'=>$data], 'id');
             $query="SELECT * FROM friends_requests WHERE requester_id = ? AND receiver_id = ?";
             $result=Database::getDb()->prepare($query);
-            $result->execute([$data, $_SESSION['id']]);
+            $result->execute([$user, $_SESSION['id']]);
             $result=$result->fetch();
 
             if(!$result){
                 try{
                 Model::createEntry('friends_requests', [
                     'requester_id' => $_SESSION['id'],
-                    'receiver_id' => $data,
+                    'receiver_id' => $user,
                     'status' => 'pending',
                     'uuid_fID'=>$this->generateUUID()
                 ]);
@@ -122,7 +130,7 @@ class User extends Model{
             }
             }else{
                 try{
-                    Model::updateEntry('friends', ['status'=>'accepted'], $result['id']);
+                    Model::updateEntry('friends_requests', ['status'=>'accepted'], $result['id']);
                     return 'accepted';
                 }catch(PDOException $e){
                     throw $e;
@@ -143,7 +151,7 @@ class User extends Model{
 
             $query = sprintf(
                 "WITH sent AS ( 
-                SELECT %s FROM friends_requests WHERE %s=? AND status='pending')
+                SELECT %s, uuid_fID FROM friends_requests WHERE %s=? AND status='pending')
                 SELECT s.uuid_fID, u.uuid_uID, u.username, u.profile_picture, u.gender, u.firstname, u.lastname FROM users u JOIN sent s ON %s=u.id;
                 ", $tab[$type][0],  $tab[$type][1], $tab[$type][0]
             );
@@ -156,16 +164,29 @@ class User extends Model{
         }
     }
 
-    public function manageInvits($id){
+    public function manageInvits($uuid, $requester=null, $type){
         try{
-            $query="SELECT * FROM friends_requests WHERE requester_id = ? AND receiver_id = ? AND status = 'accepted' ";
 
-            $result=Database::getDb()->prepare($query);
-            $result->execute([$_SESSION['id'], $id]);
-            if(!$result->rowCount()){
-                // Model::updateEntry('friends_requests', [
-
-                // ]);
+            if($type === 'accept'){
+                $user=$this->getRequestedUserData(['uuid_uID'=> $requester], 'id');
+                $query="SELECT * FROM friends_requests WHERE ((requester_id = ? AND receiver_id = ?) OR (receiver_id = ? AND requester_id = ?)) AND status = 'accepted' ";
+                $result=Database::getDb()->prepare($query);
+                $result->execute([$user, $_SESSION['id'], $user, $_SESSION['id']]);
+                if($result->rowCount()){
+                    return 'noUpdate';
+                }else{
+                    $entry=Model::getEntry('friends_requests', ['uuid_fID'=>$uuid]);
+                    Model::updateEntry('friends_requests', ['status'=>'accepted'], $entry['id']);
+                    return 'created';
+                }
+            }elseif($type === 'reject'){
+                $entry=Model::getEntry('friends_requests', ['uuid_fID'=>$uuid]);
+                Model::updateEntry('friends_requests', ['status'=>'rejected'], $entry['id']);
+                return true;
+            }else if($type === 'cancel'){
+                $entry=Model::getEntry('friends_requests', ['uuid_fID'=>$uuid]);
+                Model::deleteEntry('friends_requests', $entry['id']);
+                return true;
             }
         }catch(PDOException $e){
             throw $e;

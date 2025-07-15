@@ -77,11 +77,13 @@
     margin: auto;
     gap: 2.5%;
     padding: 0 45px 0 20px;
+    display: grid;
+    grid-template-columns: 40% 58%;
 }
 
 #profil .main-profil .left{
-    width: calc(65% - 30px);
-    margin: 0 auto;
+    width: 100%;
+    margin: 20px auto 10px;
 }
 #profil .main-profil .left .card{
     width: calc(100% - 20px);
@@ -93,6 +95,7 @@
 }
 #profil .home-top-post{
     width: 98%;
+    margin:0;
 }
 #profil .profil-div-photo-change{
     position: absolute; 
@@ -112,6 +115,9 @@
 }
 #profil .publications-done{
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 #profil .publications-done .post{
     margin: 0!important;

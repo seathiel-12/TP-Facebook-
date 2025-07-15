@@ -46,7 +46,9 @@ trait Auth{
                 throw $e;
             }
             $_SESSION['profile_picture']= $user['profile_picture'] ? 'posts/user-' . $_SESSION['id'] . '/' .$user['profile_picture'] : 'images/' . $user['gender'] . '.png';
-            $_SESSION['cover_picture']= 'posts/user-' . $_SESSION['id'] . '/' . $user['cover_picture'];
+            
+            if(isset($user['cover_picture']) && !empty($user['cover_picture']) && !is_null($user['cover_picture']))
+            $_SESSION['cover_picture']= 'posts/user-' . $_SESSION['id'] . '/' . $user['cover_picture'] ;
 
             $_SESSION['connect']=true;
             $_SESSION['first_try_time']=new DateTime(date('H:i:s'))->getTimestamp();

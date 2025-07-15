@@ -6,7 +6,7 @@ use PDOException;
     require_once $_SERVER['DOCUMENT_ROOT'].'/headers.php';
     class Controller {
 
-        protected $method;
+        private $method;
         protected $uri;
 
         public function __contruct(){
@@ -67,7 +67,7 @@ use PDOException;
     }
 
      public function verifyRequestMethod($method){
-        if($this->method !== $method){
+        if($_SERVER['REQUEST_METHOD'] !== $method){
             echo json_encode(['success'=>false,'message'=>'Methode non autorisée!'], 405);
             throw new PDOException("Méthode $method non autorisée pour cette requete!");
         }

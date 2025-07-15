@@ -151,7 +151,11 @@
             }
         }
     
-        if(isset($_SESSION['connect']) && $_SESSION['connect'] && isset($_SESSION['id'])    ){ 
+        if(isset($_SESSION['connect']) && $_SESSION['connect'] && isset($_SESSION['id'])){ 
+            if(!new User()->find(['id'=>$_SESSION['id']])){
+                $this->logout();
+                return false;
+            }
             $this->limitLogin();
             $this->generateCSRFToken();
             return true;
@@ -170,9 +174,8 @@
             $result->execute([$data[$emailOrPhone]]);
             $result=$result->fetch();
             if(password_verify($data['password'],$result['password'])){
-                if($this)
                 $this->startSession($result);
-                
+                    
                 echo json_encode(['success'=>true]);
                 return;
             }

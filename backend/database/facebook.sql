@@ -25,12 +25,24 @@ CREATE TABLE users (
     FOREIGN KEY (lives_at) REFERENCES country(id)
 );
 
+DROP Table users
 
 CREATE TABLE professions (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR (255) NOT NULL
 );
 
+SELECT id, uuid_uID, firstname, lastname, username, profile_picture, gender FROM users WHERE id!= 2
+                    AND (id NOT IN(
+                        SELECT receiver_id FROM friends_requests WHERE requester_id = 2 AND status != 'rejected'
+                    )
+                    AND id NOT IN (
+                        SELECT requester_id FROM friends_requests WHERE receiver_id = 2 AND (status = 'accepted' OR status='rejected' AND DATEDIFF(NOW() , updated_at) < 30 ) 
+                    )
+                ) LIMIT 50;
+
+
+SELECT requester_id FROM friends_requests WHERE receiver_id = 2 AND (status = 'accepted' OR status='rejected' AND DATEDIFF(NOW() , updated_at) < 30 ) ;
 -- Insertion de 50 professions variées
 INSERT INTO professions (name) VALUES
 ('Médecin'),
@@ -128,12 +140,13 @@ CREATE TABLE managers(
     CHECK (email LIKE '%@%.%')
 );
 
+DROP Table posts_interactions
 
 CREATE TABLE posts(
     id INT PRIMARY KEY AUTO_INCREMENT,
     caption TEXT,
     uuid_pID VARCHAR(255) NOT NULL UNIQUE,
-    author INT REFERENCES users (id),
+    author INT,
     file_path VARCHAR(255) DEFAULT NULL,
     background VARCHAR(255) DEFAULT NULL, 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -144,15 +157,16 @@ CREATE TABLE posts(
         (file_path IS NULL AND background IS NULL)
             OR
         (file_path IS NULL AND background IS NOT NULL)
-    )
+    ), 
+    FOREIGN KEY (author) REFERENCES users (id) ON DELETE CASCADE
 )
 
 
 CREATE TABLE posts_interactions(
     id INT PRIMARY KEY AUTO_INCREMENT,
     uuid_pIID VARCHAR (255) NOT NULL UNIQUE,
-    user_id INT,
-    post_id INT,
+    user_id INT NOT NULL,
+    post_id INT NOT NULL,
     likes BOOLEAN,
     comments TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
