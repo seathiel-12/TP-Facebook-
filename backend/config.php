@@ -13,3 +13,7 @@ define('TOKEN_LIFETIME', 600);
 define('MAX_VIDEO_SIZE', 1024 * 1024 * 100);
 
 define('MAX_IMG_SIZE', 1024 * 1024 * 10);
+
+define('PICTURE_PATH', '/assets/media/posts/user-');
+
+define('GENDER_PATH', '/assets/media/images/');

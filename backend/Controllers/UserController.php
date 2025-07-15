@@ -4,6 +4,7 @@ namespace App\Controllers;
 use App\Models\Database;
 use App\Models\Model;
 use App\Models\Post;
+use App\Models\User;
 use Exception;
 use PDOException;
 use PHPMailer\PHPMailer\POP3;
@@ -91,18 +92,34 @@ class UserController extends Controller{
     }
 
     public function deletePost($id){
-
-        $post=new Post()->get(['id'=>$id]);
-
-        if(!$post){
-            echo json_encode(['success'=>false,'message'=>'Ce post a déjà eté supprimé ou n\'a jamais existé!'], 404);
+        session_start();
+        if(isset($_SESSION['id']) && isset($_SESSION['connect']) && $_SESSION['connect']){
+            $post=new Post()->get(['id'=>$id]);
+            if(!$post){
+                echo json_encode(['success'=>false,'message'=>'Ce post a déjà eté supprimé ou n\'a jamais existé!'], 404);
+                return;
+            }
+    
+            if($post['author']!==$_SESSION['id']){
+                echo json_encode(['success'=>false, "Vous n'êtes pas authorisé à supprimer ce post", 403]);
+                return;
+            }
         }
+       
+            if($post['file_path']){
+                $path=$_SERVER['DOCUMENT_ROOT'] . '/assets/media/posts/user-'. $_SESSION['id'] .'/' . $post['file_path'];
+                if(file_exists($path)){
+                    if(!unlink($path)){
+                        echo json_encode(['success'=>false, 'message'=>'Erreur lors de la suppression du post.']);
+                        return;
+                    }   
+                }
+            }
 
-        if($post['author']!==$id){
-            echo json_encode(['success'=>false, "Vous n'êtes pas authorisé à supprimer ce post", 403]);
-        }
-
-        //Supprimer post et image si associé
+            new Post()->delete($post['id']);
+            echo json_encode(['success'=>true]);
+            return;
+        
     }
 
     public function updatePost(){
@@ -209,4 +226,121 @@ class UserController extends Controller{
         }
     }
 
+    public function friends($case, $action=null){
+        
+        if(isset($case)){
+            switch($case){
+                case 'suggestions':{
+                    if(isset($action) && $action){
+                        $this->manageSuggestions($action); 
+                        return;           
+                    }else{
+                        return 'Action required';
+                    }
+                }
+                case 'get':{
+                    $id=$action ? ($action==='me' ? $_SESSION['id'] : $action) : null;
+                    if(!$id) throw new Exception('User required');
+                    $friends=new User()->getFriends($id);
+                    echo json_encode(['success'=>true, 'friends'=>$friends]);
+                    return;
+                }
+                case 'invit': {
+                    if(isset($action)){
+                        $this->manageInvits($action);
+                        return;
+                    }
+
+                }
+                default:{
+                    throw new Exception('Action required!');
+                }
+                // case 'accept':{
+                //     $this->verifyRequestMethod('POST');
+                //     if($this->verifyCSRFToken()===200){
+                //         $data=$this->getRequestData();
+                //         $result=Database::getDb()->prepare('SELECT * FROM friends WHERE (user_id= ? AND friend_id=?) OR (friend_id=? AND user_id=?)');
+                //         $result->execute([$_SESSION['id'], $data['id'], $data['id'], $_SESSION['id']]);
+
+                //         if($result){
+                //             echo json_encode(['success'=>false,'message'=>'Vous êtes dejà amis avec cette personne.']);
+                //             return;
+                //         }
+
+                //         Model::createEntry('friends',['user_id'=>$_SESSION['id'], 'friend_id'=>$data['id']]);
+                    
+                //     }
+                // }
+            }
+        }
+    }
+
+    public function manageSuggestions($action){
+        if(isset($action)){
+            if($action === 'get'){
+                $suggestions=new User()->getSuggestions();
+                foreach($suggestions as $key=>$value){
+                    $suggestions[$key]['profile_picture']= $suggestions[$key]['profile_picture'] ? (PICTURE_PATH . $suggestions[$key]['id'] .'/' . $suggestions[$key]['profile_picture']) : GENDER_PATH . $suggestions[$key]['gender'] .'.png';
+                    
+                    $suggestions[$key]['username']= $value['username'] ?? $value['firstname'] . ' ' . $value['lastname'];
+                    unset($suggestions[$key]['gender'], $suggestions[$key]['firstname'], $suggestions['key']['lastname']);
+                }
+                echo json_encode(['success'=>true, 'data'=>$suggestions]);
+                return;
+            }
+
+            if($action === 'add'){
+                // $this->verifyRequestMethod();
+                if($this->verifyCSRFToken() === 200){
+                    $data=$this->getRequestData();
+                    $result=new User()->manageSuggestion($data['id']);
+                    if($result === 'created')
+                    echo json_encode(['success'=>true, 'message'=>'Demande envoyée.']);
+                    else if($result === 'accepted')
+                    echo json_encode(['success'=>true, 'message'=> 'Vous êtes maintenant amis.']);
+                    return;
+                }
+
+            }
+        }       
+    }
+
+    public function getValidUserData($data){
+        foreach($data as $key=>$value){
+            $data[$key]['profile_picture']= $data[$key]['profile_picture'] ? (PICTURE_PATH . $data[$key]['id'] .'/' . $data[$key]['profile_picture']) : GENDER_PATH . $data[$key]['gender'] .'.png';
+            
+            $data[$key]['username']= $value['username'] ?? $value['firstname'] . ' ' . $value['lastname'];
+            unset($data[$key]['gender'], $data[$key]['firstname'], $data['key']['lastname']);
+        }
+        return $data;
+    }
+
+    public function manageInvits($action){
+
+        if(isset($action)){
+            switch($action){
+                case 'get&sent' :
+                case 'get&received': {
+                    $type = $action === 'get&sent' ? 'sent' : 'received';
+                    $invits=new User()->getInvits($type);
+                    $invits=$this->getValidUserData($invits);
+                    echo json_encode(['success'=>true, 'data'=>$invits]);
+                    return;
+                } 
+                case 'accept' :{
+                    $this->verifyRequestMethod('POST');
+                    $user=$this->getRequestData();
+                    if($this->verifyCSRFToken() === 200){
+                        new User()->manageInvits($user);
+                        echo json_encode(['success'=>true]);
+                    }
+                    return;
+                }
+                default:{
+                    throw new Exception('Action required for this method!');
+                } 
+            }
+        }
+    }
 }
+  

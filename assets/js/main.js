@@ -145,7 +145,10 @@ const apiRequest=async (url, method='GET', data)=>{
 
 
 const loadUrlPage=async(url)=>{
-   history.pushState({},'', url );
+ const path={
+    '/' : '/frontend/views/templates/homeT.php'
+  }
+   history.pushState({},'', path[url]);
    await fetchPageContent(url);
 }
 
@@ -215,7 +218,11 @@ const loadUrlPage=async(url)=>{
           await apiRequest('isOnline')
         .then(async (data)=> {
           if(data){
-            await fetchPageContent('/frontend/views/templates/homeT.php');
+            if(history.length){
+              await fetchPageContent('/frontend/views/templates/homeT.php');
+            }else{
+              await fetchPageContent('/frontend/views/templates/homeT.php');
+            }
             lucide.createIcons();
           }else{
             showNotification('Veuillez vous reconnecter!', 'error');
@@ -251,7 +258,7 @@ const loadUrlPage=async(url)=>{
           const toRemove=document.querySelectorAll('.on-window-click-remove');
            toRemove.forEach(remove=> {
             if(remove && !remove.contains(e.target)){
-              remove.remove()
+              remove.remove();  
               document.body.classList.remove('overflow');
               document.querySelector('.overlay')?.remove();
             }

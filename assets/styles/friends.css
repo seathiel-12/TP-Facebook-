@@ -61,6 +61,8 @@
   display: flex;
   flex-direction: column;
   gap:10px;
+  min-height: calc(100vh - 120px);
+  overflow-y: auto;
 }
 .depliant-icon{
   fill: rgba(128, 128, 128, 0.7);
@@ -71,6 +73,34 @@
 .depliant-icon:hover{
   fill: rgba(36, 36, 36, 0.74);
   stroke: rgba(36, 36, 36, 0.74);
+}
+
+.invit-close{
+  height: 0;
+  display: none;
+}
+
+.friend{
+  border-radius: 10px;
+  margin: 8px 0;
+  padding: 10px 10px;
+  cursor: pointer;
+}
+.invitation{
+  margin: 8px 0;
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.friend:hover, .invitation:hover{
+  background-color:  rgba(181, 181, 181, 0.72);
+}
+
+.this-profil{
+  width: 77%;
+  height: 100%;
+  display: flex;
 }
 
 #find-friends{

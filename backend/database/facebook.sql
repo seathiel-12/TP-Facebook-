@@ -1,6 +1,7 @@
 -- Active: 1750739211247@@127.0.0.1@3306@facebook
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    uuid_uID VARCHAR(255) NOT NULL UNIQUE,
     firstname VARCHAR(255) NOT NULL,
     lastname VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
@@ -131,6 +132,7 @@ CREATE TABLE managers(
 CREATE TABLE posts(
     id INT PRIMARY KEY AUTO_INCREMENT,
     caption TEXT,
+    uuid_pID VARCHAR(255) NOT NULL UNIQUE,
     author INT REFERENCES users (id),
     file_path VARCHAR(255) DEFAULT NULL,
     background VARCHAR(255) DEFAULT NULL, 
@@ -148,14 +150,22 @@ CREATE TABLE posts(
 
 CREATE TABLE posts_interactions(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT REFERENCES users (id),
-    post_id INT REFERENCES posts (id),
+    uuid_pIID VARCHAR (255) NOT NULL UNIQUE,
+    user_id INT,
+    post_id INT,
     likes BOOLEAN,
     comments TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 )
 
+CREATE TRIGGER AFTER DELETE posts (
+    DELETE FROM posts interactions WHERE post_id= OLD
+);
+
+DROP TABLE posts_interactions
 
 
 CREATE TABLE security_log (
@@ -183,3 +193,101 @@ WITH comments AS (
 SELECT c.id, p.author, c.comments, c.user_id, c.created_at, c.updated_at, u.username, u.firstname, u.lastname, u.gender, u.profile_picture FROM comments c JOIN users u ON u.id=c.user_id;
 
 SELECT * FROM posts WHERE author=4;
+
+CREATE TABLE friends(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT REFERENCES users (id),
+    friend_id INT REFERENCES users (id),
+    CHECK(user_id != friend_id), 
+    UNIQUE (user_id, friend_id)
+);
+DROP TABLE  friends_requests;
+CREATE TABLE friends_requests(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    uuid_fID VARCHAR(255) NOT NULL UNIQUE,
+    requester_id INT ,
+    receiver_id INT ,
+    status ENUM ('pending', 'accepted', 'rejected') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (requester_id) REFERENCES users(id)
+)
+
+SELECT FROM friends_requests WHERE user_id = 1 and 
+
+
+WITH friends_r AS (
+    SELECT * FROM friends_requests 
+    WHERE (requester_id = 2 OR receiver_id = 2) AND status = 'accepted'
+),
+friends AS (
+    SELECT 
+        CASE 
+            WHEN requester_id = 2 THEN receiver_id
+            ELSE requester_id 
+        END AS id 
+    FROM friends_r
+)
+SELECT u.firstname
+FROM users u
+JOIN friends f ON f.id = u.id;
+
+SELECT u.username, u.id, u.firstname, u.lastname, u.profil_picture, u.gender 
+FROM user u 
+JOIN friends ON 
+
+
+
+WITH sent AS (
+    SELECT receiver_id FROM friends_requests WHERE requester_id = 20 AND status ='pending'
+) 
+SELECT u.username, u.profile_picture, u.gender, u.firstname, u.lastname FROM users u JOIN sent s ON receiver_id = u.id
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (1, 2, 'pending');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (2, 3, 'accepted');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (3, 4, 'rejected');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (4, 5, 'pending');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (5, 6, 'accepted');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (6, 7, 'pending');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (7, 8, 'accepted');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (8, 9, 'rejected');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (9, 10, 'pending');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (10, 11, 'accepted');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (11, 12, 'pending');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (12, 13, 'accepted');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (13, 14, 'rejected');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (14, 15, 'pending');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (15, 16, 'accepted');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (16, 17, 'pending');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (17, 18, 'accepted');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (18, 19, 'rejected');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (19, 20, 'pending');
+INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (20, 1, 'accepted');
+INSERT INTO friends_requests (requester_id, user_id, status) VALUES (2, 5, 'pending');
+INSERT INTO friends_requests (requester_id, user_id, status) VALUES (3, 6, 'accepted');
+INSERT INTO friends_requests (requester_id, user_id, status) VALUES (4, 7, 'pending');
+INSERT INTO friends_requests (requester_id, user_id, status) VALUES (5, 8, 'rejected');
+INSERT INTO friends_requests (requester_id, user_id, status) VALUES (6, 9, 'pending');
+INSERT INTO friends_requests (requester_id, user_id, status) VALUES (7, 10, 'accepted');
+INSERT INTO friends_requests (requester_id, user_id, status) VALUES (8, 11, 'pending');
+INSERT INTO friends_requests (requester_id, user_id, status) VALUES (9, 12, 'accepted');
+INSERT INTO friends_requests (requester_id, user_id, status) VALUES (10, 13, 'rejected');
+INSERT INTO friends_requests (requester_id, user_id, status) VALUES (11, 14, 'pending'); 

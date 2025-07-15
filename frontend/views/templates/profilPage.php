@@ -19,7 +19,6 @@
     <script src="../../../assets/js/icons.js" defer></script>
     <script src="../../../assets/js/modules/profil.js" defer></script>
 
-
 </head>
 <body id="profil">
     

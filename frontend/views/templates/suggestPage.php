@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +10,7 @@
     <?php require '../includes/header.php'; ?>
 
     <main>
-        <aside class="invit-aside">
+        <aside class="invit-aside" style="min-height: 100vh; height: max-content; min-width:23%; width: max-content;">
             <div class="flexDivStart">
                 <div class="rounded-icon standard-hover flexDiv back-to-home-friends"><i data-lucide="arrow-left" stroke="rgba(52, 52, 52, 0.82)"></i></div>
                 <div style="text-align:left; padding-left:5px;"><p> Ami(e)s <p>
@@ -18,18 +19,7 @@
             <p style="font-size:1.1em; font-weight: 500; text-align: left; padding-left:20px;">Personnes que vous pourriez connaître</p>
 
             <div class="friends-suggestions">
-
-                <div class="flexDivStart">
-                    <img src="/assets/media/images/male.png" width="60" height="60" style="border-radius: 100%;" alt="">
-                    <div>
-                        <p style="text-align: left;">Name here</p>
-                        <div class="flexDiv" style="width: 100%">
-                            <button style="width:130px; padding: 10px;">Ajouter ami(e)</button>
-                            <button style="background: rgba(198, 198, 198, 0.64); width:130px; color:rgba(44, 44, 44, 0.77);">Retirer</button>
-                        </div>
-                    </div>
-                </div>
-
+                
             </div>
 
         </aside>

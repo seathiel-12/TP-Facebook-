@@ -78,10 +78,26 @@ class Model{
             $query="SELECT * FROM $table WHERE $binding";
             $result=$db->prepare($query);
             $result->execute(array_values($condition));
-            return $result->rowCount() > 0 ? $result->fetchAll() : false;
+
+            if($result->rowCount()){
+                if($result->rowCount() > 1) return $result->fetchAll();
+                else return $result->fetch();
+            }
+            return false;
         }catch(PDOException $e){
             throw new PDOException("Erreur lors de la récupération de la donnée: $e");
         }
+    }
+
+    protected static function generateUUID(){
+        // Génère un UUID v4 aléatoire
+        $data = random_bytes(16);
+        // Version 4
+        $data[6] = chr((ord($data[6]) & 0x0f) | 0x40);
+        // Variant RFC 4122
+        $data[8] = chr((ord($data[8]) & 0x3f) | 0x80);
+        $uuid = vsprintf('%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x', str_split(bin2hex($data), 2));
+        return $uuid;
     }
 }
 

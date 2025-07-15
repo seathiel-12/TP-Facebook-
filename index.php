@@ -37,6 +37,7 @@
 </head>
 
 <body>
+    
     <input type="hidden" id="csrf_token" value="<?php echo $_SESSION['csrf_token']??''; ?>">
 </body>
 

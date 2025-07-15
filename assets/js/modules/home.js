@@ -143,6 +143,7 @@ export const changeColor=async (li=null)=>{
     
     const loadedPosts=document.querySelector('.loaded-posts');
     loadedPosts.innerHTML=renderPosts(posts);
+    createPostOptions();
     lucide.createIcons();
 }
 ////////////////////////////////
@@ -181,7 +182,7 @@ export const renderPosts=(posts)=>{
                     <p style="text-align:left;"><a class="profiling" style="color:black;"><strong>${post.firstname+' '+post.lastname}</strong></a> <br> <span style="font-size:0.9em;">${renderDate(post.created_at)}</span> </p>
                 </div>
                 <div class="flexDiv">
-                    <div class="view-post-options"><i data-lucide="ellipsis" class="standard-hover" stroke="gray" style="padding:5px; border-radius:100%;"></i></div>
+                    <div class="view-post-options" post-author="${post.author}" post="${post.id}"><i data-lucide="ellipsis" class="standard-hover" stroke="gray" style="padding:5px; border-radius:100%;"></i></div>
                     <i data-lucide="x" class="standard-hover" stroke="gray" style="padding:5px; border-radius:100%;"></i>
                 </div>
             </div>
@@ -356,6 +357,7 @@ export const initHome=async()=>{
     profilingBtns.forEach(btn=>
         btn.onclick=()=>{
             fetchPageContent('/frontend/views/templates/profilPage.php')
+            document.querySelector('.profil-contextuel')?.classList.remove('visible')
         }
     )
 }
@@ -366,32 +368,107 @@ export const initHome=async()=>{
 //////////////////////////////////////////////////////////////////////////////
 //Gestion des posts
 
- const createPostOptions=()=>{
-    const ul=document.createElement('ul');
-    const optionsPoints=document.querySelector(".view-post-options");
-    ul.className="options-post on-window-click-close"
-    ul.innerHTML=`
-        <li class="flexDivStart" style="padding-left:15px;"><i data-lucide="bookmark" fill="#000"></i> <p>Enregistrer la vidéo</p></li>
-        <hr style="margin:0 auto; width:90%; border: solid 0.5px rgba(192, 190, 190, 0.45);">
-        <li class="flexDivStart" style="padding-left:15px;"><i data-lucide="user-round-x"></i><p>Bloquer ce profil</p></li>    
-        <li class="flexDivStart" style="padding-left:15px;"><i data-lucide="message-square-warning"></i><p>Signaler la publication</p> </li>
-    `
+ const createPostOptions=(post)=>{
+    const optionsPoints=document.querySelectorAll(".view-post-options");
 
-    document.querySelector('.main-section').appendChild(ul);
-    
-    ul.style.cssText=`
-        position:absolute;
-        top:${optionsPoints?.offsetTop + optionsPoints?.offsetHeight}px;
-        left:${optionsPoints?.offsetLeft - ul.offsetWidth + optionsPoints.offsetWidth - 20}px;
-        display: none;
-    `
+    optionsPoints.forEach(option=>{
+        option.onclick=(e)=>{
+            e.stopPropagation();
+            const author= option.getAttribute('post-author');
+            const post =option.getAttribute('post');
+            const ul=document.createElement('ul');
+            ul.className="options-post on-window-click-remove"
+            ul.innerHTML=`
+                <li class="flexDivStart" style="padding-left:15px;"><i data-lucide="bookmark" fill="#000"></i> <p>Enregistrer </p></li>
+                <hr style="margin:0 auto; width:90%; border: solid 0.5px rgba(192, 190, 190, 0.45);">
+                ${author == document.getElementById('me').value ? 
+                `<li class="flexDivStart delete-post" post="${post}" style="padding-left:15px;"><i data-lucide="trash-2" ></i> <p>Supprimer le post</p></li>`:
 
-    optionsPoints.onclick=(e)=>{
-        e.stopPropagation();
-        ul.classList.toggle('visible');
-    }
+                `<li class="flexDivStart" style="padding-left:15px;"><i data-lucide="user-round-x"></i><p>Bloquer ce profil</p></li>    
+                <li class="flexDivStart" style="padding-left:15px;"><i data-lucide="message-square-warning"></i><p>Signaler la publication</p> </li>
+                `
+                }
+            `
+            document.querySelector('.main-section').appendChild(ul);
+            lucide.createIcons();
 
-    lucide.createIcons();
+            if(author == document.getElementById('me').value)
+            handleCreatePostOptionsBtns(post);
+
+            ul.style.cssText=`
+            position:fixed;
+            top:${option?.offsetTop + option?.offsetHeight}px;
+            left:${option?.offsetLeft - ul.offsetWidth + option.offsetWidth - 20}px;
+        `
+        }  
+    })    
+}
+
+const removePost=(postID)=>{
+    document.querySelector(`div[data-post-id="${postID}"]`)?.remove();
+}
+
+const handleCreatePostOptionsBtns=(postID)=>{
+
+    const deletePost=document.querySelector('.delete-post');
+        deletePost.onclick=(e)=>{
+            e.stopPropagation();
+            const div = document.createElement('div');
+            div.innerHTML=`
+                <h3>Etes-vous sur de vouloir supprimer ce post?</h3>
+                <p>Vous perdrez toutes les interactions associées.</p>
+                <button class="cancel-delete-post" style="background:rgba(164, 164, 164, 0.64); color: black; width: 100%;">Annuler</button>
+                <button class="delete-this-post" post="${postID}" style="background:rgba(255, 49, 49, 0.67); width:100%;">Supprimer</button>
+            `
+            document.body.appendChild(div);
+        
+            div.className="on-window-click-remove confirm-delete-post"
+            div.style.cssText=`
+            width:40%;
+            padding: 15px 25px;
+            background: white;
+            box-shadow: 0 0 10px 0 rgba(66, 66, 66, 0.8);
+            border-radius: 10px; 
+            position:fixed;
+            z-index:1000000;
+            top: calc((100vh - ${div.offsetHeight}px)/2);
+            left: calc((100vw - ${div.offsetWidth}px)/2);
+            transform: translateX(60%);
+            `
+            const overlay=document.createElement('div');
+            overlay.className="overlay"
+            document.body.appendChild(overlay);
+            document.body.classList.add("overflow")
+            handleConfirmDeletePost()
+        }
+}
+
+const deletePosts=async(postId)=>{
+    await apiRequest('user/posts/delete','POST',{
+        id: postId,
+    }).then((response)=>{
+        if(response && response.success){
+            showNotification('Post supprimé.', 'success');
+            closeDeletePostModale();
+            removePost(postId);
+        }
+    }).catch(err=>{
+        showNotification('Une erreur est survenue');
+        console.error(err);
+    })
+}
+
+const closeDeletePostModale=()=>{
+    document.querySelector('.confirm-delete-post')?.remove();
+    document.body.classList.remove('overflow');
+    document.querySelector('.overlay')?.remove();
+}
+
+const handleConfirmDeletePost=()=>{
+    const cancel=document.querySelector('.cancel-delete-post')
+    const deleteThisPost=document.querySelector('.delete-this-post');
+    cancel.onclick=()=>closeDeletePostModale();
+    deleteThisPost.onclick=(e)=>deletePosts(e.target.getAttribute('post'));
 }
 
 /**

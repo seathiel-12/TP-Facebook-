@@ -117,6 +117,17 @@ class ApiCall{
                                 return;
                             }
 
+                            if($this->uri[3] === 'friends'){
+                                if(!new AuthController()->verifyOnline()){
+                                    throw new PDOException('Non autorisé! Veuillez vous authentifier.',401);
+                                }
+
+                                if(isset($this->uri[4]) && isset($this->uri[5])){
+                                    new UserController()->friends($this->uri[4], $this->uri[5]);
+                                }
+                                return;
+                            }
+
                             if($this->uri[3] === 'posts'){
                                 if(!new AuthController()->verifyOnline()){
                                     throw new PDOException('Non autorisé! Veuillez vous authentifier.',401);
@@ -141,7 +152,9 @@ class ApiCall{
                                         }                                            
                                         case 'delete':{
                                             session_start();
-                                            $user->deletePost(3);
+                                            $this->verifyRequestMethod('POST');
+                                            $data=$this->getRequestData();
+                                            $user->deletePost($data['id']);
                                             break;
                                         }                                   
                                         case 'all':{
