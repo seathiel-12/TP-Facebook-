@@ -142,6 +142,7 @@
     padding:10px; 
     border-radius: 10px;
     justify-content: flex-start;
+    cursor: pointer;
 }
 .profils .user:hover{
     background: rgb(215, 215, 215);
@@ -162,13 +163,14 @@
     border: solid 1.5px ;
     border-radius: 20px;
 }
-#home li{
+#home li, .profil-contextuel li{
     list-style-type: none;
     border-radius: 5px;
     padding: 10px 25px;
     justify-content: start;
     cursor: pointer;
 }
+
 aside.right{
     background-color: var(--bg-secondary);   
     padding-top:15px ;
@@ -176,7 +178,7 @@ aside.right{
     top:70px;
 }
 
-#home li:hover{
+#home li:hover, .profil-contextuel li:hover{
     background: rgb(207, 207, 207);
 }
 #home .sidebar{

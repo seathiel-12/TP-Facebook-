@@ -26,12 +26,11 @@
 
     <main>
         <section class="profil-pictures">
-            
                 <form class="noFormRootStyle" style="max-width: 100%!important; width:73%; margin:auto; position:relative;">
                     <div class="profil-cover" 
                         <?php 
                         if($_SESSION['cover_picture'])  
-                        echo "style='background-image: url(\"/assets/media/". $_SESSION['cover_picture'] . "\");
+                        echo "style='background-image: url(". $_SESSION['cover_picture'] . ");
                             background-size: cover;
                             background-repeat: no-repeat;
                           '  
@@ -44,7 +43,7 @@
                     <div class="profil-photo flexDiv">   
                              <?php 
                                 if($_SESSION['profile_picture']);  
-                                echo "<img width='170' height='170' style='border-radius:100%; background:white;' src='/assets/media/". $_SESSION['profile_picture'] . "'/>";
+                                echo "<img width='170' height='170' id='profile-picture' style='border-radius:100%; background:white;' src='". $_SESSION['profile_picture'] . "'/>";
                             ?>
 
                         <div class="rounded-icon camera flexDiv standard-hover"><i data-lucide="camera"></i></div>
@@ -52,9 +51,13 @@
                 </form>
 
                 <div class="username">
-                        <h1><?= $_SESSION['username'] ?></h1>
+                        <h1 id="username">
+                            <?= $_SESSION['username'] ?>
+                        </h1>
 
-                        <div><button class="flexDiv" style="background:rgba(136, 136, 136, 0.58); color: black;"> <i data-lucide="pencil" stroke="#d5d5d5" fill="#000" ></i> Modifier votre profil</button></div>
+                        <div class="profil-btn">
+                            <button class="flexDiv edit-profil" style="background:rgba(136, 136, 136, 0.58); color: black;"> <i data-lucide="pencil" stroke="#d5d5d5" fill="#000" ></i> Modifier votre profil</button>
+                        </div>
                 </div>  
 
                 <hr style="width: 70%; margin:15px auto;">
@@ -71,7 +74,7 @@
 
         <section class="main-profil">
             <div class="left"> 
-                <div class="card" style="border-radius: 10px; background: white; padding:10px; margin: 0 0 10px !important;">
+                <div class="card user-info" style="border-radius: 10px; background: white; padding:10px; margin: 0 0 10px !important;">
                     <h2 style="text-align: left;">Intro</h2>
                     <button style="width: calc(100% - 30px); padding: 10px; color: black; background: var(--bg-button-tertiary);">Ajouter une bio</button>
                     <button style="width: calc(100% - 30px); padding: 10px; color: black; background: var(--bg-button-tertiary);">Modifier les infos</button>
@@ -91,7 +94,7 @@
                         <div class="noFormRootStyle flexDiv" style="width:95%; padding:0 10px;">
                              <?php 
                                 if($_SESSION['profile_picture']);  
-                                echo "<img width='50' height='50' style='border-radius:100%; background:white;' src='/assets/media/". $_SESSION['profile_picture'] . "'/>";
+                                echo "<img width='50' height='50' style='border-radius:100%; background:white;' src='   ". $_SESSION['profile_picture'] . "'/>";
                             ?>
                             <div style="background-color:rgba(212, 212, 212, 0.74); width:100%; padding: 12px 10px 10px; margin:10px; text-align:left; border-radius:50px;" class="standard-hover createPostBtn">Quoi de neuf, <?= $_SESSION['username'] ?>?</div>
                         </div>
@@ -104,7 +107,7 @@
                     </div>
                 </div>
                 
-                <div class="publications-done">
+                <div class="publications-done loaded-posts">
 
                 </div>
             </div>
@@ -152,9 +155,6 @@
 </form>
 
     </main>
-
-
-
 
 </body>
 </html>

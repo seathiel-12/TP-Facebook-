@@ -19,7 +19,8 @@
         <div class="accountIcon flexDiv">
             <?php session_start();
                 if($_SESSION['profile_picture']);  
-                echo "<img width='50' height='50' style='border-radius:100%;' src='/assets/media/". $_SESSION['profile_picture'] . "'/>";
+                echo "<img width='50'
+                 height='50' style='border-radius:100%;' src='". $_SESSION['profile_picture'] . "'/>";
             ?>
         </div> 
    </div>

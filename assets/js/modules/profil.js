@@ -31,7 +31,8 @@ async function loadThisUserPosts(user){
                     if(response.data){
                         await import('./posts.js')
                         .then(module => {
-                            module.loadPosts(response.data, 'publications-done');
+                            const thisUserPosts=document.querySelector('.loaded-posts');
+                            thisUserPosts.innerHTML=module.renderPosts(response.data);
                             lucide.createIcons();
                             module.initPosts();
                     })
@@ -47,4 +48,49 @@ async function loadThisUserPosts(user){
 export async function initProfil(thisUser){
     handleHeaderClicks()
     await loadThisUserPosts();
+}
+
+
+
+function createProfil(thisUser){
+    const me = document.getElementById('me')
+    const isMe= thisUser.id === parseInt(me);
+
+    const profilPicture=document.getElementById('profile-picture');
+    profilPicture.src=thisUser['profile_picture'];
+
+    const coverPicture=document.querySelector(".profil-cover");
+    coverPicture.style.cssText=`
+        background-image: url("${thisUser['cover_picture']}");
+        background-size: cover;
+        background-repeat: no-repeat;`
+
+    const profilBtn= document.querySelector('.profil-btn');
+    const userInfo=document.querySelector('.user-info');
+
+    if(isMe){
+        const profilPhoto= document.querySelector('.profil-photo');
+        profilPhoto.innerHTML+=`
+        <div class="rounded-icon camera flexDiv standard-hover"><i data-lucide="camera"></i></div>`;
+
+        profilBtn.innerHTML=`
+            <button class="flexDiv edit-profil"> <i data-lucide="pencil" stroke="#d5d5d5" fill="#000"></i> Modifier votre profil</button>`
+        
+        userInfo.innerHTML=``
+
+    }else{
+        profilBtn.innerHTML=`
+        <button class="message-this-user">
+            <img src="/assets/media/svgIcon/home/messenger_logo.png" width="15px" height="15px" style="" />
+        </button>
+
+        ${thisUser.isFriend ? `` : `<button>Ajouter en ami(e)</button>`}
+        `
+        
+    }
+
+    const username=document.getElementById('username');
+    username.textContent=thisUser.username;
+
+    
 }

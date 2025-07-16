@@ -33,15 +33,9 @@ const loadJsModule=async(bodyId)=>{
           break;
           case 'home':
             document.title="Acceuil-Home"
-            await import('./modules/header.js')
-                  .then(module=> module.initHeader('home'));
             await import('./modules/home.js')
               .then(async(module)=>{
-                await module.loadPosts();
-                module.handlePostInteractions();
-                module.initHome();
-                module.changeColor();
-                module.handlePosting();
+                await module.initHome();
                 document.querySelector('.sidebar').onmouseenter=(e)=> e.target.style.overflowY="scroll";
                 document.querySelector('.sidebar').onmouseleave=(e)=> e.target.style.overflowY="hidden";
 

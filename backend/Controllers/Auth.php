@@ -45,7 +45,7 @@ trait Auth{
             }catch(PDOException $e){
                 throw $e;
             }
-            $_SESSION['profile_picture']= $user['profile_picture'] ? 'posts/user-' . $_SESSION['id'] . '/' .$user['profile_picture'] : 'images/' . $user['gender'] . '.png';
+            $_SESSION['profile_picture']= $user['profile_picture'] ? PICTURE_PATH . $_SESSION['id'] . '/' .$user['profile_picture'] : GENDER_PATH . $user['gender'] . '.png';
             
             if(isset($user['cover_picture']) && !empty($user['cover_picture']) && !is_null($user['cover_picture']))
             $_SESSION['cover_picture']= 'posts/user-' . $_SESSION['id'] . '/' . $user['cover_picture'] ;

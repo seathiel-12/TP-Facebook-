@@ -180,7 +180,7 @@ class UserController extends Controller{
                     
 
                     echo json_encode(['success'=>true, 'message'=>'Commentaire ajouté', 'data'=>[
-                        'profile_picture'=>$_SESSION['picture'],
+                        'profile_picture'=>$_SESSION['profile_picture'],
                         'username'=>$_SESSION['username'],
                         'comments'=>$data['comment'],
                     ], 'author'=>$author]);

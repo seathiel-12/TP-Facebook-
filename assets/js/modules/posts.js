@@ -3,13 +3,13 @@ let allComments= null;
 let me=null;
 
 
-export const loadPosts=async(posts, elementClass)=>{
+export const loadPosts=async(posts)=>{
     if(!posts){
         await getAllPostsData();
         posts=allPosts;
     }
     allPosts=posts;
-    const loadedPosts=document.querySelector('.'+ elementClass);
+    const loadedPosts=document.querySelector('.loaded-posts');
     loadedPosts.innerHTML=renderPosts(posts);
     createPostOptions();
     lucide.createIcons();
@@ -118,6 +118,7 @@ const handleCreatePostModal=()=>{
         })
     }
 
+    handlePosting();
 }
 
 // Couleur de fond d'un post
@@ -181,16 +182,16 @@ export const renderPosts=(posts)=>{
         `
     }
 
-    const htmlPosts=posts.map(post=>
+    const htmlPosts=posts.map((post, index)=>
         `
         <div class="post card" data-post-id="${post.id}">
             <div class="flexDivBetween">
                 <div class="flexDivStart">
                 <img src="/assets/media/${post['profile_picture'] ? 'posts/user-'+post.author+'/'+post['profile_picture'] : 'images/'+(post.gender==='male' ? 'boy' : (post.gender==='female' ? 'happy' : 'horse'))+'.png'}" width="40" height="40" class="image"/>
-                    <p style="text-align:left;"><a class="profiling" style="color:black;"><strong>${post.firstname+' '+post.lastname}</strong></a> <br> <span style="font-size:0.9em;">${renderDate(post.created_at)}</span> </p>
+                    <p style="text-align:left;"><a class="profiling" refering="${post.valid}" style="color:black;"><strong>${post.firstname+' '+post.lastname}</strong></a> <br> <span style="font-size:0.9em;">${renderDate(post.created_at)}</span> </p>
                 </div>
                 <div class="flexDiv">
-                    <div class="view-post-options" post-author="${post.author}" post="${post.id}"><i data-lucide="ellipsis" class="standard-hover" stroke="gray" style="padding:5px; border-radius:100%;"></i></div>
+                    <div class="view-post-options" ref="${index}" post-author="${post.author}" post="${post.id}"><i data-lucide="ellipsis" class="standard-hover" stroke="gray" style="padding:5px; border-radius:100%;"></i></div>
                     <i data-lucide="x" class="standard-hover" stroke="gray" style="padding:5px; border-radius:100%;"></i>
                 </div>
             </div>
@@ -209,7 +210,7 @@ export const renderPosts=(posts)=>{
                 </div>
 
                 <div class="flexDiv" style="gap:15px;">
-                    <a class="comment" post="${post.id}">${post['nb_comments']} commentaires</a>
+                    <a class="comment" post="${post.id}"><span comment-count>${post['nb_comments']}</span> commentaires</a>
                     <a>${post.share?post.share+' '+'partages': ''}</a>
                 </div>
             </div>
@@ -226,7 +227,7 @@ export const renderPosts=(posts)=>{
 }
 
 
-export const handlePosting=()=>{
+const handlePosting=()=>{
     const modal=document.querySelector('.modal');
     modal.addEventListener('submit',async(e)=>{
         e.preventDefault();
@@ -259,7 +260,7 @@ export const handlePosting=()=>{
                         createPostOptions();
                         document.querySelector("#post-text").value=""
                         document.querySelector("#post-text").style.height="80px"
-                        initHome();
+                        initPosts();
                         document.querySelector('.modal').classList.remove('visible');
                         document.querySelector('.overlay')?.remove();
                         document.body.classList.remove('overflow');
@@ -283,7 +284,7 @@ export const handlePosting=()=>{
                     showNotification(response.message, 'success');
                     await loadPosts();
                     createPostOptions();
-                    initHome();
+                    initPosts();
                     document.querySelector("#post-text").value=""
                     document.querySelector("#post-text").style.height="80px"
                     document.querySelector('.modal').classList.remove('visible');
@@ -343,13 +344,20 @@ const removeFile=()=>{
 const createPostOptions=(post)=>{
     const optionsPoints=document.querySelectorAll(".view-post-options");
 
-    optionsPoints.forEach(option=>{
+    optionsPoints.forEach((option,index)=>{
         option.onclick=(e)=>{
             e.stopPropagation();
+            const exists=document.querySelector(`.this-option-${option.getAttribute('ref')}`);
+            if(exists){
+                document.querySelectorAll(".options-post")?.forEach(opt=>opt?.remove());
+                return;
+            }else{
+                document.querySelectorAll(".options-post")?.forEach(opt=>opt?.remove()); 
+            }
             const author= option.getAttribute('post-author');
             const post =option.getAttribute('post');
             const ul=document.createElement('ul');
-            ul.className="options-post on-window-click-remove"
+            ul.className=`options-post this-option-${option.getAttribute('ref')} on-window-click-remove`
             ul.innerHTML=`
                 <li class="flexDivStart" style="padding-left:15px;"><i data-lucide="bookmark" fill="#000"></i> <p>Enregistrer </p></li>
                 <hr style="margin:0 auto; width:90%; border: solid 0.5px rgba(192, 190, 190, 0.45);">
@@ -361,7 +369,7 @@ const createPostOptions=(post)=>{
                 `
                 }
             `
-            document.body.appendChild(ul);
+            document.body.querySelector('main').appendChild(ul);
             lucide.createIcons();
 
             if(author == document.getElementById('me').value)
@@ -531,12 +539,15 @@ function confirmDeleteComment(){
     }
 
     const confirmDelete=document.querySelector('.delete-comment');
-    confirmDelete.onclick=async()=>{        
+    confirmDelete.onclick=async function(){        
         await apiRequest(`user/posts/comment/delete`, 'POST', {
             id:document.querySelector('.delete-comment').getAttribute('comment-id')
         }).then(response=>{
             if(response && response.success){
                 showNotification('Commentaire supprimé.', 'success');
+
+                document.querySelector(`div[comment-id="${this.getAttribute('comment-id')}"]`)?.remove();
+                
                 initCommentTextarea();
                 return;
             }
@@ -682,16 +693,16 @@ export const handlePostInteractions=()=>{
             `   
               <div class="flexDivStart" style="align" style="position:relative;" comment-id="${comment.id}">
                 <div class="flexDivStart" style="max-width: calc(100% - 20px); margin: 5px; ">
-                    <img width="35" height="35" style="border-radius: 100%; padding:5px; background:rgba(215, 215, 215, 0.64);" src="../assets/media/${comment.profile_picture ? `posts/user-${comment.user_id}/${comment.profile_picture}` : `images/${comment.gender}.png`}"/>
+                        <img width="35" height="35" style="border-radius: 100%; padding:5px; background:rgba(215, 215, 215, 0.64);" src="${comment.profile_picture}"/>
 
                     <div style="text-align:left; background:rgba(207, 207, 207, 0.72); border-radius:15px; padding:10px;">
-                    <strong>${comment.username}</strong> ${parseInt(comment.user_id) === author ? '<span style="font-size:0.8em; padding-left: 5px; color:rgb(89, 64, 37);">Author</span>' : '' }
+                    <strong>${comment.username}</strong> ${(parseInt(me) === comment.user_id || parseInt(me) === author) ? '<span style="font-size:0.8em; padding-left: 5px; color:rgb(89, 64, 37);">Author</span>' : '' }
                     ${comment.created_at !== comment.updated_at ? '<span>(edited)</span>' : ''}
                     <p comment-id="${comment.id}">${comment.comments} </p>
                     </div>
                 </div>
 
-                ${parseInt(me) === comment.user_id ? `<div class="comment-options-points rounded-icon fade-hover flexDiv" style="width:20px; height: 20px; transform: translate(-5px, -5px);"><i data-lucide="ellipsis" stroke="rgba(132, 132, 132, 0.96)" width="15" height="15"></i></div>` : ''}
+                ${(parseInt(me) === comment.user_id || parseInt(me) === author) ? `<div class="comment-options-points rounded-icon fade-hover flexDiv" style="width:20px; height: 20px; transform: translate(-5px, -5px);"><i data-lucide="ellipsis" stroke="rgba(132, 132, 132, 0.96)" width="15" height="15"></i></div>` : ''}
             </div>
             `   
         ).join('');
@@ -783,8 +794,12 @@ export const handlePostInteractions=()=>{
             }).then(response => {
                 console.log(response);
                const newComment= renderComments([response.data], response.author);
+               createCommentOptions(newComment,null);
+
                document.querySelector('.no-comment')?.remove();
                document.querySelector('.comments-elements').insertAdjacentHTML('afterbegin',newComment);
+               lucide.createIcons();
+
             });
         }else{
 
@@ -831,6 +846,7 @@ export const handlePostInteractions=()=>{
     })   
 }
 
+//Change la couleur de fond d'un post
 export const changeColor=async (li=null)=>{  
     if(li){
         const textareaPost=document.getElementById('post-text');  
@@ -849,7 +865,7 @@ export const changeColor=async (li=null)=>{
 }
 
 
-export function initPosts(){
+export async function initPosts(){
     handleHomePostDiv();
     handlePostInteractions();
     changeColor();

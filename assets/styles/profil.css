@@ -20,7 +20,10 @@
     box-shadow: 0 0 10px 0 rgba(40, 39, 39, 0.66);
     cursor: pointer;
 }
-
+#profil .edit-profil{
+    background:rgba(136, 136, 136, 0.58); 
+    color: black;
+}
 #profil .profil-pictures .profil-photo{
     position: absolute;
     left: 40px;
