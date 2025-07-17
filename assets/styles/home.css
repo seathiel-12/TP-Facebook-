@@ -163,7 +163,7 @@
     border: solid 1.5px ;
     border-radius: 20px;
 }
-#home li, .profil-contextuel li{
+#home li, .profil-contextuel li, .options-post li{
     list-style-type: none;
     border-radius: 5px;
     padding: 10px 25px;
@@ -178,7 +178,9 @@ aside.right{
     top:70px;
 }
 
-#home li:hover, .profil-contextuel li:hover{
+#home li:hover, 
+.profil-contextuel li:hover,
+.options-post li:hover {
     background: rgb(207, 207, 207);
 }
 #home .sidebar{

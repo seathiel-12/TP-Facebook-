@@ -37,7 +37,7 @@ const validateLogin= async (data)=>{
         const request = await apiRequest('login', 'POST', data);
             console.log(request);
         if(request && request.success){
-           await fetchPageContent('/frontend/views/templates/homeT.php');
+           await loadThisPage('home');
            showNotification('Connexion réussie','success');
            lucide.createIcons();
         }else{

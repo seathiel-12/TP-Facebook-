@@ -40,12 +40,12 @@ trait Auth{
             $_SESSION['username']=$sessionInfo['username']?$sessionInfo['username']:($sessionInfo['firstname'].' '.$sessionInfo['lastname']);
             $_SESSION['attempt']=1;
             try{
-                $user=new User()->getRequestedUserData(['id'=>$_SESSION['id']],['cover_picture', 'profile_picture', 'gender']);
-
+                $user=new User()->getRequestedUserData(['id'=>$_SESSION['id']],['cover_picture', 'profile_picture', 'gender', 'uuid_uID']);
             }catch(PDOException $e){
                 throw $e;
             }
             $_SESSION['profile_picture']= $user['profile_picture'] ? PICTURE_PATH . $_SESSION['id'] . '/' .$user['profile_picture'] : GENDER_PATH . $user['gender'] . '.png';
+            $_SESSION['valid'] = $user['uuid_uID'];
             
             if(isset($user['cover_picture']) && !empty($user['cover_picture']) && !is_null($user['cover_picture']))
             $_SESSION['cover_picture']= 'posts/user-' . $_SESSION['id'] . '/' . $user['cover_picture'] ;

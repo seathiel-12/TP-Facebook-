@@ -1,5 +1,61 @@
 
 const DOCUMENT_ROOT={};
+
+const routeManager={
+  index:{
+    path:'/index.php',
+    uri:'/'
+  },
+  register:{
+    path:'/frontend/views/usersClients/register.php',
+    uri:'/register'
+  },
+  auth:{
+    path:'/frontend/views/usersClients/auth.php',
+    uri:'/auth'
+  },
+  home:{
+    path:'/frontend/views/templates/homeT.php',
+    uri:'/home'
+  },
+  friends:{
+    path:'/frontend/views/templates/friendsT.php',
+    uri:'/friends',
+    subpages:{
+      all:{
+      path:'/frontend/views/includes/allFriendsPage.php',
+      uri:'/friends/all'
+      },
+      invits:{
+      path:'/frontend/views/includes/invitPage.php',
+      uri:'/friends/invits'
+      },
+    suggestions:{
+      path:'/frontend/views/includes/suggestPage.php',
+      uri:'/friends/suggestions'
+      },
+    personals:{
+      path:'/frontend/views/includes/friendsPersonalsPage.php',
+      uri:'/friends/personals'
+      }
+  },
+}, 
+  profil:{
+    path:'/frontend/views/templates/profilPage.php',
+    uri:'/profil?valid=',
+    param:'valid'
+  },
+  messenger:{
+    path:'/frontend/views/templates/messenger.php',
+    uri:'/messenger'
+  },
+  fallback:{
+    path:'frontend/index.html',
+    uri:'/fallback'
+  }
+}
+
+
 const loadJsModule=async(bodyId)=>{
     switch(bodyId){
         case 'register':
@@ -40,7 +96,7 @@ const loadJsModule=async(bodyId)=>{
                 document.querySelector('.sidebar').onmouseleave=(e)=> e.target.style.overflowY="hidden";
 
               })
-              .catch(error=>console.error(`Error loading module home: ${error}`));
+              .catch(err=>console.error(`Error loading module home: ${err}`));
           break;
           case 'friends':{
             await import('./modules/header.js')
@@ -51,10 +107,17 @@ const loadJsModule=async(bodyId)=>{
                 break;
           }
           case 'profil':{
+            await import('./modules/header.js')
+                  .then(module=> module.initHeader());
             await import('./modules/profil.js')
                   .then(module=>{
                     module.initProfil();
                   });
+            break;
+          }
+          case 'messenger':{
+            await import('./modules/header.js')
+                  .then(module=> module.initHeader());
           }
     }
 }
@@ -65,11 +128,14 @@ const fetchPageContent=async(url)=>{
     .then(response=>response.text())
         .then(async(html)=> {
             const parser= new DOMParser();
+
             html=parser.parseFromString(html,'text/html');
              const header=html.querySelector('header');
+            
                   if(header && header.id && header.getAttribute('id') === document.querySelector('header')?.id){
-                      const main= html.querySelector('main');
-                      if(main){
+            
+                      const main= html.body.querySelector('main');
+                      if(main && html.body.className){
                         document.body.querySelector('main').innerHTML=main.innerHTML;
                         document.body.id=html.body.id;
                         document.body.className=html.body.className;
@@ -125,25 +191,16 @@ const apiRequest=async (url, method='GET', data)=>{
     }
 
     try{
-      console.log(options);
       const request= 
       await fetch(`/api/${url}`, options)
               .then(response=> response.json())
               .catch(error=> console.warn(`Erreur lors de l\'appel API ${url} :${error}`))  
+              console.log(request);
       return request;
     }catch(error){
       console.warn(`Erreur lors de l\'appel API ${url} :${error}`)
     } 
   }
-
-
-const loadUrlPage=async(url)=>{
- const path={
-    '/' : '/frontend/views/templates/homeT.php'
-  }
-   history.pushState({},'', path[url]);
-   await fetchPageContent(url);
-}
 
 
 
@@ -204,23 +261,51 @@ const loadUrlPage=async(url)=>{
   }
 
 
+  async function loadThisPage(url, params='', subpage=''){
+  
+    let route="";
+    if(Object.hasOwn(routeManager, url)){
+
+      if(subpage && Object.hasOwn(routeManager[url],'subpages')){
+        route=routeManager[url].subpages[subpage];
+      }else{
+        route =routeManager[url];
+      }
+
+      console.log(route)
+      history.pushState({page:route.uri + params},'',route.uri+params);
+      await fetchPageContent(route.path) 
+
+    }else{
+      console.warn('Unknow route '+ url);
+     await fetchPageContent(routeManager.fallback.path);
+      history.pushState({},'',routeManager.fallback.uri);
+    }
+  }
+  
+
   window.addEventListener('DOMContentLoaded',async ()=>{
 
       // await import('./modules/includes.js').then((module)=>module.resetPassword());
-    
+      window.addEventListener('popstate',(event)=>{
+       console.log(event.state)
+       loadThisPage(event.state.page.split('/')[1])
+      })
           await apiRequest('isOnline')
         .then(async (data)=> {
           if(data){
-            if(history.length){
-              await fetchPageContent('/frontend/views/templates/homeT.php');
-            }else{
-              await fetchPageContent('/frontend/views/templates/homeT.php');
-              handleTopNavdivClick();
-            }
+
+            const route=location.pathname.split('/');
+            let params= new URLSearchParams(location.search);
+            params=params.get(routeManager[route[1]].param)
+
+            console.log(route)
+             await loadThisPage(route[1], params ?? '', route[2] ?? '');
             lucide.createIcons();
+
           }else{
+            await loadThisPage('auth');
             showNotification('Veuillez vous reconnecter!', 'error');
-            await fetchPageContent('/frontend/views/usersClients/auth.php');
             lucide.createIcons();
           }
         })
@@ -239,6 +324,7 @@ const loadUrlPage=async(url)=>{
 
         createIcons();
 
+        
         window.addEventListener('click',(e)=>{
           const toClose=document.querySelectorAll('.on-window-click-close');
             toClose.forEach(close=> {

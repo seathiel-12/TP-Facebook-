@@ -128,6 +128,17 @@ class ApiCall{
                                 return;
                             }
 
+                            if($this->uri[3] === 'profiling'){
+                                if(!new AuthController()->verifyOnline()){
+                                    throw new PDOException('Non autorisé! Veuillez vous authentifier.',401);
+                                }
+
+                                if(isset($this->uri[4])){
+                                    new UserController()->profiling($this->uri[4]);
+                                    return;
+                                }
+                            }
+
                             if($this->uri[3] === 'posts'){
                                 if(!new AuthController()->verifyOnline()){
                                     throw new PDOException('Non autorisé! Veuillez vous authentifier.',401);
@@ -176,7 +187,7 @@ class ApiCall{
                                             break;
                                         }
                                         case 'get':{
-                                            if(isset($this->uri[5])){
+                                            if(isset($this->uri[5]) && !is_null($this->uri[5])){
                                                 try{
                                                     $posts = new Post()->getAllPosts(user: $this->uri[5]);
                                                     echo json_encode(['success'=>true, 'data'=>$posts]);

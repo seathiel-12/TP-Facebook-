@@ -1,4 +1,5 @@
 const divIconBorder=document.createElement('div');
+divIconBorder.className="divIconBorder"
 
 //Créer la bordure de bas qi se deplace sur les icones de navigations de
 const createDivIconBorder=(div,divIconBorder)=>{
@@ -17,7 +18,7 @@ const handleProfilContextuelLi=()=>{
     const disconnectBtn=document.querySelector('.disconnect');
     disconnectBtn.onclick=()=>{
         fetchPageContent('/frontend/views/usersClients/logout.php');
-        fetchPageContent('/frontend/views/usersClients/auth.php');
+        loadThisPage('auth');
         return;
     }
 }
@@ -45,22 +46,28 @@ const handleHomeHeaderIcon= ()=>{
 
     homeIcon.onclick=()=>{
         if(document.body.id !== 'home')
-          fetchPageContent('/frontend/views/templates/homeT.php');
+          loadThisPage('home');
     }
 
     friendIcon.onclick=()=>{
         if(document.body.id !== 'friends')
-            fetchPageContent('/frontend/views/templates/friendsT.php');  
+            loadThisPage('friends');  
     }
 }
 
 export const initHeader=(page)=>{
-    const divIcon=document.querySelector(`.top-nav div.${page}Icon`);
-    divIconBorder.className="divIconBorder";
-    document.querySelector('header').appendChild(divIconBorder);
 
-
-    createDivIconBorder(divIcon,divIconBorder);
+    if(page){
+        const divIcon=document.querySelector(`.top-nav div.${page}Icon`);
+        document.querySelector('header').appendChild(divIconBorder);
+    
+        createDivIconBorder(divIcon,divIconBorder);    
+    }else{
+        const topNavIcons= document.querySelectorAll('.top-nav div');
+        topNavIcons.forEach(divIcon => divIcon.firstElementChild.style.stroke="");
+    
+        document.querySelector('.divIconBorder')?.remove();
+    }
      
 
     handleProfilContextuelLi();

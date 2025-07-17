@@ -52,6 +52,43 @@ class User extends Model{
         return $requestedData;
     }   
 
+    public function profiling($uuid_uID){
+        try{
+            $user= $this->getRequestedUserData(['uuid_uID'=>$uuid_uID], [
+                'username',
+                'id',
+                'uuid_uID',
+                'firstname', 
+                'lastname', 
+                'bio',
+                'gender', 
+                'created_at', 
+                'profile_picture', 
+                'cover_picture',
+                'lives_at',
+                'date_of_birth',
+                'study_level',
+                'about']);
+            
+                $query="SELECT * FROM friends_requests WHERE status='accepted' AND ((requester_id=? AND receiver_id=?) OR (requester_id=? AND receiver_id=?))";
+
+                $isFriend=Database::getDb()->prepare($query);
+                $isFriend->execute([$_SESSION['id'], $user['id'], $user['id'], $_SESSION['id']]);
+
+            $user['isFriend']= $isFriend->rowCount() > 0;
+            $friends = $this->getFriends($user['id']);
+            $posts = new Post()->getAllPosts('LIMIT 20', $user['id']);
+            return [
+                'user'=>$user,
+                'friends'=>$friends,
+                'posts'=>$posts
+            ];
+        }catch(PDOException $e){
+            throw $e;
+        }
+        
+    }
+
     public function getFriends($id){
         session_start();
         try{
@@ -67,7 +104,7 @@ class User extends Model{
                         END AS id 
                         FROM friends_r
                         )
-                SELECT u.firstname, u.firstname, u.lastname, u.profile_picture, u.gender
+                SELECT u.firstname, u.firstname, u.username, u.lastname, u.profile_picture, u.gender
                 FROM users u
                 JOIN friends f ON f.id = u.id;
                 ";

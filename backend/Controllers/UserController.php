@@ -197,6 +197,15 @@ class UserController extends Controller{
         }
     }
 
+    public function profiling($uuid_uID){
+        if($uuid_uID === 'me') 
+            $uuid_uID = $_SESSION['valid'];
+        $profil=new User()->profiling($uuid_uID);
+        $profil=$this->getValidUserData($profil);
+        echo json_encode(['success'=>true, 'data'=>$profil]);
+        return;
+    }
+
 
     public function comment($action){
         if(isset($action)){
@@ -304,13 +313,18 @@ class UserController extends Controller{
     public function getValidUserData($data){
         foreach($data as $key=>$value){
             
-                $data[$key]['profile_picture']= $data[$key]['profile_picture'] ? (PICTURE_PATH . $data[$key]['id'] .'/' . $data[$key]['profile_picture']) : GENDER_PATH . $data[$key]['gender'] .'.png';      
+            if(array_key_exists('profile_picture', $value)){
+                $data[$key]['profile_picture']= $data[$key]['profile_picture'] ? (PICTURE_PATH . $data[$key]['id'] .'/' . $data[$key]['profile_picture']) : GENDER_PATH . $data[$key]['gender'] .'.png';   
+            }
+                   
+            if(array_key_exists('username', $value)){
+                $data[$key]['username'] = $value['username'] ?? $value['firstname'] . ' ' . $value['lastname'];
+            }
 
-                $data[$key]['username']= $value['username'] ?? $value['firstname'] . ' ' . $value['lastname'];
-                
+            if(array_key_exists('uuid_uID', $value)){
                 $data[$key]['valid']=$data[$key]['uuid_uID'];
-                unset($data[$key]['gender'], $data[$key]['firstname'], $data[$key]['lastname'], $data[$key]['id'], $data[$key]['uuid_uID']); 
-                
+            } 
+            unset($data[$key]['gender'], $data[$key]['firstname'], $data[$key]['lastname'], $data[$key]['id'], $data[$key]['uuid_uID']);  
         }
         return $data;
     }

@@ -26,42 +26,23 @@
 
     <main>
         <section class="profil-pictures">
-                <form class="noFormRootStyle" style="max-width: 100%!important; width:73%; margin:auto; position:relative;">
-                    <div class="profil-cover" 
-                        <?php 
-                        if($_SESSION['cover_picture'])  
-                        echo "style='background-image: url(". $_SESSION['cover_picture'] . ");
-                            background-size: cover;
-                            background-repeat: no-repeat;
-                          '  
-                        ";
-                        ?>
-                    ;">
-                    
-                </div>
+                <div class="noFormRootStyle" style="max-width: 100%!important; width:73%; margin:auto; position:relative;">
+                    <div class="profil-cover"></div>
 
-                    <div class="profil-photo flexDiv">   
-                             <?php 
-                                if($_SESSION['profile_picture']);  
-                                echo "<img width='170' height='170' id='profile-picture' style='border-radius:100%; background:white;' src='". $_SESSION['profile_picture'] . "'/>";
-                            ?>
-
-                        <div class="rounded-icon camera flexDiv standard-hover"><i data-lucide="camera"></i></div>
-                    </div>
+                    <div class="profil-photo cam flexDiv">  
+                        <img width='170' height='170' id='profile-picture' style='border-radius:100%; background:white;' src="" />
+                    </div>  
                 </form>
 
                 <div class="username">
-                        <h1 id="username">
-                            <?= $_SESSION['username'] ?>
-                        </h1>
-
-                        <div class="profil-btn">
-                            <button class="flexDiv edit-profil" style="background:rgba(136, 136, 136, 0.58); color: black;"> <i data-lucide="pencil" stroke="#d5d5d5" fill="#000" ></i> Modifier votre profil</button>
-                        </div>
+                    <h1 class="username-text"></h1>
+                    <div class="profil-btn flexDivEnd">
+                       
+                    </div>
                 </div>  
 
                 <hr style="width: 70%; margin:15px auto;">
-            
+
                 <nav>
                     <ul class="flexDivStart">
                      <li style="border-bottom: solid 4px var(--bg-button-primary); color: var(--bg-button-primary);">Publications</li>
@@ -69,7 +50,6 @@
                         <li>Ami(e)s</li>                
                     </ul>
                 </nav>
-        
         </section>
 
         <section class="main-profil">
@@ -79,32 +59,23 @@
                     <button style="width: calc(100% - 30px); padding: 10px; color: black; background: var(--bg-button-tertiary);">Ajouter une bio</button>
                     <button style="width: calc(100% - 30px); padding: 10px; color: black; background: var(--bg-button-tertiary);">Modifier les infos</button>
                 </div>
-                <div class="flexDivBetween card" style="border-radius: 10px; background: white; padding:10px 20px; margin:  15px 0 !important; width: calc(100% - 40px);">
-                    <h3>Ami(e)s</h3>
-                    <a style="color:var(--bg-button-primary);">Tou(te)s les ami(e)s</a>
-                </div>
-                <div class="">
+                <div class="card" style="border-radius: 10px; background: white; padding:10px 20px; margin:  15px 0 !important; width: calc(100% - 40px);">
+                    <div class="flexDivBetween" style="width:100%;">
+                        <h3>Ami(e)s</h3>
+                        <a style="color:var(--bg-button-primary);">Tou(te)s les ami(e)s</a>
+                    </div>
+                   
+                    <div class="this-user-friends flexDiv" style="flex-wrap: wrap; margin-top:10px;">
                     
+                    </div>
                 </div>
+               
             </div>
             
             <div class="publications flexDiv" style="flex-direction:column;">
-                <div class="home-top-post card" style="margin:10px 0;">
-                    <div>
-                        <div class="noFormRootStyle flexDiv" style="width:95%; padding:0 10px;">
-                             <?php 
-                                if($_SESSION['profile_picture']);  
-                                echo "<img width='50' height='50' style='border-radius:100%; background:white;' src='   ". $_SESSION['profile_picture'] . "'/>";
-                            ?>
-                            <div style="background-color:rgba(212, 212, 212, 0.74); width:100%; padding: 12px 10px 10px; margin:10px; text-align:left; border-radius:50px;" class="standard-hover createPostBtn">Quoi de neuf, <?= $_SESSION['username'] ?>?</div>
-                        </div>
-                        <hr style="border-color:rgba(210, 210, 210, 0.32); margin:5px 0; ">
-                    </div>
-                    <div class="flexDivIcon">
-                        <div class="flexDivIcon options standard-hover"><i data-lucide="video" fill="red" stroke="red"></i> <p>Video en direct</p></div>
-                        <div class="flexDivIcon options standard-hover"><i data-lucide="images" stroke="rgb(115, 227, 145)" ></i> <p>Photo et Video</p></div>
-                        <div class="flexDivIcon options standard-hover"><i data-lucide="smile" stroke="rgb(215, 224, 90)"></i> <p>Humeur/Activité</p></div>
-                    </div>
+                <div class="filter card flexDivBetween" style="margin:10px 0 10px 5px; width:calc(100% - 30px); padding:10px 20px;">
+                    <h3>Publications</h3>
+                    <div><i data-lucide="sliders-horizontal" class="rounded-icon fade-hover"></i></div>
                 </div>
                 
                 <div class="publications-done loaded-posts">

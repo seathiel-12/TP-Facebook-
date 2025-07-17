@@ -77,7 +77,7 @@ const handleRegisterRetrieveCode=(data)=>{
     const cancelCode=document.querySelector('.not-me');
     cancelCode.onclick=()=>{
         fetchPageContent('/frontend/views/usersClients/logout.php');
-        fetchPageContent('/frontend/views/usersClients/auth.php');
+        loadThisPage('auth');
     }
     
     const form=document.querySelector('form');
@@ -522,7 +522,7 @@ header{
     skip.onclick=()=>{
         showLoadingPage();
         setTimeout(async()=>{
-            await fetchPageContent('/frontend/views/templates/homeT.php');
+            await loadThisPage('home');
         },3000);
         // animation de bienvenue
     }
@@ -616,7 +616,7 @@ header{
                     showNotification('Info ajoutés avec succès', 'success');
                     setTimeout(()=> {
                         showLoadingPage();
-                        setTimeout(async()=>await fetchPageContent('/frontend/views/templates/homeT.php')
+                        setTimeout(async()=>await loadThisPage('home')
                         , 3000);
                     },2000);
                 }else{

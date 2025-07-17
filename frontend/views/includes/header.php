@@ -1,3 +1,5 @@
+<?php session_start(); ?>
+
 <header id="standard-header">
     <div class="flexDivIcon searchZone">
         <img src="https://www.facebook.com/images/fb_icon_325x325.png" alt="facecook-logo" width="30">
@@ -17,7 +19,7 @@
         <div class="notificationIcon"><box-icon name='bell' type='solid' animation='' style="transform: scale(1.4) translateY(2px);"></box-icon></div>
         <div class="messengerIcon"><i class='bxl bx-messenger'></i></div>
         <div class="accountIcon flexDiv">
-            <?php session_start();
+            <?php
                 if($_SESSION['profile_picture']);  
                 echo "<img width='50'
                  height='50' style='border-radius:100%;' src='". $_SESSION['profile_picture'] . "'/>";
@@ -34,7 +36,7 @@
 <div class="profil-contextuel on-window-click-close">
     <div class='content'>
     <div class="profils">
-            <div class="flexDivIcon user profiling">
+            <div class="flexDivIcon user profiling" refering="me">
                 <i data-icon="account" width="30" height="30" class="bIcon flexDivIcon"></i> <p><?= $_SESSION['username']??'Unknown' ?></p>
             </div>
             <hr style="width:95%; border:solid 0.3px rgba(79, 79, 79, 0.37); margin: 10px auto;">
@@ -66,5 +68,10 @@
         </ul>
     </div>
 </div>
+<input type="hidden" id="csrf_token" value="<?php
+echo $_SESSION['csrf_token']??''; ?>">
 
+<input type="hidden" id="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
+<input type="hidden" id="me" value="<?= $_SESSION['id']; ?>">
+<input type="hidden" id="valid" value="<?= $_SESSION['valid']; ?>">
 

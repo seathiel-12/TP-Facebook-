@@ -12,6 +12,7 @@ export const loadPosts=async(posts)=>{
     const loadedPosts=document.querySelector('.loaded-posts');
     loadedPosts.innerHTML=renderPosts(posts);
     createPostOptions();
+    enableProfiling();
     lucide.createIcons();
 }
 
@@ -32,12 +33,20 @@ const getAllPostsData=async()=>{
 }
 
 
-const handleHomePostDiv=()=>{   
+export const handleHomePostDiv=()=>{   
     const modal=document.querySelector('.modal');
     const postInput= document.querySelectorAll('.home-top-post .createPostBtn');
     const textareaPost=document.getElementById('post-text');  
     
+    // Supprimer les anciens event listeners en clonant les éléments
     postInput.forEach(postInp=>{
+        const newPostInp = postInp.cloneNode(true);
+        postInp.parentNode.replaceChild(newPostInp, postInp);
+    });
+    
+    // Récupérer les nouveaux éléments et ajouter les event listeners
+    const newPostInputs = document.querySelectorAll('.home-top-post .createPostBtn');
+    newPostInputs.forEach(postInp=>{
         postInp.onclick=(e)=>{
             console.log('click')
             e.stopPropagation();
@@ -190,7 +199,7 @@ export const renderPosts=(posts)=>{
                 <img src="/assets/media/${post['profile_picture'] ? 'posts/user-'+post.author+'/'+post['profile_picture'] : 'images/'+(post.gender==='male' ? 'boy' : (post.gender==='female' ? 'happy' : 'horse'))+'.png'}" width="40" height="40" class="image"/>
                     <p style="text-align:left;"><a class="profiling" refering="${post.valid}" style="color:black;"><strong>${post.firstname+' '+post.lastname}</strong></a> <br> <span style="font-size:0.9em;">${renderDate(post.created_at)}</span> </p>
                 </div>
-                <div class="flexDiv">
+                <div class="flexDiv option-post-zone">
                     <div class="view-post-options" ref="${index}" post-author="${post.author}" post="${post.id}"><i data-lucide="ellipsis" class="standard-hover" stroke="gray" style="padding:5px; border-radius:100%;"></i></div>
                     <i data-lucide="x" class="standard-hover" stroke="gray" style="padding:5px; border-radius:100%;"></i>
                 </div>
@@ -296,6 +305,20 @@ const handlePosting=()=>{
     })
 }
 
+ function enableProfiling(){
+    
+    const profilingBtns=document.querySelectorAll('.profiling');
+    profilingBtns.forEach(btn=>
+        btn.onclick=async()=>{
+
+
+            await loadThisPage('profil', btn.getAttribute('refering'));
+            
+
+            document.querySelector('.profil-contextuel')?.classList.remove('visible')
+        }
+    )
+}
 
 const showFile=(file)=>{
     const blob= new Blob(file.files);
@@ -341,7 +364,7 @@ const removeFile=()=>{
 }
 
 
-const createPostOptions=(post)=>{
+const createPostOptions=()=>{
     const optionsPoints=document.querySelectorAll(".view-post-options");
 
     optionsPoints.forEach((option,index)=>{
@@ -376,9 +399,9 @@ const createPostOptions=(post)=>{
             handleCreatePostOptionsBtns(post);
 
             ul.style.cssText=`
-            position:fixed;
-            top:${option?.offsetTop + option?.offsetHeight}px;
-            left:${option?.offsetLeft - ul.offsetWidth + option.offsetWidth - 20}px;
+            position:absolute;
+            top:${e.y + window.scrollY + 20}px;
+            left:${e.x + window.screenX - ul.offsetWidth + option.offsetWidth - 40}px;
         `
         }  
     })    
@@ -869,5 +892,6 @@ export async function initPosts(){
     handleHomePostDiv();
     handlePostInteractions();
     changeColor();
+    createPostOptions();
     createIcons();
 }

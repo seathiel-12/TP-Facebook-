@@ -22,7 +22,18 @@ body{
     max-height: 100vh;
     overflow-y: auto;
 }
-
+.gray{
+    background: var(--bg-button-tertiary);
+    color: black;
+    box-shadow: 1px 1px 8px 1px #f0f2f5;
+    border: solid 0.5px rgb(172, 172, 172); 
+}
+.flexDivEnd{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap:10px;
+}
 
 button, .cancelForgotBtn{
     display: block;

@@ -1,0 +1,29 @@
+.messenger-aside{
+    width: 25%;
+    box-shadow: 0 0 10px 0 rgba(151, 151, 151, 0.78);
+    min-height: 100vh;
+}
+.all-chats{
+    padding: 10px 0;
+}
+.all-chats li{
+    width: calc(100% - 20px);
+    padding:10px;
+    cursor: pointer;
+}
+
+.all-chats li:hover{
+    background-color: rgba(179, 179, 179, 0.77);
+}
+
+.flexDivColumn{
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.message-preview{
+    color: rgba(85, 85, 85, 0.72);
+}

@@ -1,18 +1,36 @@
+let suggestions=null;
+
 const handleFriendsSidebarButtons= ()=>{
     const invitBtn = document.getElementById('invitBtn');
-    invitBtn.onclick=()=>fetchPageContent('/frontend/views/templates/invitPage.php');
+    invitBtn.onclick=()=>loadThisPage('friends','','invits');
 
     const suggestBtn=document.getElementById('suggestBtn');
-    suggestBtn.onclick=()=>fetchPageContent('/frontend/views/templates/suggestPage.php');
+    suggestBtn.onclick=()=>loadThisPage('friends','','suggestions');
 
     const allFriendsBtn=document.getElementById('all-friends');
-    allFriendsBtn.onclick=()=> fetchPageContent('/frontend/views/templates/allFriendsPage.php');
+    allFriendsBtn.onclick=()=> loadThisPage('friends','','all');
 
     const friendPersonalBtn=document.getElementById('friends-personals');
-    friendPersonalBtn.onclick=()=>fetchPageContent('/frontend/views/templates/friendsPersonalsPage.php')
+    friendPersonalBtn.onclick=()=>loadThisPage('friends','','personals');
 }
 
-
+const initFriendsHome= async ()=>{
+     suggestions=(await getSuggestions()).data;
+     const suggestionsDivAtHomeFriends=document.querySelector('.some-suggestions');
+     
+     const twoSuggestions=Array.from(suggestions).slice(0,2);
+     suggestionsDivAtHomeFriends.innerHTML=twoSuggestions.map((suggest, index)=>`
+        <div class="suggestion suggestion-parent-${index} card" valid="${suggest.valid}">
+                <img src="${suggest.profile_picture}" alt="" height="220" width="100%">
+                <div>
+                    <p>${suggest.username}</p>
+                    <button index="${index}" class="add accept-suggestion">Ajouter ami(e)</button>
+                    <button index="${index}" class="remove remove-suggestion">Retirer</button>
+                </div>
+            </div>`).join('');
+    handleSuggestions();
+     handleFriendsSidebarButtons();
+}
 ////////////////////////////////////////////////////
 
     // INVIT PAGE ZONE
@@ -21,7 +39,7 @@ const handleFriendsSidebarButtons= ()=>{
 
 const handleInvitPageButtons=()=>{
     const back=document.querySelector('.back-to-home-friends')
-    back.onclick=()=>fetchPageContent('/frontend/views/templates/friendsT.php');
+    back.onclick=()=>loadThisPage('friends');
 
     const depliantIcon=document.querySelectorAll('.depliant-icon');
     depliantIcon.forEach(icon=>{
@@ -187,7 +205,7 @@ function initInvitPage(){
 
 const handleAllFriendsPageButtons=()=>{
     const back=document.querySelector('.back-to-home-friends')
-    back.onclick=()=>fetchPageContent('/frontend/views/templates/friendsT.php');
+    back.onclick=()=>loadThisPage('friends');
 
 }
 
@@ -239,7 +257,7 @@ async function loadAllFriends(){
 
 const handleFriendsPersonalButtons=()=>{
     const back=document.querySelector('.back-to-home-friends')
-    back.onclick=()=>fetchPageContent('/frontend/views/templates/friendsT.php');
+    back.onclick=()=>loadThisPage('friends');
 
 }
 
@@ -255,7 +273,7 @@ const handleFriendsPersonalButtons=()=>{
 
 function handleSuggestPageButtons(){
     const back=document.querySelector('.back-to-home-friends')
-    back.onclick=()=>fetchPageContent('/frontend/views/templates/friendsT.php');
+    back.onclick=()=>loadThisPage('friends');
 
 }
 
@@ -282,8 +300,13 @@ function renderSuggestions(suggestions){
     return suggestions;
 }
 
+const getSuggestions=async()=>{
+    return await apiRequest('user/friends/suggestions/get');
+}
+
 async function loadSuggestions(){
-    const suggestions=await apiRequest('user/friends/suggestions/get');
+     suggestions=await getSuggestions();
+
         if(suggestions && suggestions.success){
             const suggestionDiv=document.querySelector('.friends-suggestions');
             
@@ -327,7 +350,7 @@ export const initFriendPage=(bodyClassName)=>{
     
     switch(bodyClassName){
         case 'friends-home':{
-            handleFriendsSidebarButtons();
+            initFriendsHome();
             break;
         }
         case 'friends-invit':{
