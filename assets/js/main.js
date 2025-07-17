@@ -304,8 +304,9 @@ const apiRequest=async (url, method='GET', data)=>{
             lucide.createIcons();
 
           }else{
-            await loadThisPage('auth');
             showNotification('Veuillez vous reconnecter!', 'error');
+
+            await loadThisPage('auth');
             lucide.createIcons();
           }
         })
