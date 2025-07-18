@@ -118,6 +118,8 @@ const loadJsModule=async(bodyId)=>{
           case 'messenger':{
             await import('./modules/header.js')
                   .then(module=> module.initHeader());
+            await import('./modules/messenger.js')
+                  .then(module=> module.initMessenger());
           }
     }
 }

@@ -46,7 +46,7 @@ trait Auth{
             }
             $_SESSION['profile_picture']= $user['profile_picture'] ? PICTURE_PATH . $_SESSION['id'] . '/' .$user['profile_picture'] : GENDER_PATH . $user['gender'] . '.png';
             $_SESSION['valid'] = $user['uuid_uID'];
-            
+
             if(isset($user['cover_picture']) && !empty($user['cover_picture']) && !is_null($user['cover_picture']))
             $_SESSION['cover_picture']= 'posts/user-' . $_SESSION['id'] . '/' . $user['cover_picture'] ;
 

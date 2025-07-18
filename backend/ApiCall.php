@@ -2,8 +2,10 @@
 namespace App;
 use App\Controllers\Controller;
 use App\Controllers\AuthController;
+use App\Controllers\DiscussionController;
 use App\Controllers\Register;
 use App\Controllers\UserController;
+use App\models\Discussion;
 use App\Models\Model;
 use App\Models\Post;
 use App\Models\User;
@@ -236,7 +238,32 @@ class ApiCall{
                         }
                         break;
                     }
-                    
+                    case 'discussions':{
+                        if(isset($this->uri[3])){
+                            if($this->uri[3] === 'get'){
+                                if(!new AuthController()->verifyOnline()){
+                                    throw new PDOException('Non autorisé! Veuillez vous authentifier.',401);
+                                }
+    
+                                new DiscussionController()->getAll();
+                                return;
+                            }
+    
+                            if($this->uri[3] === 'messages'){
+                                if(!new AuthController()->verifyOnline()){
+                                    throw new PDOException('Non autorisé! Veuillez vous authentifier.',401);
+                                }
+    
+                                if($this->uri[4] === 'get'){
+                                    if(isset($this->uri[5])){
+                                        new DiscussionController()->getMessage($this->uri[5]);
+                                    }
+                                }
+                                return;
+                            }
+                        }
+                       break;
+                    }
                     case 'login':{
                         $data=json_decode(file_get_contents('php://input'),true);
                          new AuthController()->verifyEntries($data);

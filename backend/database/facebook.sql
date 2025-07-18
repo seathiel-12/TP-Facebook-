@@ -259,20 +259,32 @@ WITH sent AS (
 SELECT u.username, u.profile_picture, u.gender, u.firstname, u.lastname FROM users u JOIN sent s ON receiver_id = u.id
 
 
+CREATE TABLE messages (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    uuid_mID VARCHAR (255) UNIQUE NOT NULL,
+    sender_id INT REFERENCES users (id),
+    receiver_id INT REFERENCES users (id),
+    content TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    file_path VARCHAR (255) DEFAULT NULL,
+    sticker_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (sticker_id) REFERENCES stickers (id),
+    CHECK (sender_id != receiver_id)
+);
+DROP TABLE messages;
+
+SELECT * FROM messages WHERE sender_id = 2 OR receiver_id = 2;
+CREATE TABLE stickers (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    path VARCHAR (255) NOT NULL
+)
 
 
+SET sql_mode=''
 
-
-
-
-
-
-
-
-
-
-
-
+WITH users_disc AS (;
 
 
 INSERT INTO friends_requests (requester_id, receiver_id, status) VALUES (1, 2, 'pending');
