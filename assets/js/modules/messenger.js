@@ -1,5 +1,8 @@
 
-let allChats=null;
+let allChats= null;
+let date= null;
+const valid=document.getElementById('valid').value;
+const me =document.getElementById('me').value;
 
 export async function initMessenger(){
     await loadChats();
@@ -11,7 +14,7 @@ function handleMessagesSidebar(){
 
     chatsDiv.forEach( chat=>{
         chat.onclick=()=>{
-            renderCurrentChat(chat.getAttribute('valid'));
+            renderCurrentChat(chat.getAttribute('valid'), chat);
         }
     })
 
@@ -47,13 +50,13 @@ async function loadChats(){
 
 function renderDiscussions(discussions){
     return discussions.map(disc=>`
-        <li class="flexDivBetween" valid="${disc.valid}">
+        <li class="flexDivBetween" valid="${disc.valid}" dtjat="${disc.created_at}">
             <div class="flexDivStart">
                 <div><img src="${disc.profile_picture}" width="50" height="50" style="border-radius:100%;" alt=""></div>
                     <div class="flexDivColumn">
-                        <p>${disc.username}</p>
+                        <p class="name">${disc.username}</p>
                         <p class="message-preview">
-                            ${disc.content}
+                           ${disc.valid !== valid ? 'You: ' : disc.username + ' :'} ${disc.content.length > 30? disc.content.slice(0, 30) + '...' : disc.content}
                         </p>
                     </div>
                 </div>           
@@ -72,29 +75,37 @@ async function getAllMessages(valid){
             .catch(err=>console.error(err));
 }
 
-async function renderMessages(validate){
-    const messages=await getAllMessages(validate);
-    console.log(messages);
-    const valid=document.getElementById('valid');
+async function renderMessages(validate, message=null){
+    let messages=[{
+        valid:validate,
+        content:message
+    }];
+    console.log(validate)
+    if(!message){
+         messages=await getAllMessages(validate);
+    }
+
     return messages.map(message=>`
-            <div class="${message.valid === valid ? 'flexDivEnd message-blue' : 'flexDivStart message-gray'}>""
+            <div class="${message.valid === valid ? 'flexDivEnd message-blue my-message' : 'flexDivStart message-gray'}">
                 <div>
                     <p>${message.content}</p>
                 </div>
             </div>
-        `).join('')
+        `).join('');
 }
 
-function renderCurrentChat(chatInfo){
+async function renderCurrentChat(chatInfo, elem){
+
+
 
     const currentChat=document.createElement('section');
 
-    currentChat.innerHTML=`
+    currentChat.innerHTML=` 
         <header class="header-top flexDivBetween">
             <div class="flexDivStart">
-                <img src="${chatInfo.profile_picture}" width="50" height="50" style="border-radius:100%; border:solid 3px var(--bg-button-primary);" alt="">
+                <img src="${elem.querySelector('img').src}" width="50" height="50" style="border-radius:100%; border:solid 3px var(--bg-button-primary);" alt="">
                 <div class="flexDivstart">
-                    <p style="text-align:left;">Username</p>
+                    <p style="text-align:left;">${elem.querySelector('.name').textContent}</p>
                     <div class="flexDiv" style="color:rgba(72, 72, 72, 0.71); font-weight:600; font-size:0.9em;">
                         <p>Active now</p>
                         <p style="height:10px; width: 10px; border-radius:100%; background: var(--bg-button-secondary); display:block; transform: translateY(2px);"></p>
@@ -112,13 +123,13 @@ function renderCurrentChat(chatInfo){
             <div class="chat-container-middle">
                 <section class="chat-container">
                     <div class="first-element-of-chat">
-                        <img src="${chatInfo.profile_picture}" width="120" height="120" style="border-radius:100%; border:solid 3px var(--bg-button-primary);" alt="">
-                        <p>Username</p>
-                        <p>${renderDate(chatInfo.created_at)}</p>
+                        <img src="${elem.querySelector('img').src}" width="120" height="120" style="border-radius:100%; border:solid 3px var(--bg-button-primary);" alt="">
+                        <p style="font-weight: 600; font-size: 1.2em;">${elem.querySelector('.name').textContent}</p>
+                        <p>Joined at <strong>${renderDate(elem.getAttribute('dtjat'))}</strong></p>
                     </div>
 
                     <div class="all-messages">
-                        ${renderMessages(chatInfo)}
+                        ${await renderMessages(chatInfo)}
                     </div>
 
                 </section>
@@ -128,7 +139,10 @@ function renderCurrentChat(chatInfo){
             </div>
            <section class="send-message-zone flexDiv">
                <div class="flexDiv chat-icon rounded-icon standard-hover"><i data-lucide="plus"></i></div>
-               <div class="flexDiv" style="width:87%; margin:0 10px 0 5px;"> <input type="text" id="send-message" placeholder="Envoyer un message..."></div>
+                <form valid="${chatInfo}" class="noFormRootStyle flexDiv" style="width:87%; margin:0 5px 0 5px; gap:10px; background:none;">
+                    <input type="text" id="send-message" placeholder="Envoyer un message..." required>
+                    <div class="send-btn rounded-icon standard-hover flexDiv" style="width: max-content;"><i data-lucide="send-horizontal"></i></div>
+                </form>
                <div class="flexDiv standard-hover rounded-icon"><i data-lucide="camera"></i></div>
                <div class="flexDiv standard-hover rounded-icon"><i data-lucide="mic"></i></div>
            </section>
@@ -136,9 +150,13 @@ function renderCurrentChat(chatInfo){
     `
 
     currentChat.className="current-chat";
+    currentChat.id=chatInfo;
 
     document.querySelector('.current-chat').replaceWith(currentChat);
     lucide.createIcons();
+    
+    handleSendMessage();
+    handleMessages();
 }
 
 
@@ -151,5 +169,75 @@ function renderDate(date){
     const month = months[newDate.getMonth()];
     const year=newDate.getFullYear();
 
-    return day + ' ' + month + (year === today.getFullYear()? '' : year) 
+    return day + ' ' + month + ' ' + year
 }
+
+function handleSendMessage(){
+    const sendMessage= document.getElementById('send-message');
+    const sendMessageForm=document.querySelector('.send-message-zone form');
+    const sendBtn=document.querySelector('.send-btn');
+
+    sendBtn.onclick=()=>{
+        sendMessageForm.requestSubmit();
+    }
+    sendMessageForm.onsubmit= async(e)=>{
+        e.preventDefault();
+        await apiRequest('discussions/messages/send', 'POST', {
+            sender_id: me,
+            receiver_id: sendMessageForm.getAttribute('valid'),
+            content:  sendMessage.value
+        }).then(async (response)=>{
+            if(response && response.success){
+                updateMessageView();
+                return;
+            }
+            showNotification("Une erreur s'est produite!");
+            return;
+        }).catch(err => console.error(err));
+    }
+}
+
+async function updateMessageView(){
+    const sendMessage= document.getElementById('send-message');
+    const allMessages=document.querySelector('.all-messages');
+    const message= await renderMessages( valid, sendMessage.value);
+    allMessages.insertAdjacentHTML('beforeend', message);
+    document.querySelector('.message-preview').textContent = sendMessage.value;
+    sendMessage.value="";
+}
+
+function handleMessages(){
+    const messages= document.querySelectorAll('.my-message');
+    messages.forEach(message=>{
+        message.ondblclick=(e)=>{
+            e.preventDefault()
+            const overlay=document.createElement('div');
+            overlay.className="overlay on-window-click-close";
+            document.body.appendChild(overlay);
+            const mess=message.cloneNode(true);
+            mess.style.cssText=`
+                position:fixed;
+                z-index: 1000;
+                bottom:100px;
+            `;
+
+            const optionDiv=document.createElement('ul');
+            optionDiv.innerHTML=`
+                <li class="flexDiv"><i data-lucide="pencil" width="15" height="15" ></i>Modifier</li>
+                <li class="flexDiv"><i data-lucide="pencil" width="15" height="15" ></i>Supprimer</li>
+            `
+
+            optionDiv.style.cssText=`
+                position:fixed;
+                bottom: calc();
+            `
+            document.body.appendChild(optionDiv);
+
+
+            mess.classList.add('on-window-click-remove')
+            document.body.appendChild(mess);
+        }
+    })
+    
+}
+ 

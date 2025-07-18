@@ -35,5 +35,24 @@ use \PDOException;
             echo json_encode(['success'=>true, 'data'=>$message]);
             return;
         }
+
+        public function manageMessages($data, $action){
+            switch($action){
+                case 'send':{
+                    if(!$data){
+                        throw new Exception('Content needed');
+                    }
+                    try{
+                        unset($data['csrf_token']);
+                        new Discussion($data);
+                        echo json_encode(['success'=>true]);
+                        return;
+                    }catch(PDOException $e){
+                        throw $e;
+                    }      
+                    break;           
+                }
+            }
+        }
         
     }

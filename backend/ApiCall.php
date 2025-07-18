@@ -259,7 +259,15 @@ class ApiCall{
                                         new DiscussionController()->getMessage($this->uri[5]);
                                     }
                                 }
-                                return;
+                                if($this->uri[4] === 'send'){
+                                    $this->verifyRequestMethod('POST');
+                                    if($this->verifyCSRFToken() === 200){
+                                        $data=$this->getRequestData();
+                                        new DiscussionController()->manageMessages($data, $this->uri[4]);
+                                        return;
+                                    }
+                                    echo json_encode(['success'=>false]);
+                                }
                             }
                         }
                        break;

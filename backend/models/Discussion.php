@@ -9,8 +9,9 @@ use PDOException;
 class Discussion extends Model{
     private $table = 'messages';
 
-    public function __contruct($data=null){
+    public function __construct($data=null){
         if(is_array($data)){  
+           $data['receiver_id'] = new User()->getRequestedUserData(['uuid_uID'=>$data['receiver_id']], 'id');
            $data['uuid_mID'] = $this->generateUUID();
            Model::createEntry($this->table, $data);
         }
@@ -78,7 +79,12 @@ class Discussion extends Model{
 
     public function getMessage($with){
         try{
-            $query="SELECT content, created_at FROM messages WHERE sender_id = ? OR receiver_id = ?";
+            $query=" WITH mess AS (
+            SELECT sender_id, content, created_at FROM messages 
+            WHERE sender_id = ? OR receiver_id = ?
+            ) 
+            SELECT u.uuid_uID AS valid, m.content, m.created_at FROM users u JOIN mess m
+            ON m.sender_id = u.id";
             $result=Database::getDb()->prepare($query);
             $result->execute(array_fill(0, 2, $_SESSION['id']));
 
@@ -88,4 +94,5 @@ class Discussion extends Model{
         }
     }
 
+    
 }

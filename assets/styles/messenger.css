@@ -46,29 +46,32 @@
     gap: 5px;
 }
 
-.message-blue{
-    background-color: #0866FF;
-    border-radius: 20px 20px 0 20px;
-    color: white;
+.message-blue, .message-gray{
     max-width: 100%;
     width: 100%;
-    margin-right: 20px;
+    margin: 5px 0;
 }
 
 .message-blue div, .message-gray div{
-    max-width: calc(30% - 15px);
+    max-width: calc(40% - 15px);
     width: max-content;
-    padding: 10px 15px;
+    padding: 5px 10px;
+    text-align: left;
+}
+.message-blue div{
+    background-color: #0866FF;
+    border-radius: 10px 10px 0 10px;
+    font-weight: 500;
+    margin-right: 20px;
+    color: white;
 }
 
-.message-gray{
+.message-gray div{
     background-color: #8f8f8fb7;
-    border-radius: 20px 20px 20px 0;
+    border-radius: 10px 10px 10px 0;
     margin-left: 20px;
     color: black;
     font-weight: 500;
-    max-width: 100%;
-    width: 100%;
 }
 
 .message-preview{
@@ -107,7 +110,6 @@
     transform: scale(1);
     fill: black;
 }
-
 .no-discussions{
     width: calc(100% - 10px);
     border-radius:10px;
@@ -117,6 +119,9 @@
 }
 .first-element-of-chat{
     margin: 20px auto;
+}
+.my-message{
+    cursor: pointer;
 }
 #send-message{
     width: 100%;
