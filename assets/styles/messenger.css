@@ -76,6 +76,7 @@
 
 .message-preview{
     color: rgba(85, 85, 85, 0.72);
+    text-align: left;
 }
 .current-chat{
     padding-top: 65px;

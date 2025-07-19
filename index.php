@@ -4,7 +4,7 @@
     session_start();
 
     // var_dump($_SESSION);
-        // exit();
+    //     exit();
     $uri=explode('/',$_SERVER['REQUEST_URI']);
     if(in_array('api',$uri)){
        new ApiCall()->requestTreatment(); 

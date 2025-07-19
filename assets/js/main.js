@@ -47,7 +47,8 @@ const routeManager={
   },
   messenger:{
     path:'/frontend/views/templates/messenger.php',
-    uri:'/messenger'
+    uri:'/messenger?with=',
+    param:'with'
   },
   fallback:{
     path:'frontend/index.html',

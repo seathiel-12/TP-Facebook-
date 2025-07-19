@@ -26,6 +26,11 @@
             ?>
         </div> 
    </div>
+
+   <input type="hidden" id="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
+   <input type="hidden" id="me" value="<?= $_SESSION['id']; ?>">
+   <input type="hidden" id="valid" value="<?= $_SESSION['valid']; ?>">
+
 </header>
 
 <script>
@@ -68,10 +73,5 @@
         </ul>
     </div>
 </div>
-<input type="hidden" id="csrf_token" value="<?php
-echo $_SESSION['csrf_token']??''; ?>">
 
-<input type="hidden" id="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
-<input type="hidden" id="me" value="<?= $_SESSION['id']; ?>">
-<input type="hidden" id="valid" value="<?= $_SESSION['valid']; ?>">
 

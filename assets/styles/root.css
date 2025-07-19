@@ -100,6 +100,12 @@ input:not([type="radio"]){
 .error{
     background: rgba(240, 75, 75, 0.61);
 }
+.red-on-hover{
+    cursor: pointer;
+}
+.red-on-hover:hover{
+    background: rgba(231, 36, 36, 0.61)!important;
+}
 .success{
     background: rgb(114, 241, 114);
 }

@@ -1,3 +1,4 @@
+const param="valid=";
 const createChangeProfilPhotoDiv=()=> {
     const div=document.createElement('div');
     div.innerHTML=`
@@ -46,7 +47,7 @@ export async function initProfil(){
 }
 
  async function getUserInfo(){
-    const valid=location.href.split('valid=')[1];
+    const valid=location.href.split(param)[1];
     return await apiRequest('user/profiling/'+valid)
             .then(response => {
                 if(response && response.success){

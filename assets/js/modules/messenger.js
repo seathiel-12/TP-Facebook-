@@ -1,12 +1,20 @@
 
 let allChats= null;
 let date= null;
-const valid=document.getElementById('valid').value;
-const me =document.getElementById('me').value;
+let valid=null;
+let me =null;
+const param='with='
 
 export async function initMessenger(){
+    valid=document.getElementById('valid').value;
+    me=document.getElementById('me').value;
     await loadChats();
     handleMessagesSidebar();
+    const user=location.href.split(param)[1];
+    if(user){
+        const chat = document.querySelector(`.all-chats li[valid="${user}"]`)
+        renderCurrentChat(user, chat);
+    }
 }
 
 function handleMessagesSidebar(){
@@ -15,6 +23,7 @@ function handleMessagesSidebar(){
     chatsDiv.forEach( chat=>{
         chat.onclick=()=>{
             renderCurrentChat(chat.getAttribute('valid'), chat);
+            history.pushState({},'', '/messenger?with='+chat.getAttribute('valid'));
         }
     })
 
@@ -41,7 +50,6 @@ async function loadChats(){
                 <button style='margin: 10px auto;'>Ecrivez à vos amis</button>
             </div>
         `  
-        
         return;
     }
 
@@ -55,12 +63,12 @@ function renderDiscussions(discussions){
                 <div><img src="${disc.profile_picture}" width="50" height="50" style="border-radius:100%;" alt=""></div>
                     <div class="flexDivColumn">
                         <p class="name">${disc.username}</p>
-                        <p class="message-preview">
-                           ${disc.valid !== valid ? 'You: ' : disc.username + ' :'} ${disc.content.length > 30? disc.content.slice(0, 30) + '...' : disc.content}
+                        <p class="message-preview" ${(disc.is_read === 0  && disc.sender !== valid)? "style='font-weight:bold; color: black;'" : ''}>
+                           ${disc.sender === valid ? '<i data-lucide="mouse-pointer-2" width="15" height="15" style="transform: translateY(3px);"></i>' : ''} ${disc.content.length > 30? disc.content.slice(0, 30) + '...' : disc.content}
                         </p>
                     </div>
                 </div>           
-            <div class="chat-count flexDiv"></div>
+            ${(disc.is_read === 0  && disc.sender !== valid) ? "<div class='chat-count flexDiv'></div>" : ''}
         </li>
     `).join('');
 }
@@ -86,7 +94,7 @@ async function renderMessages(validate, message=null){
     }
 
     return messages.map(message=>`
-            <div class="${message.valid === valid ? 'flexDivEnd message-blue my-message' : 'flexDivStart message-gray'}">
+            <div data-as="${message.ID}" class="${message.valid === valid ? 'flexDivEnd message-blue my-message' : 'flexDivStart message-gray'}">
                 <div>
                     <p>${message.content}</p>
                 </div>
@@ -95,8 +103,6 @@ async function renderMessages(validate, message=null){
 }
 
 async function renderCurrentChat(chatInfo, elem){
-
-
 
     const currentChat=document.createElement('section');
 
@@ -182,18 +188,33 @@ function handleSendMessage(){
     }
     sendMessageForm.onsubmit= async(e)=>{
         e.preventDefault();
-        await apiRequest('discussions/messages/send', 'POST', {
-            sender_id: me,
-            receiver_id: sendMessageForm.getAttribute('valid'),
-            content:  sendMessage.value
-        }).then(async (response)=>{
-            if(response && response.success){
-                updateMessageView();
+        if(!sendMessageForm.hasAttribute('edit')){
+            await apiRequest('discussions/messages/send', 'POST', {
+                sender_id: me,
+                receiver_id: sendMessageForm.getAttribute('valid'),
+                content:  sendMessage.value
+            }).then(async (response)=>{
+                if(response && response.success){
+                    updateMessageView();
+                    return;
+                }
+                showNotification("Une erreur s'est produite!");
                 return;
-            }
-            showNotification("Une erreur s'est produite!");
-            return;
-        }).catch(err => console.error(err));
+            }).catch(err => console.error(err));   
+        }else{
+            await apiRequest('discussions/messages/update/'+ e.target.getAttribute('edit'), 'POST', {
+                content:sendMessage.value
+            }).then(response => {
+                if(response && response.success){
+                    const updated=document.querySelector(`.my-message[data-as="${e.target.getAttribute('edit')}"]`);
+                    updated.innerHTML=`
+                        ${sendMessage.value} <p style="width:100%; text-align: right; font-size:0.8em color:gray;">(edited)</p>
+                    `
+
+                    sanitizeSendMessage();
+                }
+            })
+        }
     }
 }
 
@@ -202,42 +223,111 @@ async function updateMessageView(){
     const allMessages=document.querySelector('.all-messages');
     const message= await renderMessages( valid, sendMessage.value);
     allMessages.insertAdjacentHTML('beforeend', message);
-    document.querySelector('.message-preview').textContent = sendMessage.value;
+    document.querySelector('.message-preview').innerHTML = `
+        <div class="flexDiv"><i data-lucide="mouse-pointer-2" width="15" height="15" style="transform: translateY(2px);"></i>${sendMessage.value}</div>
+    `;
+    lucide.createIcons();
     sendMessage.value="";
 }
 
 function handleMessages(){
     const messages= document.querySelectorAll('.my-message');
-    messages.forEach(message=>{
-        message.ondblclick=(e)=>{
-            e.preventDefault()
+    messages.forEach((messageDiv)=>{
+        const message=messageDiv.querySelector('div');
+        message.ondblclick=(e)=>{   
+            e.preventDefault();
+
+            const rect = message.getBoundingClientRect();
             const overlay=document.createElement('div');
             overlay.className="overlay on-window-click-close";
+            overlay.style.backdropFilter="blur(15px)";
             document.body.appendChild(overlay);
-            const mess=message.cloneNode(true);
+
+            const mess=message.parentNode.cloneNode(true);
             mess.style.cssText=`
                 position:fixed;
+                top:${rect.top}px;
+                left:${rect.left}px;
+                height:max-content;
+                width:max-content;
+                max-width: calc(28% - 20px);
                 z-index: 1000;
                 bottom:100px;
             `;
 
-            const optionDiv=document.createElement('ul');
-            optionDiv.innerHTML=`
-                <li class="flexDiv"><i data-lucide="pencil" width="15" height="15" ></i>Modifier</li>
-                <li class="flexDiv"><i data-lucide="pencil" width="15" height="15" ></i>Supprimer</li>
-            `
-
-            optionDiv.style.cssText=`
-                position:fixed;
-                bottom: calc();
-            `
-            document.body.appendChild(optionDiv);
-
-
-            mess.classList.add('on-window-click-remove')
+            mess.firstElementChild.style.maxWidth="100%";
+            mess.classList.add('on-window-click-remove', 'm-selected')
             document.body.appendChild(mess);
+
+            const animation=mess.animate(
+                [
+                    {transform:"translateY(0)"},
+                    {transform:`translateY(-${rect.height}px)`}
+                ],
+                {
+                    duration:500,
+                    fill:"forwards",
+                    easing:"ease"
+                }
+            );
+            
+
+
+            animation.onfinish=()=>{
+                const optionDiv=document.createElement('ul');
+                optionDiv.innerHTML=`
+                    <li data-as="${messageDiv.getAttribute('data-as')}" class="flexDivStart standard-hover edit-message" style="padding:10px; width: calc(100% - 20px); border-radius:10px 10px 0 0;"><i data-lucide="pencil" width="15" height="15" ></i>Modifier</li>
+                    <li data-as="${messageDiv.getAttribute('data-as')}" class="flexDivStart red-on-hover delete-message" style="padding:10px; width: calc(100% - 20px); border-radius:0 0 10px 10px;"><i data-lucide="trash-2" width="15" height="15" ></i>Supprimer</li>
+                `
+                optionDiv.style.width="150px"
+                document.body.appendChild(optionDiv);
+                console.log(optionDiv.clientWidth)
+                optionDiv.style.cssText=`
+                    position:fixed;
+                    top:${rect.top}px;  
+                    left:${rect.left + rect.width - optionDiv.offsetWidth}px;
+                    z-index: 1000;
+                    width: 150px;
+                    background-color: white;
+                    border-radius: 10px;
+                    margin:10px 0;
+                `
+                optionDiv.className='card message-option on-window-click-remove';
+                lucide.createIcons();
+                handleOptionMessage(message);
+            }
         }
     })
     
 }
  
+function handleOptionMessage(elem){
+    const editMessage=document.querySelector('.edit-message');
+    const deleteMessage=document.querySelector('.delete-message');
+
+    editMessage.onclick=()=>{
+        const input=document.getElementById('send-message');
+        const form=document.querySelector('.send-message-zone')
+        input.value=document.querySelector('.m-selected').innerText;
+        input.setAttribute('edit', editMessage.getAttribute('data-as'))
+        editMessage.parentNode.remove(); 
+        elem.animate(
+            [
+                {transform:"translateX(0)",
+                },
+                {transform:"translateX(-30px)",
+                }
+            ],
+            {
+                duration:1000,
+                easing:"ease",
+                fill:"forwards"
+            }
+        )
+        
+        form.querySelectorAll('div').forEach(svg=>svg.remove())
+        form.classList.replace('flexDiv', 'flexDivStart')
+        
+    }    
+}
+
