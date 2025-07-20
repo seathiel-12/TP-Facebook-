@@ -29,6 +29,22 @@ class User extends Model{
         return Model::deleteEntry($this->table, $id);
     }
 
+    public function isOnline($status, $time=null){
+        session_start();
+        if(isset($_SESSION['id']) && isset($_SESSION['connect']) && $_SESSION['connect'] && $status!==null){
+            try{
+                if(!$time && $status === 1)
+                $this->update(['online'=>$status], $_SESSION['id']);
+                else $this->update(['online'=>$status, 'last_seen'=>$time], $_SESSION['id']);
+                return 200;
+            }catch(PDOException $e){
+                throw $e;
+            }
+        }else{
+            return 500;
+        }
+    }
+
     public function find($condition){
         if(!is_array($condition) || sizeof($condition)>1){
             throw new Exception('An array with one key->value is required');

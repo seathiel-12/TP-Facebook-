@@ -151,8 +151,9 @@
             }
         }
     
-        if(isset($_SESSION['connect']) && $_SESSION['connect'] && isset($_SESSION['id'])){ 
-            if(!new User()->find(['id'=>$_SESSION['id']])){
+        if(isset($_SESSION['connect']) && $_SESSION['connect'] && isset($_SESSION['id'])){
+           $user = new User()->find(['id'=>$_SESSION['id']]);
+            if(!$user || !$user['online']){
                 $this->logout();
                 return false;
             }

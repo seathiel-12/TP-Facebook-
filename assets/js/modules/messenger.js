@@ -4,6 +4,7 @@ let date= null;
 let valid=null;
 let me =null;
 const param='with='
+let chatInfos=null;
 
 export async function initMessenger(){
     valid=document.getElementById('valid').value;
@@ -26,7 +27,6 @@ function handleMessagesSidebar(){
             history.pushState({},'', '/messenger?with='+chat.getAttribute('valid'));
         }
     })
-
 }
 
 async function getAllChats(){
@@ -41,7 +41,7 @@ async function getAllChats(){
 
 async function loadChats(){
     await getAllChats();
-    console.log('users')
+    console.log('users');
     const chatsDiv=document.querySelector(".all-chats");
     if(Array.isArray(allChats) && allChats.length === 0){
         chatsDiv.innerHTML=`
@@ -54,6 +54,7 @@ async function loadChats(){
     }
 
     chatsDiv.innerHTML=renderDiscussions(allChats);
+    lucide.createIcons();
 }
 
 function renderDiscussions(discussions){
@@ -77,6 +78,7 @@ async function getAllMessages(valid){
     return await apiRequest('discussions/messages/get/'+valid)
             .then(response=> {
                 if(response && response.success){
+                    chatInfos=response.infos;
                     return response.data;
                 }
             })
@@ -90,19 +92,20 @@ async function renderMessages(validate, message=null){
     }];
     console.log(validate)
     if(!message){
-         messages=await getAllMessages(validate);
+         messages = await getAllMessages(validate);
     }
 
     return messages.map(message=>`
             <div data-as="${message.ID}" class="${message.valid === valid ? 'flexDivEnd message-blue my-message' : 'flexDivStart message-gray'}">
                 <div>
-                    <p>${message.content}</p>
+                    <p class="content">${message.content}</p>
+                    ${message.is_edited ? '<p style="width:100%; text-align: right; font-size:0.8em;">(edited)</p>' : ''} 
                 </div>
             </div>
         `).join('');
 }
 
-async function renderCurrentChat(chatInfo, elem){
+async function renderCurrentChat(chatInfo, elem, infos){
 
     const currentChat=document.createElement('section');
 
@@ -113,8 +116,8 @@ async function renderCurrentChat(chatInfo, elem){
                 <div class="flexDivstart">
                     <p style="text-align:left;">${elem.querySelector('.name').textContent}</p>
                     <div class="flexDiv" style="color:rgba(72, 72, 72, 0.71); font-weight:600; font-size:0.9em;">
-                        <p>Active now</p>
-                        <p style="height:10px; width: 10px; border-radius:100%; background: var(--bg-button-secondary); display:block; transform: translateY(2px);"></p>
+                        <p class="online"></p>
+                        <p class="online-green-round" style="height:10px; width: 10px; border-radius:100%; background: var(--bg-button-secondary); display:block; transform: translateY(2px);"></p>
                     </div>
                 </div>
             </div>
@@ -161,10 +164,17 @@ async function renderCurrentChat(chatInfo, elem){
     document.querySelector('.current-chat').replaceWith(currentChat);
     lucide.createIcons();
     
+    updateCurrentChatHeader(chatInfos);
     handleSendMessage();
     handleMessages();
 }
 
+function updateCurrentChatHeader(infos){
+    console.log(infos)
+    const online=document.querySelector('.online')
+    online.textContent = infos['online'] ? 'Active now' : `Last seen at ${infos['last_seen']}`;
+    if(!infos['online']) document.querySelector('.online-green-round')?.remove()
+}
 
 function renderDate(date){
     const newDate=new Date(date);
@@ -183,12 +193,14 @@ function handleSendMessage(){
     const sendMessageForm=document.querySelector('.send-message-zone form');
     const sendBtn=document.querySelector('.send-btn');
 
+    if(sendBtn)
     sendBtn.onclick=()=>{
         sendMessageForm.requestSubmit();
     }
+    
     sendMessageForm.onsubmit= async(e)=>{
         e.preventDefault();
-        if(!sendMessageForm.hasAttribute('edit')){
+        if(!sendMessage.hasAttribute('edit')){
             await apiRequest('discussions/messages/send', 'POST', {
                 sender_id: me,
                 receiver_id: sendMessageForm.getAttribute('valid'),
@@ -202,16 +214,17 @@ function handleSendMessage(){
                 return;
             }).catch(err => console.error(err));   
         }else{
-            await apiRequest('discussions/messages/update/'+ e.target.getAttribute('edit'), 'POST', {
-                content:sendMessage.value
+            await apiRequest('discussions/messages/update', 'POST', {
+                content: sendMessage.value,
+                valid: sendMessage.getAttribute('edit')
             }).then(response => {
                 if(response && response.success){
-                    const updated=document.querySelector(`.my-message[data-as="${e.target.getAttribute('edit')}"]`);
+                    const updated=document.querySelector(`.my-message[data-as="${sendMessage.getAttribute('edit')}"] div`);
                     updated.innerHTML=`
-                        ${sendMessage.value} <p style="width:100%; text-align: right; font-size:0.8em color:gray;">(edited)</p>
+                        ${sendMessage.value} <p style="width:100%; text-align: right; font-size:0.8em;">(edited)</p>
                     `
 
-                    sanitizeSendMessage();
+                    initFormZone(sendMessageForm);
                 }
             })
         }
@@ -231,12 +244,16 @@ async function updateMessageView(){
 }
 
 function handleMessages(){
+    
     const messages= document.querySelectorAll('.my-message');
     messages.forEach((messageDiv)=>{
+
         const message=messageDiv.querySelector('div');
+
         message.ondblclick=(e)=>{   
             e.preventDefault();
 
+            if(document.getElementById('send-message').hasAttribute('edit')) return;
             const rect = message.getBoundingClientRect();
             const overlay=document.createElement('div');
             overlay.className="overlay on-window-click-close";
@@ -256,7 +273,8 @@ function handleMessages(){
             `;
 
             mess.firstElementChild.style.maxWidth="100%";
-            mess.classList.add('on-window-click-remove', 'm-selected')
+            mess.classList.add('on-window-click-remove', 'clone')
+            message.classList.add('m-selected');
             document.body.appendChild(mess);
 
             const animation=mess.animate(
@@ -306,16 +324,27 @@ function handleOptionMessage(elem){
     const deleteMessage=document.querySelector('.delete-message');
 
     editMessage.onclick=()=>{
-        const input=document.getElementById('send-message');
-        const form=document.querySelector('.send-message-zone')
-        input.value=document.querySelector('.m-selected').innerText;
-        input.setAttribute('edit', editMessage.getAttribute('data-as'))
+        const formZone=document.querySelector('.send-message-zone')
         editMessage.parentNode.remove(); 
+        const ed=document.createElement('p')
+        ed.innerHTML="Ed"
+        ed.style.cssText=`
+            border-radius:100%;
+            padding:2px;
+            border:solid 2px gray;
+            font-weight: 800;
+            width:30px;
+            color: gray;
+        `
+        ed.className='ed'
+
+        elem.insertAdjacentHTML('afterend', ed.outerHTML);
+
         elem.animate(
             [
                 {transform:"translateX(0)",
                 },
-                {transform:"translateX(-30px)",
+                {transform:"translateX(-10px)",
                 }
             ],
             {
@@ -325,9 +354,151 @@ function handleOptionMessage(elem){
             }
         )
         
-        form.querySelectorAll('div').forEach(svg=>svg.remove())
-        form.classList.replace('flexDiv', 'flexDivStart')
+        formZone.querySelectorAll('div').forEach(svg=>svg.remove())
+        formZone.classList.replace('flexDiv', 'flexDivStart')
+
         
+        formZone.innerHTML+=`
+            <img src="/assets/media/images/checked.svg"  class="edit-check scale"/>
+            <i data-lucide="circle-x" class="cancel-on-edition cursp scale"></i>
+        `
+        lucide.createIcons();
+
+        const input=document.getElementById('send-message');
+        input.setAttribute('edit', editMessage.getAttribute('data-as'))
+        input.value=document.querySelector('.m-selected .content').innerText;
+
+        handleSendMessage();
+        handleEditMode(elem);
     }    
+
+    deleteMessage.onclick=()=>{
+        const modal= document.createElement('dialog');
+        modal.innerHTML=`
+            <button class="supp" style="margin:5px auto; background:rgba(179, 50, 50, 0.67); width: calc(100% - 40px); font-size:600;">Supprimer</button>
+            <button class="cancel" style=" margin:5px auto; background:rgba(164, 164, 164, 0.61); width: calc(100% - 40px); color:black; font-size:600;">Annuler</button>
+        `;
+        modal.className="card flexDivColumn modal";
+        document.body.appendChild(modal);
+        modal.showModal();
+
+        const rect = modal.getBoundingClientRect();
+        modal.style.cssText=`
+            position:fixed;
+            top: calc((100vh - ${rect.height}px)/2);
+            left: calc((100vw - ${rect.width}px)/2);
+            padding: 15px;
+            margin:0;
+            transition:none;
+        `;
+        document.querySelector('.message-option')?.remove();
+        document.querySelector('.clone')?.remove();
+
+        handleDeleteMessage();
+    }
 }
 
+function handleDeleteMessage(){
+    const supp=document.querySelector('.supp');
+    const cancel=document.querySelector('.cancel');
+    supp.onclick=async()=>{
+        await apiRequest('discussions/messages/delete','POST', {
+            valid:document.querySelector('.m-selected').parentNode.getAttribute('data-as')
+        }).then(response=>{
+            if(response && response.success){
+                const anim=document.querySelector('.m-selected').parentNode.animate(
+                    [
+                        {
+                            transform: "translateX(-10px)",
+                            opacity:1,
+                        },
+                        {
+                         transform: "translateX(10px)",
+                         opacity:0
+                        }
+                    ],
+                    {
+                        duration:1000,
+                        easing:"ease",
+                        fill:"forwards"
+                    }
+                )
+                anim.onfinish=()=>document.querySelector('.m-selected').parentNode?.remove();
+            }
+
+            closeOverlay();
+            document.querySelector('.modal').remove();
+        }).catch(err=>console.error(err));
+    }
+
+    cancel.onclick=()=>{
+        closeOverlay();
+        document.querySelector('.modal').remove();
+    }
+}
+
+function handleEditMode(elem){
+    const form=document.querySelector('.send-message-zone form');
+    const input=document.getElementById('send-message');
+    const checked=document.querySelector('.edit-check');
+    const cancel=document.querySelector('.cancel-on-edition');
+
+    checked.onclick=()=>{
+        if(input.value.trim()){
+            if(input.value.trim() !== document.querySelector('.m-selected').innerText)
+                form.requestSubmit();
+
+            initFormZone(form);
+            document.querySelector('.ed').remove();
+            elem.animate(
+                [
+                    {transform:"translateX(-10px)",
+                    },
+                    {transform:"translateX(0)",
+                    }
+                ],
+                {
+                    duration:1000,
+                    easing:"ease",
+                    fill:"forwards"
+                }
+            )
+        }
+        else showNotification('Value required');
+    }
+
+    cancel.onclick=()=>{
+        initFormZone(form);
+            document.querySelector('.ed').remove();
+            elem.animate(
+                [
+                    {transform:"translateX(-10px)",
+                    },
+                    {transform:"translateX(0)",
+                    }
+                ],
+                {
+                    duration:1000,
+                    easing:"ease",
+                    fill:"forwards"
+                }
+            )
+    }
+
+}
+
+function initFormZone(form){
+    document.querySelector('.send-message-zone').innerHTML=`
+    <div class="flexDiv chat-icon rounded-icon standard-hover" style="transform: translateX(10px);"><i data-lucide="plus"></i></div>
+                <form valid="${form.getAttribute('valid')}" class="noFormRootStyle flexDiv" style="width:87%; margin:0 5px 0 5px; gap:10px; background:none;">
+                    <input type="text" id="send-message" placeholder="Envoyer un message..." required>
+                    <div class="send-btn rounded-icon standard-hover flexDiv" style="width: max-content;"><i data-lucide="send-horizontal"></i></div>
+                </form>
+               <div class="flexDiv standard-hover rounded-icon"><i data-lucide="camera"></i></div>
+    <div class="flexDiv standard-hover rounded-icon"><i data-lucide="mic"></i></div>
+    `
+    handleSendMessage();
+    lucide.createIcons();
+
+    document.querySelector('.m-selected').classList.remove('.m-selected');
+}

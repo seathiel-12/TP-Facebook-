@@ -48,6 +48,8 @@ class Discussion extends Model{
                             r.is_read,
                             u.id AS id,
                             u.created_at,
+                            u.online,
+                            u.last_seen,
                             u.uuid_uID,
                             u.gender,
                             u.username,
@@ -69,13 +71,15 @@ class Discussion extends Model{
         }
     }
     
-    public function update(int $id, array $data)
+    public function update(string $uuid, array $data)
     {
+        $id=(Model::getEntry($this->table, ['uuid_mID'=>$uuid]))['id'];
         Model::updateEntry($this->table, $data, $id);
     }
 
-    public function delete(int $id)
+    public function delete(string $uuid)
     {
+        $id=(Model::getEntry($this->table, ['uuid_mID'=>$uuid]))['id'];
         Model::deleteEntry($this->table, $id);
     }
 
@@ -89,10 +93,10 @@ class Discussion extends Model{
     public function getMessage($with){
         try{
             $query=" WITH mess AS (
-            SELECT sender_id, uuid_mID AS ID, content, created_at FROM messages 
+            SELECT sender_id, uuid_mID AS ID, content, created_at, (created_at != updated_at) AS is_edited FROM messages 
             WHERE sender_id = ? OR receiver_id = ?
             ) 
-            SELECT u.uuid_uID AS valid, m.ID, m.content, m.created_at FROM users u JOIN mess m
+            SELECT u.uuid_uID AS valid, m.ID, m.content, m.created_at, m.is_edited  FROM users u JOIN mess m
             ON m.sender_id = u.id";
             $result=Database::getDb()->prepare($query);
             $result->execute(array_fill(0, 2, $_SESSION['id']));
@@ -102,6 +106,5 @@ class Discussion extends Model{
             throw $e;
         }
     }
-
     
 }

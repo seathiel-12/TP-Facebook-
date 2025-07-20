@@ -56,6 +56,15 @@ const routeManager={
   }
 }
 
+function createOverlay(){
+  const div=document.createElement('div');
+  div.className="overlay";
+  document.body.appendChild(div);
+}
+
+function closeOverlay(){
+  document.querySelector('.overlay')?.remove();
+}
 
 const loadJsModule=async(bodyId)=>{
     switch(bodyId){

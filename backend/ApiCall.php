@@ -253,21 +253,16 @@ class ApiCall{
                                 if(!new AuthController()->verifyOnline()){
                                     throw new PDOException('Non autorisé! Veuillez vous authentifier.',401);
                                 }
-    
+
                                 if($this->uri[4] === 'get'){
                                     if(isset($this->uri[5])){
                                         new DiscussionController()->getMessage($this->uri[5]);
                                     }
+                                    return;
                                 }
-                                if($this->uri[4] === 'send'){
-                                    $this->verifyRequestMethod('POST');
-                                    if($this->verifyCSRFToken() === 200){
-                                        $data=$this->getRequestData();
-                                        new DiscussionController()->manageMessages($data, $this->uri[4]);
-                                        return;
-                                    }
-                                    echo json_encode(['success'=>false]);
-                                }
+                                
+                                $data = $this->method === 'POST' ? $this->getRequestData() : null;
+                                new DiscussionController()->manageMessages($data, $this->uri[4]);
                             }
                         }
                        break;
@@ -277,6 +272,11 @@ class ApiCall{
                          new AuthController()->verifyEntries($data);
                          
                         break;
+                    }
+                    case 'logout':{
+                        new AuthController()->logout();
+                        echo json_encode(true);
+                        return;
                     }
                     case 'isOnline':{
                         if(new AuthController()->verifyOnline()){

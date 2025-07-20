@@ -18,6 +18,7 @@ trait Auth{
 
     public function logout(){
         session_start();
+        new User()->isOnline(0, date('Y-m-d H:i:s'));
         session_unset();
         session_destroy();
         setcookie('PHPSESSID','', time()-3600);
@@ -51,6 +52,12 @@ trait Auth{
             $_SESSION['cover_picture']= 'posts/user-' . $_SESSION['id'] . '/' . $user['cover_picture'] ;
 
             $_SESSION['connect']=true;
+
+            try{
+                new User()->isOnline(1);
+            }catch(PDOException $e){
+                throw $e;
+            }
             $_SESSION['first_try_time']=new DateTime(date('H:i:s'))->getTimestamp();
            
             $this->generateCSRFToken();

@@ -32,25 +32,59 @@ use \PDOException;
 
             $message=new Discussion()->getMessage($user['id']);
 
-            echo json_encode(['success'=>true, 'data'=>$message]);
+            echo json_encode(['success'=>true, 'data'=>$message, 'infos'=>[
+                'created_at'=>$user['created_at'],
+                'online'=>$user['online'],
+                'last_seen'=>$user['last_seen']
+                ]]);
             return;
         }
 
         public function manageMessages($data, $action){
+            $this->verifyRequestMethod('POST');
+            if($this->verifyCSRFToken() !== 200){
+                echo json_encode(['success'=>false, 'message'=>'CSRF problem']);
+                return;
+            }
+            $data=$this->getRequestData();
+            unset($data['csrf_token']);
+
+            if(!$data){
+                throw new Exception('Content needed');
+            }
+
             switch($action){
                 case 'send':{
-                    if(!$data){
-                        throw new Exception('Content needed');
-                    }
+                        try{
+                            new Discussion($data);
+                            echo json_encode(['success'=>true]);
+                            return;
+                        }catch(PDOException $e){
+                            throw $e;
+                        }     
+                        return;
+                    echo json_encode(['success'=>false]);
+                    break;           
+                }
+                case 'update':{
                     try{
-                        unset($data['csrf_token']);
-                        new Discussion($data);
+                        new Discussion()->update($data['valid'], ['content'=>$data['content']]);
                         echo json_encode(['success'=>true]);
                         return;
                     }catch(PDOException $e){
                         throw $e;
-                    }      
-                    break;           
+                    }
+                    break;
+                }
+                case 'delete':{
+                    try{
+                        new Discussion()->delete($data['valid']);
+                        echo json_encode(['success'=>true]);
+                        return;
+                    }catch(PDOException $e){
+                        throw $e;
+                    }
+                    break;
                 }
             }
         }

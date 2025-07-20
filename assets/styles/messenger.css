@@ -66,6 +66,33 @@
     color: white;
 }
 
+.edit-check{
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+}
+/* .on-edition{
+    padding: 0 5px 2px;
+    border-radius: 15px;
+    border: solid 0.5px gray ;
+    font-weight: 600;
+    background: linear-gradient(to right, rgb(126, 56, 44), rgb(203, 148, 59));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+} */
+.cursp{
+    cursor: pointer;
+}
+.cancel-on-edition{
+    width: 40px;
+    height: 40px;
+    fill: rgba(185, 44, 44, 0.75);
+    stroke: white;
+}
+.scale:hover{
+    transform: scale(1.1);
+}
 .message-gray div{
     background-color: #8f8f8fb7;
     border-radius: 10px 10px 10px 0;

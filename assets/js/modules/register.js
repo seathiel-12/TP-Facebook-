@@ -266,7 +266,7 @@ const completeProfil= (token, selectData)=>{
         </header>
 
 
-        <h1 style="margin-top: 50px;"> Complétez votre profil pour une expérience<br> personalisée <span style=" background: linear-gradient(to right, #ff6a00, #ee0979); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">by META</span></h1>
+        <h1 style="margin-top: 50px;"> Complétez votre profil pour une expérience<br> personalisée <span style="background: linear-gradient(to right, #ff6a00, #ee0979); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">by META</span></h1>
         <form class="profil-form" enctype="multipart/form-data">
             <input type="hidden" id="csrf_token" value="${token}"/>
             <div style="position:relative; width:100%; display:flex; flex-direction:column; align-items:center; gap:20px;">

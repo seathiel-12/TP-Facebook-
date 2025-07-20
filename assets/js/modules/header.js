@@ -16,9 +16,10 @@ const createDivIconBorder=(div,divIconBorder)=>{
 // Manipuler la boite de dialogue qui s'affiche au click du bouton icone profil du header 
 const handleProfilContextuelLi=()=>{
     const disconnectBtn=document.querySelector('.disconnect');
-    disconnectBtn.onclick=()=>{
-        fetchPageContent('/frontend/views/usersClients/logout.php');
-        loadThisPage('auth');
+    disconnectBtn.onclick=async()=>{
+        await apiRequest('logout').then(response=>{
+            if(response) loadThisPage('auth');
+        }).catch(err=>console.error(err));
         return;
     }
 }

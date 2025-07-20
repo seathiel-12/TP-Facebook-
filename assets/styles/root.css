@@ -35,7 +35,11 @@ body{
     gap:10px;
 }
 
-button, .cancelForgotBtn{
+button{
+    border: none;
+}
+
+button:not(.noButtonRootStyle), .cancelForgotBtn{
     display: block;
     border: none;
     border-radius: 5px;
@@ -167,7 +171,7 @@ a:hover{
     height:100vh;
     left:0;
     top:0;
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(15px);
 }
 .overflow{
     overflow: hidden;
