@@ -45,7 +45,7 @@
     padding: 4px;
 }
 
-.left-nav div, .find-friends{
+.right-nav div, .find-friends{
     border-radius: 30px;
     padding: 12px 15px;
     background: #b8b5b57a;
@@ -55,10 +55,10 @@
 .find-friends{
     margin-right: 5px;
 }
-.left-nav div{
+.right-nav div{
     transform: scale(0.8) ;
 }
-.left-nav div:hover, .find-friends:hover {
+.right-nav div:hover, .find-friends:hover {
     background: #5d5a5a7a;
     opacity: 0.8;
 }
@@ -122,6 +122,11 @@
 }
 .top-nav div:hover{
     background-color: #e4e6eb;
+}
+
+.top-nav{
+    position: relative;
+    left: -120px;
 }
 
 .accoutDivOptions li{

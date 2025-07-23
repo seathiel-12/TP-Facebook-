@@ -6,9 +6,10 @@ const createDivIconBorder=(div,divIconBorder)=>{
     const topNavIcons= document.querySelectorAll('.top-nav div');
     topNavIcons.forEach(divIcon => divIcon.firstElementChild.style.stroke="");
     if(div){
+        const rect= div.getBoundingClientRect();
         div.firstElementChild.style.stroke='blue';
-        divIconBorder.style.top=div.offsetTop + div.offsetHeight - 4 + 'px';
-        divIconBorder.style.left=div.offsetLeft + 'px';
+        divIconBorder.style.top=rect.top + rect.height + 'px';
+        divIconBorder.style.left=rect.left + (document.body.offsetHeight > 800 ? (-7.5) : 0) + 'px';
         divIconBorder.style.display="block";    
     }
 }

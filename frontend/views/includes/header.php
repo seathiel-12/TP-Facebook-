@@ -11,12 +11,12 @@
     <div class="top-nav flexDivIcon" style="gap:0;">
         <div class="homeIcon"><i data-lucide="home"></i></div>
         <div class="friendsIcon"><i data-lucide="users"></i></div>
-        <div class="groupsIcon""><i data-lucide="user-circle"></i></div>
+        <!-- <div class="groupsIcon""><i data-lucide="user-circle"></i></div> -->
     </div>
-    <div class=" flexDivIcon left-nav" style="gap: 0;">
-        <p class="find-friends">Trouvez vos ami(e)s</p>
-        <div class=""><box-icon type='solid' name='grid' style="transform: scale(1.4);"></box-icon></div>
-        <div class="notificationIcon"><box-icon name='bell' type='solid' animation='' style="transform: scale(1.4) translateY(2px);"></box-icon></div>
+    <div class="flexDiv right-nav" style="gap: 0;">
+        <!-- <p class="find-friends">Trouvez vos ami(e)s</p> -->
+        <!-- <div class=""><box-icon type='solid' name='grid' style="transform: scale(1.4);"></box-icon></div> -->
+        <!-- <div class="notificationIcon"><box-icon name='bell' type='solid' animation='' style="transform: scale(1.4) translateY(2px);"></box-icon></div> -->
         <div class="messengerIcon"><i class='bxl bx-messenger'></i></div>
         <div class="accountIcon flexDiv">
             <?php
