@@ -32,8 +32,14 @@ const handleHomeHeaderIcon= ()=>{
     const groupsIcon = document.querySelector('.groupsIcon');
 
     const accountIcon = document.querySelector('.accountIcon');
-    const notificationIcon = document.querySelector('.notificationIcon');
+    const disclaimerIcon = document.querySelector('.disclaimerIcon');
     const messengerIcon= document.querySelector('.messengerIcon');
+    const disclaimer= document.querySelector('.disclaimer');
+
+    disclaimer.style.cssText=`
+        top: ${disclaimerIcon.offsetTop + 20}px;
+        right: 10px;
+    `
 
     const modal=document.querySelector('.modal')
    
@@ -60,6 +66,22 @@ const handleHomeHeaderIcon= ()=>{
         if(document.body.id !== 'messenger')
             loadThisPage('messenger')
     }
+
+    disclaimerIcon.onclick=()=> {
+        disclaimer.classList.toggle('visible')
+        disclaimer.animate(
+            [
+                {transform:'translateY(-10px)', opacity: 0},
+                {transform:'translateY(0)', opacity: 1},
+            ],
+            {
+                duration:500,
+                easing:'ease',
+                fill:"forwards"
+            }
+        )
+    }
+    
 }
 
 export const initHeader=(page)=>{

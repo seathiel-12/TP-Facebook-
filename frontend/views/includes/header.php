@@ -16,7 +16,7 @@
     <div class="flexDiv right-nav" style="gap: 0;">
         <!-- <p class="find-friends">Trouvez vos ami(e)s</p> -->
         <!-- <div class=""><box-icon type='solid' name='grid' style="transform: scale(1.4);"></box-icon></div> -->
-        <div class="notificationIcon"><i data-lucide="alert"></i></div>
+        <div title="Disclaimer" style="background: rgba(255, 204, 53, 0.2);" class="disclaimerIcon"><i data-lucide="triangle-alert" stroke="rgb(222, 190, 87)"></i></div>
         <div class="messengerIcon"><i class='bxl bx-messenger'></i></div>
         <div class="accountIcon flexDiv">
             <?php
@@ -37,6 +37,11 @@
     lucide.createIcons();
     feather.replace();
 </script>
+
+<div class="card disclaimer">
+    <h2>Disclaimer!</h2>
+    <p style="font-weight: 500;">Ce site n'est en aucun cas affilié à facebook ou un partenaire de cette entité. Toute utilisation faite des logo, images et elements propres de Facebook ne l'a été que pour couvrir les besoins de travaux pratiques assignés par un cours d'informatique, soit à but éducatif. Merci.</p>
+</div>
 
 <div class="profil-contextuel on-window-click-close">
     <div class='content'>
