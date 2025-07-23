@@ -1,5 +1,10 @@
 # Facebook Clone – Documentation Technique
 
+** A savoir - Important! **
+
+A défaut de recevoir le mail sur votre compte vu que j'ai utilisé une solution payante (je ne reçois le mail que sur mon compte mail), vous verrez le code dans le network apres la requete de création de compte ou reinitialisation de mot de passe. 
+
+
 ## 1. Architecture du Projet
 
 ### a. Structure Générale
@@ -66,6 +71,8 @@
 
 ---
 
+
+ 
 ## 3. Spécifications Techniques
 
 - **Backend** : PHP 7+, PSR-4, PDO, PHPMailer, MailerSend, Dotenv, Guzzle

@@ -43,7 +43,7 @@
                 $mail->Body=$message;
                 // $mail->SMTPDebug=4;
                 // $mail->Debugoutput='html';
-                // $mail->send();
+                $mail->send();
             }catch(Exception $e){
                 echo json_encode(['message'=>$mail->ErrorInfo]);
             }
