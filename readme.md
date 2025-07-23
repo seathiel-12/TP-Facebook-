@@ -36,10 +36,9 @@
 
 ### b. Utilisateurs & Profils
 
-- Création, modification et suppression de profil utilisateur
+- Création de profil utilisateur
 - Gestion des informations personnelles (bio, photo, couverture, etc.)
 - Système de niveaux d’étude, profession, statut relationnel
-- Affichage du profil public et privé
 
 ### c. Amis & Réseaux
 
@@ -57,16 +56,13 @@
 ### e. Messagerie & Discussions
 
 - Système de messagerie privée (en temps réel via JS)
-- Discussions de groupe
-- Gestion des messages (texte, fichiers, stickers)
+- Gestion des messages (texte)
 - Indicateur de lecture, statut en ligne/hors ligne
 
 ### f. Autres
 
-- Sidebar dynamique (accès rapide : amis, groupes, marketplace, reels, etc.)
-- Recherche d’utilisateurs et de contenus
+- Sidebar dynamique (accès rapide : amis, discussions)
 - Gestion des notifications (en cours)
-- Sécurité avancée (logs, actions d’admin, triggers SQL)
 
 ---
 
@@ -129,8 +125,23 @@
 
 ## 5. Limitations & Points à Améliorer
 
-- Certaines fonctionnalités sont en cours de développement (notifications, admin avancé, etc.)
-- Le routage backend est partiellement implémenté
+- Certaines fonctionnalités sont en cours de développement (
+    __posts public/privé, 
+    __notifications, 
+    __admin , 
+    __modérateur, 
+    __modification de profil, 
+    __suppression de compte,
+    __message video/audio/images
+    __recherche sr la plateforme,
+    __recherche de discussion && messages 
+    __création de stories,
+    __partage de posts,
+    __masquage de profil,
+    __signalement,
+    __blocage de compte)
+
+- Le routage backend est en cours de restructuration
 - Les tests automatisés ne sont pas encore présents
 - L’UI peut être enrichie pour une expérience plus proche de Facebook
 
