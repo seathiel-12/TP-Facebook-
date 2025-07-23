@@ -139,7 +139,8 @@
     __partage de posts,
     __masquage de profil,
     __signalement,
-    __blocage de compte)
+    __blocage de compte
+    )
 
 - Le routage backend est en cours de restructuration
 - Les tests automatisés ne sont pas encore présents
