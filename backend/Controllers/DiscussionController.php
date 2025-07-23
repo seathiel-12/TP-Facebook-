@@ -68,6 +68,7 @@ use \PDOException;
                 }
                 case 'update':{
                     try{
+                        new Discussion()->verifyAuthor($data['valid']);
                         new Discussion()->update($data['valid'], ['content'=>$data['content']]);
                         echo json_encode(['success'=>true]);
                         return;
@@ -78,6 +79,7 @@ use \PDOException;
                 }
                 case 'delete':{
                     try{
+                        new Discussion()->verifyAuthor($data['valid']);
                         new Discussion()->delete($data['valid']);
                         echo json_encode(['success'=>true]);
                         return;

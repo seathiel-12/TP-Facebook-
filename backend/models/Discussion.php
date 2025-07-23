@@ -90,6 +90,13 @@ class Discussion extends Model{
         return Model::getEntry($this->table,$condition);
     }
 
+    public function verifyAuthor($uuid){
+        $message = Model::getEntry($this->table, ['uuid_mID'=>$uuid]);
+        if($_SESSION['id'] !== $message['sender_id']){
+            throw new Exception('Non autorisé! Auteur non correspondant');
+        }
+    }
+
     public function getMessage($with){
         try{
             $query=" WITH mess AS (

@@ -54,6 +54,11 @@ const handleHomeHeaderIcon= ()=>{
         if(document.body.id !== 'friends')
             loadThisPage('friends');  
     }
+
+    messengerIcon.onclick=()=>{
+        if(document.body.id !== 'messenger')
+            loadThisPage('messenger')
+    }
 }
 
 export const initHeader=(page)=>{

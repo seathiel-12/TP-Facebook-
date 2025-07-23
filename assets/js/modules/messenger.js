@@ -58,10 +58,14 @@ async function loadChats(){
 }
 
 function renderDiscussions(discussions){
+
     return discussions.map(disc=>`
         <li class="flexDivBetween" valid="${disc.valid}" dtjat="${disc.created_at}">
             <div class="flexDivStart">
-                <div><img src="${disc.profile_picture}" width="50" height="50" style="border-radius:100%;" alt=""></div>
+                <div style="position:relative;">
+                    <img src="${disc.profile_picture}" width="50" height="50" style="border-radius:100%;" alt="">
+                   ${disc.online ? '<p class="online-green-round" style="position:absolute; bottom:3px;"></p>' : ''} 
+                </div>
                     <div class="flexDivColumn">
                         <p class="name">${disc.username}</p>
                         <p class="message-preview" ${(disc.is_read === 0  && disc.sender !== valid)? "style='font-weight:bold; color: black;'" : ''}>
@@ -117,7 +121,7 @@ async function renderCurrentChat(chatInfo, elem, infos){
                     <p style="text-align:left;">${elem.querySelector('.name').textContent}</p>
                     <div class="flexDiv" style="color:rgba(72, 72, 72, 0.71); font-weight:600; font-size:0.9em;">
                         <p class="online"></p>
-                        <p class="online-green-round" style="height:10px; width: 10px; border-radius:100%; background: var(--bg-button-secondary); display:block; transform: translateY(2px);"></p>
+                        <p class="online-green-round"></p>
                     </div>
                 </div>
             </div>
@@ -147,10 +151,11 @@ async function renderCurrentChat(chatInfo, elem, infos){
                 </section> 
             </div>
            <section class="send-message-zone flexDiv">
-               <div class="flexDiv chat-icon rounded-icon standard-hover"><i data-lucide="plus"></i></div>
-                <form valid="${chatInfo}" class="noFormRootStyle flexDiv" style="width:87%; margin:0 5px 0 5px; gap:10px; background:none;">
+               <div class="flexDiv chat-icon rounded-icon standard-hover upload-file"><i data-lucide="plus"></i></div>
+                <form valid="${chatInfo}" class="noFormRootStyle flexDiv" style="width:87%; margin:0 5px 0 5px; gap:10px; background:none;" enctype="multipart/form-data">
                     <input type="text" id="send-message" placeholder="Envoyer un message..." required>
                     <div class="send-btn rounded-icon standard-hover flexDiv" style="width: max-content;"><i data-lucide="send-horizontal"></i></div>
+                    <input type="file" id="file"  hidden/>
                 </form>
                <div class="flexDiv standard-hover rounded-icon"><i data-lucide="camera"></i></div>
                <div class="flexDiv standard-hover rounded-icon"><i data-lucide="mic"></i></div>
@@ -170,9 +175,8 @@ async function renderCurrentChat(chatInfo, elem, infos){
 }
 
 function updateCurrentChatHeader(infos){
-    console.log(infos)
     const online=document.querySelector('.online')
-    online.textContent = infos['online'] ? 'Active now' : `Last seen at ${infos['last_seen']}`;
+    online.textContent = infos['online'] ? 'Active now' :  manageDate(infos['last_seen']);
     if(!infos['online']) document.querySelector('.online-green-round')?.remove()
 }
 
@@ -180,7 +184,6 @@ function renderDate(date){
     const newDate=new Date(date);
     const months=['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-    const today= new Date();
     const day= newDate.getDate();
     const month = months[newDate.getMonth()];
     const year=newDate.getFullYear();
@@ -192,6 +195,8 @@ function handleSendMessage(){
     const sendMessage= document.getElementById('send-message');
     const sendMessageForm=document.querySelector('.send-message-zone form');
     const sendBtn=document.querySelector('.send-btn');
+    const uploadFile= document.querySelector('.upload-file');
+    const file = document.getElementById('file');
 
     if(sendBtn)
     sendBtn.onclick=()=>{
@@ -229,7 +234,62 @@ function handleSendMessage(){
             })
         }
     }
+
+    if(uploadFile)
+    uploadFile.onclick=(e)=>{
+        e.stopPropagation();
+        const sendFile=document.createElement('div');
+        sendFile.innerHTML=`
+            <label for="file" class="flexDiv cursp"><i data-lucide="file-image"></i>Envoyer une image/vidéo</label>
+        `
+        sendFile.className="card standard-hover cursp on-window-click-remove";
+        sendFile.style.cssText=`
+            position: absolute;
+            width: max-content;
+            padding: 7px 5px;
+            background: rgb(235, 235, 235);
+            left: 0;
+            top: -70px;
+            box-shadow: 0 0 10px 0 gray;
+            cursor:pointer;
+        `
+
+        document.querySelector('.send-message-zone').prepend(sendFile);
+        lucide.createIcons();
+    }
+
+    file.onchange=(e)=>createPreviewFile(e.target.files)
 }
+
+function createPreviewFile(file){
+    let div =document.querySelector('.preview')
+    if(!div){
+        div = document.createElement('div');
+        document.body.querySelector('.send-message-zone').appendChild(div)
+        div.className="card preview"
+        div.style.cssText=`
+            position: absolute;
+            box-shadow: 0 0 10px 0 gray;
+            width: 150px;
+            height:auto;
+            max-height: 200px;
+            right: 50px;
+            margin:0;
+            padding:0;
+            background:none;
+        `
+    }
+    const blob = new Blob(file);
+    const url=URL.createObjectURL(blob)
+
+    div.innerHTML=`
+        <img src="${url}" style="width: 100%; height: 100%;" />
+    `
+
+    div.style.top=`${-(div.offsetHeight) - 30}px`;
+
+}   
+
 
 async function updateMessageView(){
     const sendMessage= document.getElementById('send-message');
@@ -398,6 +458,7 @@ function handleOptionMessage(elem){
     }
 }
 
+
 function handleDeleteMessage(){
     const supp=document.querySelector('.supp');
     const cancel=document.querySelector('.cancel');
@@ -501,4 +562,35 @@ function initFormZone(form){
     lucide.createIcons();
 
     document.querySelector('.m-selected').classList.remove('.m-selected');
+}
+
+// Fonction pour gérer l'affichage du last seen d'un utilisateur
+function manageDate(date) {
+    const inputDate = new Date(date);
+    const now = new Date();
+    const diffMs = now - inputDate;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffWeeks = Math.floor(diffDays / 7);
+    const diffMonths = now.getMonth() - inputDate.getMonth() + (12 * (now.getFullYear() - inputDate.getFullYear()));
+
+    // Format heure
+    const pad = n => n.toString().padStart(2, '0');
+    const hours = pad(inputDate.getHours());
+    const minutes = pad(inputDate.getMinutes());
+    const time = `${hours}:${minutes}`;
+
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    if (diffDays === 0) {
+        return `Today at ${time}`;
+    } else if (diffDays === 1) {
+        return `Yesterday at ${time}`;
+    } else if (diffDays < 7 && diffWeeks === 0) {
+        return `Last week at ${daysOfWeek[inputDate.getDay()]} at ${time}`;
+    } else if (diffMonths === 1 || (now.getMonth() !== inputDate.getMonth() && now.getFullYear() === inputDate.getFullYear())) {
+        return `Last month at ${inputDate.getDate()} ${months[inputDate.getMonth()]} at ${time}`;
+    } else {
+        return `${inputDate.getDate()} ${months[inputDate.getMonth()]} ${inputDate.getFullYear()} at ${time}`;
+    }
 }

@@ -84,6 +84,14 @@
 .cursp{
     cursor: pointer;
 }
+.online-green-round{
+    height:10px; 
+    width: 10px; 
+    border-radius:100%; 
+    background: var(--bg-button-secondary); 
+    display:block; 
+    transform: translateY(2px);
+}
 .cancel-on-edition{
     width: 40px;
     height: 40px;
@@ -157,6 +165,7 @@
 }
 .send-message-zone{
     height:90px;
+    position: relative;
 }
 .chat-container{
     max-height: 100%;
