@@ -16,7 +16,7 @@
     <div class="flexDiv right-nav" style="gap: 0;">
         <!-- <p class="find-friends">Trouvez vos ami(e)s</p> -->
         <!-- <div class=""><box-icon type='solid' name='grid' style="transform: scale(1.4);"></box-icon></div> -->
-        <!-- <div class="notificationIcon"><box-icon name='bell' type='solid' animation='' style="transform: scale(1.4) translateY(2px);"></box-icon></div> -->
+        <div class="notificationIcon"><i data-lucide="alert"></i></div>
         <div class="messengerIcon"><i class='bxl bx-messenger'></i></div>
         <div class="accountIcon flexDiv">
             <?php

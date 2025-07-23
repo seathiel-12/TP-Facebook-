@@ -98,7 +98,7 @@ const loadJsModule=async(bodyId)=>{
               .catch(error=>console.error(`Error loading auth module: ${error}`));
           break;
           case 'home':
-            document.title="Acceuil-Home"
+            document.title="Facebook Clone";
             await import('./modules/home.js')
               .then(async(module)=>{
                 await module.initHome();
