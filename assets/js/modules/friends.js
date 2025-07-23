@@ -216,12 +216,12 @@ function renderAllFriends(friends){
     }
 
    friends= friends.map(friend=>`
-        <div class="flexDivBetween friend">
+        <div class="flexDivBetween friend" valid="${friend['valid']}">
             <div class="flexDivStart">
                 <img src="${friend['profile_picture']}" width="60" height="60" style="border-radius: 100%;" alt="">
                     <p>${friend.username}</p>
                 </div>
-            <div class="rounded-icon">
+            <div class="rounded-icon options-friends">
                 <i data-lucide="ellipsis"></i>
             </div>
         </div>
@@ -231,6 +231,37 @@ function renderAllFriends(friends){
     return friends;
 }
 
+function handleAllFriends(){
+    const friends=document.querySelectorAll('.friend');
+
+    friends.forEach(friend=>
+        friend.onclick=(e)=>{
+            e.stopPropagation();
+
+            if(document.querySelector('.friend-option')) return;
+            const ul =document.createElement('ul');
+            ul.innerHTML=`
+                <li class="flexDivStart message-to" onclick="loadThisPage('messenger', '${friend.getAttribute('valid')}')" style="text-align: left;"><box-icon type='logo' style="transform: translateY(2px);" name='messenger'></box-icon>Message</li>
+            `        
+            const rect=friend.getBoundingClientRect();
+            ul.style.cssText=`
+                position:absolute; 
+                width: 150px;
+                top:${rect.top + 10}px;
+                left: ${rect.left + rect.width + 5}px;
+            `
+            ul.className="card on-window-click-remove friend-option"
+
+            document.body.appendChild(ul);
+        }
+    )
+}
+
+function handleFriendOption(){
+    const option = document.querySelector('.option');
+    
+}
+
 async function loadAllFriends(){
     await apiRequest('user/friends/get/me')
             .then(response=>{
@@ -238,6 +269,7 @@ async function loadAllFriends(){
                     if(response.data){
                         const allfriendsDiv=document.querySelector('.all-friends');
                         allfriendsDiv.innerHTML=renderAllFriends(response.data);
+                        handleAllFriends();
                         lucide.createIcons();
                     }
                 }

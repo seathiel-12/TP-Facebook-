@@ -88,7 +88,7 @@ async function createProfil(){
         
 
         profilBtn.innerHTML=`
-            <button class="flexDiv edit-profil"> <i data-lucide="pencil" stroke="#d5d5d5" fill="#000"></i> Modifier votre profil</button>`
+            <button class="flexDiv edit-profil" style="padding-top:0;"> <span> <i data-lucide="pencil" stroke="#d5d5d5" style="position:relative; top:4px;" fill="#000"></i></span> <span> Modifier votre profil</span></button>`
         const filter=document.querySelector('.filter');
 
         document.querySelectorAll('.profiling').forEach(elem=> elem.classList.remove('profiling'));

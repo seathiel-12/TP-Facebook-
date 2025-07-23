@@ -120,7 +120,7 @@ class User extends Model{
                         END AS id 
                         FROM friends_r
                         )
-                SELECT u.firstname, u.firstname, u.username, u.lastname, u.profile_picture, u.gender
+                SELECT u.firstname, u.uuid_uID, u.username, u.lastname, u.profile_picture, u.gender
                 FROM users u
                 JOIN friends f ON f.id = u.id;
                 ";
