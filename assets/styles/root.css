@@ -39,7 +39,7 @@ button{
     border: none;
 }
 
-button:not(.noButtonRootStyle), .cancelForgotBtn{
+button, .cancelForgotBtn{
     display: block;
     border: none;
     border-radius: 5px;

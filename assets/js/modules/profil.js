@@ -88,7 +88,7 @@ async function createProfil(){
         
 
         profilBtn.innerHTML=`
-            <button class="flexDiv edit-profil" style="padding-top:0;"> <span> <i data-lucide="pencil" stroke="#d5d5d5" style="position:relative; top:4px;" fill="#000"></i></span> <span> Modifier votre profil</span></button>`
+            <button class="flexDiv edit-profil" style="padding-top:0;"> <span> <i data-lucide="pencil" stroke="#d5d5d5" fill="#000"></i></span> <span> Modifier votre profil</span></button>`
         const filter=document.querySelector('.filter');
 
         document.querySelectorAll('.profiling').forEach(elem=> elem.classList.remove('profiling'));
@@ -99,7 +99,7 @@ async function createProfil(){
     }else{
         document.querySelector('.profil-cover').onclick=(e)=>e.stopPropagation();
         profilBtn.innerHTML=`
-        <button class="message-this-user flexDiv">
+        <button class="message-this-user flexDiv" onclick="loadThisPage('messenger', '${location.search.split('=')[1]}')">
             <img src="/assets/media/images/messenger.svg" width="15px" height="15px" />
             <p>Message</p>
         </button>

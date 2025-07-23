@@ -218,6 +218,8 @@ function handleSendMessage(){
                 showNotification("Une erreur s'est produite!");
                 return;
             }).catch(err => console.error(err));   
+
+            document.querySelector('.preview')?.remove();
         }else{
             await apiRequest('discussions/messages/update', 'POST', {
                 content: sendMessage.value,
@@ -258,6 +260,7 @@ function handleSendMessage(){
         lucide.createIcons();
     }
 
+    if(file)
     file.onchange=(e)=>createPreviewFile(e.target.files)
 }
 
@@ -564,7 +567,6 @@ function initFormZone(form){
     document.querySelector('.m-selected').classList.remove('.m-selected');
 }
 
-// Fonction pour gérer l'affichage du last seen d'un utilisateur
 function manageDate(date) {
     const inputDate = new Date(date);
     const now = new Date();
@@ -573,7 +575,6 @@ function manageDate(date) {
     const diffWeeks = Math.floor(diffDays / 7);
     const diffMonths = now.getMonth() - inputDate.getMonth() + (12 * (now.getFullYear() - inputDate.getFullYear()));
 
-    // Format heure
     const pad = n => n.toString().padStart(2, '0');
     const hours = pad(inputDate.getHours());
     const minutes = pad(inputDate.getMinutes());
