@@ -1,7 +1,4 @@
--- Active: 1750739211247@@127.0.0.1@3306@facebook
-
 SET sql_mode=''
-
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -31,14 +28,11 @@ CREATE TABLE users (
     FOREIGN KEY (lives_at) REFERENCES country(id)
 );
 
-DROP Table users
-
 CREATE TABLE professions (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR (255) NOT NULL
 );
 
-SELECT requester_id FROM friends_requests WHERE receiver_id = 2 AND (status = 'accepted' OR status='rejected' AND DATEDIFF(NOW() , updated_at) < 30 ) ;
 -- Insertion de 50 professions variées
 INSERT INTO professions (name) VALUES
 ('Médecin'),
@@ -136,7 +130,6 @@ CREATE TABLE managers(
     CHECK (email LIKE '%@%.%')
 );
 
-DROP Table posts_interactions
 
 CREATE TABLE posts(
     id INT PRIMARY KEY AUTO_INCREMENT,
